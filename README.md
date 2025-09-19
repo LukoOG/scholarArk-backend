@@ -6,6 +6,14 @@
 $ pnpm install
 ```
 
+## Configuration
+
+```bash
+# In your CLI, run the command. The command below is to copy the file content from the .env.example file into a new file or existing file .env. Make sure to update the necessary fields as required to have a successful run of the app.
+$ cp .env.example .env
+```
+
+
 ## Running the app
 
 ```bash
