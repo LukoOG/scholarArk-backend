@@ -7,7 +7,7 @@ export type UserDocument = HydratedDocument<User>;
 
 /**
  * All attributes are not required by default.
- * Modify to suit the app's requirements.
+ * We will modify to suit the app's requirements.
  */
 @Schema({ timestamps: true })
 export class User {
@@ -44,13 +44,14 @@ export class User {
   @Prop({ type: Nonce })
   nonce?: Nonce;
 
+  @Prop({ type: Boolean, default: false })
+  isStudent: Boolean
+
   @Prop({ type: Wallet })
   wallet?: Wallet;
 
   @Prop({ type: Number, min: 0, default: 0 })
   unreadNotifications?: number;
-
-  // todo: isSocketOnline
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
