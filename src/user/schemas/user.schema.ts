@@ -11,7 +11,7 @@ export type UserDocument = HydratedDocument<User>;
  */
 @Schema({ timestamps: true })
 export class User {
-	/*
+	///
   @Prop({
     type: String,
     required: true,
@@ -20,7 +20,7 @@ export class User {
     unique: true,
   })
   username: string;
-  */
+  ///
   @Prop()
   first_name: string;
   
