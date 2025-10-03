@@ -11,6 +11,7 @@ export type UserDocument = HydratedDocument<User>;
  */
 @Schema({ timestamps: true })
 export class User {
+	/*
   @Prop({
     type: String,
     required: true,
@@ -19,33 +20,45 @@ export class User {
     unique: true,
   })
   username: string;
-
-  @Prop({ type: Name })
-  name?: Name;
-
+  */
+  @Prop()
+  first_name: string;
+  
+  @Prop()
+  last_name: string;
+  
   @Prop({ type: Email })
-  email?: Email;
+  email: Email;
 
   @Prop({ type: Phone })
   phone?: Phone;
-
-  @Prop()
-  bio?: string;
-
-  @Prop()
-  password?: string;
-
+  
   @Prop({ type: String, enum: Gender })
   gender?: Gender;
 
   @Prop({ type: Date })
   birthday?: Date;
+  
+  @Prop({ type: Boolean, default: true })
+  isTutor: Boolean
+  
+  @Prop()
+  address?: string;
+  
+  @Prop()
+  stars?: number;
+  
+  @Prop()
+  highest_qualification?: string;
+  
+  @Prop()
+  profile_pic: string;
+  ///
+  @Prop()
+  password?: string;
 
   @Prop({ type: Nonce })
   nonce?: Nonce;
-
-  @Prop({ type: Boolean, default: false })
-  isStudent: Boolean
 
   @Prop({ type: Wallet })
   wallet?: Wallet;
