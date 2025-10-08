@@ -23,7 +23,7 @@ import { TMP_DIR } from 'src/config';
           for (const method of userMethods) schema.method(method.name, method);
 
           schema.virtual('fullName').get(function () {
-            return `${this.name.first ?? ''} ${this.name.last ?? ''}`.trim();
+            return `${this.first_name ?? ''} ${this.last_name ?? ''}`.trim();
           });
 
           schema.pre('save', preSave);
