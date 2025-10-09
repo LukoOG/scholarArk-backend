@@ -11,6 +11,7 @@ import { UserModule } from './user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AdminModule } from './admin/admin.module';
+import { CoursesModule } from './courses/courses.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { AdminModule } from './admin/admin.module';
     }),
     UserModule,
     AdminModule,
+    CoursesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
