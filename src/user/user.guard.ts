@@ -37,12 +37,15 @@ export class UserGuard implements CanActivate {
     } catch {
       throw new UnauthorizedException({ message: 'Invalid token!' });
     }
-
+	
+	/*
     const user = await this.userService.userModel
       .findById(payload.sub)
       .select('_id')
       .lean()
       .exec();
+	  */
+	const user = await this.userService.findOne(payload.sub)
 
     if (!user) throw new UserNotFoundException();
 

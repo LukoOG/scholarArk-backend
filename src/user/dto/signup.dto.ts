@@ -1,3 +1,4 @@
+/*
 import {
   IsDateString,
   IsEnum,
@@ -14,7 +15,7 @@ import { UsernameRegex } from 'src/common/regex';
 /**
  * All fields are made optional by default.
  * Modify to suit the app's requirements.
- */
+
 export class SignupDto {
   @Matches(UsernameRegex)
   @IsOptional()
@@ -51,4 +52,52 @@ export class SignupDto {
   @IsDateString()
   @IsOptional()
   birthday?: Date;
+}
+*/
+import { IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsEmail } from 'class-validator';
+import { Gender } from 'src/common/enums';
+
+export class SignupDto {
+  @IsString()
+  username: string;
+
+  @IsOptional()
+  @IsString()
+  first_name?: string;
+
+  @IsOptional()
+  @IsString()
+  last_name?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
+  @IsEnum(Gender)
+  gender?: Gender;
+
+  @IsOptional()
+  @IsDateString()
+  birthday?: Date;
+
+  @IsOptional()
+  @IsBoolean()
+  isTutor?: boolean;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @IsOptional()
+  @IsString()
+  highest_qualification?: string;
+
+  @IsOptional()
+  @IsString()
+  profile_pic?: string;
+
+  @IsOptional()
+  @IsString()
+  password?: string;
 }

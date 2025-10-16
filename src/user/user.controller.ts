@@ -1,3 +1,4 @@
+/*
 import {
   Body,
   Controller,
@@ -73,5 +74,41 @@ export class UserController {
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     return this.userService.upload(req.user.id, files);
+  }
+}
+*/
+
+import { Controller, Get, Post, Body, Param, Delete, Patch, Query } from '@nestjs/common';
+import { UserService } from './user.service';
+import { SignupDto } from './dto/signup.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+
+@Controller('users')
+export class UserController {
+  constructor(private readonly userService: UserService) {}
+
+  @Post()
+  create(@Body() signupDto: SignupDto) {
+    return this.userService.create(signupDto);
+  }
+
+  @Get()
+  findAll(@Query('role') role?: 'student' | 'tutor') {
+    return this.userService.findAll(role);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.userService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(id, updateUserDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.userService.remove(id);
   }
 }

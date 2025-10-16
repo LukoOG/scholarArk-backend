@@ -1,3 +1,4 @@
+/*
 import {
   IsDateString,
   IsEnum,
@@ -41,3 +42,9 @@ export class UpdateUserDto {
   @IsOptional()
   birthday?: Date;
 }
+*/
+
+import { PartialType } from '@nestjs/mapped-types';
+import { SignupDto } from './signup.dto';
+
+export class UpdateUserDto extends PartialType(SignupDto) {}
