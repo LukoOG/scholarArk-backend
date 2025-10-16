@@ -54,8 +54,10 @@ export class SignupDto {
   birthday?: Date;
 }
 */
-import { IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsEmail } from 'class-validator';
+import { Type } from 'class-transformer'
+import { ValidateNested, IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsEmail } from 'class-validator';
 import { Gender } from 'src/common/enums';
+import { Email } from 'src/common/schemas';
 
 export class SignupDto {
   @IsString()
@@ -68,9 +70,9 @@ export class SignupDto {
   @IsOptional()
   @IsString()
   last_name?: string;
-
-  @IsOptional()
-  @IsEmail()
+  
+  @ValidateNested()
+  @Type(() => Email)
   email?: string;
 
   @IsOptional()
