@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 
 import helmet from 'helmet';
@@ -24,7 +25,18 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+  
+  const config = new DocumentBuilder()
+    .setTitle('ScholarArk API')
+    .setDescription('API documentation for ScholarArk — Courses & Users services')
+    .setVersion('1.0')
+    .addTag('users')
+    .addTag('courses')
+    .build();
 
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+  
   app.enableCors({ origin: cors.origin });
 
   await app.listen(port, () => {
