@@ -7,7 +7,7 @@ export type CourseDocument = HydratedDocument<Course>;
 
 @Schema({ timestamps: true })
 export class Course {
-	@Prop({ type: Types.ObjectId, ref: User.name })
+	@Prop({ type: Types.ObjectId, ref: 'User', required: true })
 	user_id: Types.ObjectId;
 	
 	@Prop()
@@ -17,9 +17,7 @@ export class Course {
 	description: string;
 	
 	
-	@Prop()
-	@IsEnum(['Beginner', 'Intermediate', 'Advanced']) //till we properly define our enums
-	@IsOptional()
+	@Prop({ enum: ['Beginner', 'Intermediate', 'Advanced'], default: 'Beginner' })
 	difficulty?: string;
 	
 	@Prop({ default: 0 })

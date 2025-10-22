@@ -8,6 +8,11 @@ export class CreateCourseDto {
   @IsString()
   @IsOptional()
   description?: string;
+  
+	@IsEnum(['Beginner', 'Intermediate', 'Advanced']) //till we properly define our enums
+	@IsOptional()
+	difficulty?: string;
+
 
   @IsNumber()
   @IsOptional()
