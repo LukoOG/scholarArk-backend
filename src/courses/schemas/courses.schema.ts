@@ -21,16 +21,16 @@ export class Course {
 	difficulty: ;
 	*/
 	
-	@Prop({ required: true, default: 0 })
+	@Prop({ default: 0 })
 	price: number;
 	
-	@Prop({ required: true, default: 0 })
+	@Prop({ default: 0 })
 	students_enrolled: number;
 	
 	@Prop()
 	thumbnail_url: string;
 	
-	@Prop({ required: true, default: 0 })
+	@Prop({ default: 0 })
 	rating: number;
 	
 	/* TODO: define tags enum
