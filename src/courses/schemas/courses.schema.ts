@@ -16,10 +16,11 @@ export class Course {
 	@Prop()
 	description: string;
 	
-	/* TODO: define difficulty enum
+	
 	@Prop()
-	difficulty: ;
-	*/
+	@IsEnum(['Beginner', 'Intermediate', 'Advanced']) //till we properly define our enums
+	@IsOptional()
+	difficulty?: string;
 	
 	@Prop({ default: 0 })
 	price: number;
