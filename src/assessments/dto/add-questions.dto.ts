@@ -1,6 +1,7 @@
 import { IsString, IsArray, IsOptional, ValidateNested, IsEnum, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-import { QuestionType } from '../schemas/assessment.schema';
+import { QuestionType } from '../schemas/assessments.schema';
+import { ApiProperty } from '@nestjs/swagger';
 
 class OptionDto {
   @IsString() id: string;
@@ -9,9 +10,9 @@ class OptionDto {
 
 class QuestionDto {
   @IsEnum(QuestionType) type: QuestionType;
-  @IsString() text: string;
+  @ApiProperty({ example: "What is 2 + 2? " }) @IsString() question: string;
   @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => OptionDto) options?: OptionDto[]; // MCQ
-  @IsOptional() @IsString() correctAnswer?: string; // server-side stored
+  @ApiProperty({ example: "4" })@IsString() correctAnswer: string; // server-side stored
   @IsOptional() @IsNumber() points?: number;
 }
 

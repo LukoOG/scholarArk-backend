@@ -12,6 +12,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AdminModule } from './admin/admin.module';
 import { CoursesModule } from './courses/courses.module';
+import { AssessmentsModule } from './assessments/assessments.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { CoursesModule } from './courses/courses.module';
     UserModule,
     AdminModule,
     CoursesModule,
+    AssessmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,7 +2,7 @@ import { IsString, IsOptional, IsDateString, IsNumber, IsMongoId } from 'class-v
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 
 export class CreateAssessmentDto {
-  @ApiProperty() @IsString() title: string;
+  @ApiProperty({ example: "General Mathematics Class 3 Test" }) @IsString() title: string;
   @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
   @ApiPropertyOptional({ description: 'seconds' }) @IsOptional() @IsNumber() duration_seconds?: number;
   @ApiPropertyOptional() @IsOptional() @IsDateString() startAt?: Date;
