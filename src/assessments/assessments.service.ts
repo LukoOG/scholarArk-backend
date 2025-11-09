@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Assessment, AssessmentDocument } from './schemas/assessment.schema';
+import { Assessment, AssessmentDocument } from './schemas/assessments.schema';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { AddQuestionsDto } from './dto/add-questions.dto';
 
@@ -24,10 +24,10 @@ export class AssessmentsService {
   }
 
   async addQuestions(assessmentId: string, addQuestionsDto: AddQuestionsDto) {
-	  const assessment = this.assessmentModel.findById(assessmentId)
+	  const assessment = await this.assessmentModel.findById(assessmentId)
 	  if (!assessment) throw new NotFoundException('Assessment not found')
 		  
-	  addQuestionsDto.forEach((question) => assessment.questions.push(question))
+	  addQuestionsDto.questions.forEach((question) => assessment.questions.push(question))
 	  
 	  await assessment.save()
 	  
@@ -35,7 +35,7 @@ export class AssessmentsService {
   }
 
   async publishAssessment(assessmentId: string) {
-    const assessment = this.assessments.findById(assessmentId);
+    const assessment = await this.assessmentModel.findById(assessmentId);
     if (!assessment) throw new NotFoundException('Assessment not found');
 
     assessment.isPublished = true;
@@ -45,7 +45,7 @@ export class AssessmentsService {
   }
 
   async getAssessmentById(assessmentId: string) {
-    const assessment = this.assessments.findById(assessmentId);
+    const assessment = await this.assessmentModel.findById(assessmentId);
     if (!assessment) throw new NotFoundException('Assessment not found');
     return assessment;
   }

@@ -1,15 +1,26 @@
-import { Controller, Post, Get, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
 import { AssessmentsService } from './assessments.service';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { AddQuestionsDto } from './dto/add-questions.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Roles } from '../common/decorators/roles.decorator';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { UserGuard } from '../user/user.guard';
+
+enum UserRole {
+  STUDENT = 'student',
+  TUTOR = 'tutor',
+  ADMIN = 'admin',
+}
 
 @ApiTags('assessments')
 @Controller('assessments')
+@UseGuards(UserGuard, RolesGuard)
 export class AssessmentsController {
   constructor(private readonly assessmentsService: AssessmentsService) {}
 
   @Post()
+  @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: 'Create a new assessment (tutor)' })
   @ApiResponse({ status: 201, description: 'Assessment created successfully' })
   create(@Body() createAssessmentDto: CreateAssessmentDto) {
@@ -17,6 +28,7 @@ export class AssessmentsController {
   }
 
   @Post(':id/questions')
+  @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: 'Add questions to an assessment (tutor)' })
   addQuestions(
     @Param('id') id: string,
@@ -26,14 +38,16 @@ export class AssessmentsController {
   }
 
   @Post(':id/publish')
+  @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: 'Publish assessment (tutor)' })
   publish(@Param('id') id: string) {
     return this.assessmentsService.publishAssessment(id);
   }
 
   @Get(':id')
+  @Roles(UserRole.TUTOR, UserRole.STUDENT)
   @ApiOperation({ summary: 'Get assessment by ID (students/tutors)' })
   getAssessment(@Param('id') id: string) {
-    return this.assessmentsService.getAssessment(id);
+    return this.assessmentsService.getAssessmentById(id);
   }
 }
