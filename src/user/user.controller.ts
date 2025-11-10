@@ -78,18 +78,59 @@ export class UserController {
 }
 */
 
-import { Controller, Get, Post, Body, Param, Delete, Patch, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { SignupDto } from './dto/signup.dto';
+import { LoginDto } from './dto/login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
+@ApiTags('Users')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() signupDto: SignupDto) {
+  @Post('signup')
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({
+	status: 201,
+    description: 'User created successfully',
+    schema: {
+      example: {
+        user: {
+          _id: '6730a8cfb8c2a12b4e9b25cd',
+          username: 'emmanuel',
+          email: { value: 'emma@test.com', verified: true },
+          role: 'STUDENT',
+        },
+        token: 'eyJhbGciOiJIUzI1NiIsInR5...',
+      },
+    },
+  })
+  async create(@Body() signupDto: SignupDto) {
     return this.userService.create(signupDto);
+  }
+  
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login user and get JWT token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful login',
+    schema: {
+      example: {
+        user: {
+          _id: '6730a8cfb8c2a12b4e9b25cd',
+          username: 'emmanuel',
+          email: { value: 'emma@test.com', verified: true },
+          role: 'STUDENT',
+        },
+        token: 'eyJhbGciOiJIUzI1NiIsInR5...',
+      },
+    },
+  })
+  async login(@Body() loginDto: LoginDto) {
+    return this.userService.login(loginDto);
   }
 
   @Get()

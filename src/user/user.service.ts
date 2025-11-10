@@ -157,25 +157,80 @@ export class UserService {
 }
 */
 
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { SignupDto } from './dto/signup.dto';
+import { LoginDto } from './dto/login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRole } from '../common/enums';
+import {
+  UserAlreadyExistsException,
+  UserNotFoundException,
+} from './exceptions';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>, private readonly jwtService: JwtService) {}
 
-  async create(signupDto: SignupDto): Promise<User> {
-	const { role = UserRole.STUDENT, ...rest } = signupDto; //Ensures default role is default if no role is provided
-    const createdUser = new this.userModel({
+  async create(signupDto: SignupDto): Promise<{ user: Omit<User, 'password'>, token: string }> {
+	let user = await this.userModel
+      .findOne({
+        $or: [
+          { username: signupDto.username },
+          { 'email.value': signupDto.email?.value },
+        ],
+      })
+      .exec();
+
+    if (user) throw new UserAlreadyExistsException();
+	const { role = UserRole.STUDENT, password: plainPassword, ...rest } = signupDto; //Ensures default role is default if no role is provided
+    
+	const hashedPassword = await bcrypt.hash(plainPassword, 10)
+	
+	const createdUser = new this.userModel({
 		...rest,
+		password: hashedPassword,
 		role
 	});
-    return createdUser.save();
+    const savedUser = await createdUser.save();
+	
+	const payload = {
+		sub: savedUser._id.toString(),
+		username: savedUser.username,
+		role: savedUser.role,
+		typ: 'user',
+	};
+	const token = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
+	
+	const { password, ...userWithoutPassword } = savedUser.toObject();
+	return { user: userWithoutPassword, token }
+  }
+  
+  async login(loginDto: LoginDto){
+	const { email, password: plainPassword } = loginDto;
+	
+	const user = await this.userModel.findOne({ email }).exec();
+	
+	if(!user) throw new UnauthorizedException('Invalid credentials');
+	
+	const isMatch = await bcrypt.compare(plainPassword, user.password);
+    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+	
+	const payload = {
+		sub: user._id.toString(),
+		username: user.username,
+		role: user.role,
+		typ: 'user',
+	};
+	const token = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
+	
+	const { password, ...userWithoutPassword } = user.toObject();
+	return { user: userWithoutPassword, token }
+	
   }
 
   async findAll(role?: 'student' | 'tutor'): Promise<User[]> {

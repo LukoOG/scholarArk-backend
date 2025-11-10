@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer'
 import { ValidateNested, IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsEmail, IsStrongPassword } from 'class-validator';
 import { Gender, UserRole } from 'src/common/enums';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class EmailDto {
   @IsEmail()
@@ -11,46 +12,57 @@ export class EmailDto {
 }
 
 export class SignupDto {
+  @ApiProperty()
   @IsString()
   username: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
   first_name?: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
   last_name?: string;
   
+  @ApiProperty({ example: { value: 'user@example.com', verified: false } })
   @IsOptional()
   @ValidateNested()
   @Type(() => EmailDto)
   email?: EmailDto;
 
+  @ApiProperty()
   @IsOptional()
   @IsEnum(Gender)
   gender?: Gender;
 
+  @ApiProperty()
   @IsOptional()
   @IsDateString()
   birthday?: Date;
 
+  @ApiProperty()
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
   address?: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
   highest_qualification?: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
   profile_pic?: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
   @IsStrongPassword(
