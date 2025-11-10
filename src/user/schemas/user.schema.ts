@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { Gender } from 'src/common/enums';
+import { Gender, UserRole } from 'src/common/enums';
 import { Email, Name, Nonce, Phone, Wallet } from 'src/common/schemas';
 
 export type UserDocument = HydratedDocument<User>;
@@ -41,8 +41,8 @@ export class User {
   @Prop({ type: Date })
   birthday?: Date;
   
-  @Prop({ type: Boolean, default: true })
-  isTutor: Boolean
+  @Prop({ type: String, enum: UserRole, default: UserRole.STUDENT })
+  role: UserRole;
   
   @Prop()
   address?: string;

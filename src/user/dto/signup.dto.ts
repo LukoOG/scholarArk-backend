@@ -1,62 +1,6 @@
-/*
-import {
-  IsDateString,
-  IsEnum,
-  IsOptional,
-  IsPhoneNumber,
-  IsString,
-  IsStrongPassword,
-  Matches,
-} from 'class-validator';
-import { EmailValidator, TitleValidator } from 'src/common/decorators';
-import { Gender } from 'src/common/enums';
-import { UsernameRegex } from 'src/common/regex';
-
-/**
- * All fields are made optional by default.
- * Modify to suit the app's requirements.
-
-export class SignupDto {
-  @Matches(UsernameRegex)
-  @IsOptional()
-  username?: string;
-
-  @TitleValidator()
-  @IsOptional()
-  'name.first'?: string;
-
-  @TitleValidator()
-  @IsOptional()
-  'name.last'?: string;
-
-  @EmailValidator()
-  @IsOptional()
-  'email.value'?: string;
-
-  @IsPhoneNumber()
-  @IsOptional()
-  'phone.value'?: string;
-
-  @IsString()
-  @IsOptional()
-  bio?: string;
-
-  @IsStrongPassword()
-  @IsOptional()
-  password?: string;
-
-  @IsEnum(Gender)
-  @IsOptional()
-  gender?: Gender;
-
-  @IsDateString()
-  @IsOptional()
-  birthday?: Date;
-}
-*/
 import { Type } from 'class-transformer'
-import { ValidateNested, IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsEmail } from 'class-validator';
-import { Gender } from 'src/common/enums';
+import { ValidateNested, IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsEmail, IsStrongPassword } from 'class-validator';
+import { Gender, UserRole } from 'src/common/enums';
 
 export class EmailDto {
   @IsEmail()
@@ -92,8 +36,8 @@ export class SignupDto {
   birthday?: Date;
 
   @IsOptional()
-  @IsBoolean()
-  isTutor?: boolean;
+  @IsEnum(UserRole)
+  role?: UserRole;
 
   @IsOptional()
   @IsString()
@@ -109,5 +53,9 @@ export class SignupDto {
 
   @IsOptional()
   @IsString()
+  @IsStrongPassword(
+		{ minLength: 8, minSymbols: 0 },
+		{ message: "Password must be at least 8 characters long" },
+	)
   password?: string;
 }

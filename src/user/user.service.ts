@@ -163,18 +163,23 @@ import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { SignupDto } from './dto/signup.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserRole } from '../common/enums';
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(signupDto: SignupDto): Promise<User> {
-    const createdUser = new this.userModel(signupDto);
+	const { role = UserRole.STUDENT, ...rest } = signupDto; //Ensures default role is default if no role is provided
+    const createdUser = new this.userModel({
+		...rest,
+		role
+	});
     return createdUser.save();
   }
 
   async findAll(role?: 'student' | 'tutor'): Promise<User[]> {
-    if (role) return this.userModel.find({ isTutor: role === 'tutor' }).exec();
+    if (role) return this.userModel.find({ role }).exec();
     return this.userModel.find().exec();
   }
 

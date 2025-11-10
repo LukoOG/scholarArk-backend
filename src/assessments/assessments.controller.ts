@@ -6,12 +6,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { UserGuard } from '../user/user.guard';
-
-enum UserRole {
-  STUDENT = 'student',
-  TUTOR = 'tutor',
-  ADMIN = 'admin',
-}
+import { UserRole } from '../common/enums';
 
 @ApiTags('assessments')
 @Controller('assessments')

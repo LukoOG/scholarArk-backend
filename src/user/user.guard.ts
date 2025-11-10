@@ -49,7 +49,7 @@ export class UserGuard implements CanActivate {
 
     if (!user) throw new UserNotFoundException();
 
-    request['user'] = { id: user._id };
+    request['user'] = { id: user._id, role: user.role };
 
     return true;
   }
