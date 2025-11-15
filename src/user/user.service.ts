@@ -224,7 +224,7 @@ export class UserService {
   async login(loginDto: LoginDto): Promise<{ user: Omit<User, 'password'>, accessToken: string, refreshToken: string }>{
 	const { email, password: plainPassword } = loginDto;
 	
-	const user = await this.userModel.findOne({ email }).exec();
+	const user = await this.userModel.findOne({ 'email.value': email }).exec();
 	
 	if(!user) throw new UnauthorizedException('Invalid credentials');
 	
