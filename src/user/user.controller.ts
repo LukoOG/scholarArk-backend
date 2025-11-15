@@ -79,7 +79,7 @@ export class UserController {
 */
 
 import { Controller, Get, Post, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -103,7 +103,8 @@ export class UserController {
           email: { value: 'emma@test.com', verified: true },
           role: 'STUDENT',
         },
-        token: 'eyJhbGciOiJIUzI1NiIsInR5...',
+        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5...',
+        refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5...',
       },
     },
   })
@@ -125,12 +126,31 @@ export class UserController {
           email: { value: 'emma@test.com', verified: true },
           role: 'STUDENT',
         },
-        token: 'eyJhbGciOiJIUzI1NiIsInR5...',
+        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5...',
+        refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5...',
       },
     },
   })
   async login(@Body() loginDto: LoginDto) {
     return this.userService.login(loginDto);
+  }
+  
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Refresh user tokens after access token expiry" })
+  @ApiBody({ schema: { properties: { refreshToken: { type: 'string' } } } })
+  @ApiResponse({
+	  status: 200,
+	  description: "tokens refreshed",
+	  schema: {
+		  example: {
+			  accessToken: 'eyJhbGciOiJIUzI1NiIsInR5...',
+			  refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5...',  
+		  }
+	  },
+  })
+  async refresh(@Body('refreshToken') refreshToken: string ){
+	return this.userService.refreshTokens(refreshToken);
   }
 
   @Get()

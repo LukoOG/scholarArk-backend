@@ -175,8 +175,24 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>, private readonly jwtService: JwtService) {}
+  
+  private async generateTokens(user: User){
+	const payload = {
+		sub: user._id.toString(),
+		username: user.username,
+		role: user.role,
+		typ: 'user',
+	};
 
-  async create(signupDto: SignupDto): Promise<{ user: Omit<User, 'password'>, token: string }> {
+	const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '15m' });
+	const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
+
+	await this.storeRefreshToken(user._id.toString(), refreshToken);
+
+	return { accessToken, refreshToken };
+  }
+
+  async create(signupDto: SignupDto): Promise<{ user: Omit<User, 'password'>, accessToken: string, refreshToken: string }> {
 	let user = await this.userModel
       .findOne({
         $or: [
@@ -198,19 +214,14 @@ export class UserService {
 	});
     const savedUser = await createdUser.save();
 	
-	const payload = {
-		sub: savedUser._id.toString(),
-		username: savedUser.username,
-		role: savedUser.role,
-		typ: 'user',
-	};
-	const token = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
+	const { accessToken, refreshToken } = await this.generateTokens(savedUser);
 	
 	const { password, ...userWithoutPassword } = savedUser.toObject();
-	return { user: userWithoutPassword, token }
+	
+	return { user: userWithoutPassword, accessToken, refreshToken }
   }
   
-  async login(loginDto: LoginDto){
+  async login(loginDto: LoginDto): Promise<{ user: Omit<User, 'password'>, accessToken: string, refreshToken: string }>{
 	const { email, password: plainPassword } = loginDto;
 	
 	const user = await this.userModel.findOne({ email }).exec();
@@ -220,18 +231,46 @@ export class UserService {
 	const isMatch = await bcrypt.compare(plainPassword, user.password);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 	
-	const payload = {
-		sub: user._id.toString(),
-		username: user.username,
-		role: user.role,
-		typ: 'user',
-	};
-	const token = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
+	const { accessToken, refreshToken } = await this.generateTokens(user);
 	
 	const { password, ...userWithoutPassword } = user.toObject();
-	return { user: userWithoutPassword, token }
+	return { user: userWithoutPassword, accessToken, refreshToken }
 	
   }
+  
+  async storeRefreshToken(userId: string, refreshToken: string) {
+	  const hashed = await bcrypt.hash(refreshToken, 10);
+	  await this.userModel.updateOne(
+		{ _id: userId },
+		{ $set: { refresh_token: hashed } },
+	  );
+	}
+	
+	async validateRefreshToken(userId: string, refreshToken: string) {
+	  const user = await this.userModel.findById(userId).exec();
+	  if (!user || !user.refresh_token) throw new UnauthorizedException();
+
+	  const isValid = await bcrypt.compare(refreshToken, user.refresh_token);
+	  if (!isValid) throw new UnauthorizedException();
+
+	  return user;
+	}
+	
+	//service for the endpoint to refresh both access and refresh token
+	async refreshTokens(refreshToken: string) {
+	  let payload: any;
+
+	  try {
+		payload = await this.jwtService.verifyAsync(refreshToken);
+		if (payload.typ !== 'user') throw new Error();
+	  } catch {
+		throw new UnauthorizedException('Invalid refresh token');
+	  }
+
+	  const user = await this.validateRefreshToken(payload.sub, refreshToken);
+
+	  return this.generateTokens(user);
+	}
 
   async findAll(role?: 'student' | 'tutor'): Promise<User[]> {
     if (role) return this.userModel.find({ role }).exec();

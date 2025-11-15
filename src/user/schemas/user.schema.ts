@@ -64,6 +64,9 @@ export class User {
 
   @Prop({ type: Wallet })
   wallet?: Wallet;
+  
+  @Prop()
+  refresh_token?: string;
 
   @Prop({ type: Number, min: 0, default: 0 })
   unreadNotifications?: number;
