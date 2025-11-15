@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 import { AdminMethods } from './schemas/methods';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
-import { SignupDto } from 'src/user/dto/signup.dto';
+import { SignupDto } from './dto/signup.dto';
 
 @Injectable()
 export class AdminService {
