@@ -27,10 +27,9 @@ export class SignupDto {
   last_name?: string;
   
   @ApiProperty({ example: { value: 'user@example.com', verified: false } })
-  @IsOptional()
   @ValidateNested()
   @Type(() => EmailDto)
-  email?: EmailDto;
+  email: EmailDto;
 
   @ApiProperty()
   @IsOptional()
@@ -63,11 +62,10 @@ export class SignupDto {
   profile_pic?: string;
 
   @ApiProperty()
-  @IsOptional()
   @IsString()
   @IsStrongPassword(
 		{ minLength: 8, minSymbols: 0 },
 		{ message: "Password must be at least 8 characters long" },
 	)
-  password?: string;
+  password: string;
 }
