@@ -25,8 +25,6 @@ import { TMP_DIR } from 'src/config';
           schema.virtual('fullName').get(function () {
             return `${this.first_name ?? ''} ${this.last_name ?? ''}`.trim();
           });
-
-          schema.pre('save', preSave);
           schema.pre('validate', preValidate);
 
           return schema;
