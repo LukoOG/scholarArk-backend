@@ -1,6 +1,9 @@
 import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from '../decorators/roles.decorator';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Assessment } from './schemas/assessments.schema';
+import { NotFoundException } from 'src/common/exceptions/not-found.exception';
 
 @Injectable()
 export class AssessmentOwnerGuard implements CanActivate {

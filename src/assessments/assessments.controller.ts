@@ -5,7 +5,7 @@ import { AddQuestionsDto } from './dto/add-questions.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
-import { AssessmentOwnerGuard } from '../common/guards/assessment.guard';
+import { AssessmentOwnerGuard } from './assessments.guard';
 import { UserGuard } from '../user/user.guard';
 import { UserRole } from '../common/enums';
 
