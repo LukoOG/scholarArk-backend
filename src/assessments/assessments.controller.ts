@@ -5,6 +5,7 @@ import { AddQuestionsDto } from './dto/add-questions.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { AssessmentOwnerGuard } from '../common/guards/assessment.guard';
 import { UserGuard } from '../user/user.guard';
 import { UserRole } from '../common/enums';
 
@@ -22,6 +23,7 @@ export class AssessmentsController {
     return this.assessmentsService.createAssessment(createAssessmentDto);
   }
 
+  @UseGuards(AssessmentOwnerGuard)
   @Post(':id/questions')
   @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: 'Add questions to an assessment (tutor)' })
@@ -32,6 +34,7 @@ export class AssessmentsController {
     return this.assessmentsService.addQuestions(id, addQuestionsDto);
   }
 
+  @UseGuards(AssessmentOwnerGuard)
   @Post(':id/publish')
   @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: 'Publish assessment (tutor)' })
