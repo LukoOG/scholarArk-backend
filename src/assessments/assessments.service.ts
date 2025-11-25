@@ -13,7 +13,7 @@ export class AssessmentsService {
 	constructor(
 		@InjectModel(Assessment.name)
 		private readonly assessmentModel: Model<AssessmentDocument>,
-		private readonly aiservice: AiService,
+		private readonly aiService: AiService,
 	){}
 	
   async createAssessment(createAssessmentDto: CreateAssessmentDto) {
@@ -53,12 +53,18 @@ export class AssessmentsService {
     return assessment;
   }
   
-  async generateQuestions(assessmentId: string, dto: GenerateQuestionsDto){
-	const assessment = await this.assessmentModel.findById(assessmentId).exec();
-	if(!assessment) throw new NotFoundException('Assessment not found');
-	
-	const generatedQuestions = await this.aiservice.generateQuestions(dto);
-	
-	return { assessmentId, generatedQuestions }	
-  }
+  async generateQuestions(id: string, dto: GenerateQuestionsDto) {
+	  const assessment = await this.assessmentModel.findById(id).exec();
+	  if (!assessment) throw new NotFoundException("Assessment not found");
+
+	  const aiResponse = await this.aiService.generateQuestions(dto);
+
+	  const parsed = JSON.parse(aiResponse);
+
+	  assessment.questions.push(...parsed.questions);
+	  await assessment.save();
+
+	  return assessment;
+	}
+
 }
