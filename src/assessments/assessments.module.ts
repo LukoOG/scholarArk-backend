@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AssessmentsService } from './assessments.service';
 import { AssessmentsController } from './assessments.controller';
+import { AiService } from '../common/services/AI.service'; 
 import { Assessment, AssessmentSchema } from './schemas/assessments.schema';
 import { UserModule } from '../user/user.module';
 
@@ -13,6 +14,6 @@ import { UserModule } from '../user/user.module';
 	UserModule
   ],
   controllers: [AssessmentsController],
-  providers: [AssessmentsService],
+  providers: [AssessmentsService, AiService],
 })
 export class AssessmentsModule {}

@@ -1,7 +1,9 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { CacheModule } from '@nestjs/cache-manager';
+import { APP_GUARD } from '@nestjs/core';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -16,6 +18,10 @@ import { AssessmentsModule } from './assessments/assessments.module';
 
 @Module({
   imports: [
+	CacheModule.register({
+		isGlobal: true,
+		
+	}),
     EventEmitterModule.forRoot({
       wildcard: true,
       delimiter: ':',
@@ -69,7 +75,13 @@ import { AssessmentsModule } from './assessments/assessments.module';
     AssessmentsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+		AppService,
+		{
+			provide: APP_GUARD,
+			useClass: ThrottlerGuard,
+		}
+	],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -1,8 +1,10 @@
 import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
 import { AssessmentsService } from './assessments.service';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
+import { GenerateQuestionsDto } from './dto/generate-questions.dto';
 import { AddQuestionsDto } from './dto/add-questions.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { AssessmentOwnerGuard } from './assessments.guard';
@@ -48,4 +50,13 @@ export class AssessmentsController {
   getAssessment(@Param('id') id: string) {
     return this.assessmentsService.getAssessmentById(id);
   }
+  
+  @UseGuards(AssessmentOwnerGuard)
+  @Post(':id/generate-questions')
+  @Roles(UserRole.TUTOR)
+  @ApiOperation({ summary: "Generate questions using AI" })
+  genereateQuestions(@Param('id') id: string, @Body() dto: GenerateQuestionsDto){
+	return this.assessmentsService.generateQuestions(id, dto)
+  }
+  
 }
