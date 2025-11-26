@@ -8,7 +8,7 @@ export type CourseDocument = HydratedDocument<Course>;
 @Schema({ timestamps: true })
 export class Course {
 	@Prop({ type: Types.ObjectId, ref: 'User', required: true })
-	user_id: Types.ObjectId;
+	createdBy: Types.ObjectId;
 	
 	@Prop()
 	title: string;

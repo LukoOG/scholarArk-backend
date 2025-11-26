@@ -216,9 +216,9 @@ export class UserService {
 	
 	const { accessToken, refreshToken } = await this.generateTokens(savedUser);
 	
-	const { password, ...userWithoutPassword } = savedUser.toObject();
+	const { password, refresh_token, ...userWithoutSecrets } = savedUser.toObject();
 	
-	return { user: userWithoutPassword, accessToken, refreshToken }
+	return { user: userWithoutSecrets, accessToken, refreshToken }
   }
   
   async login(loginDto: LoginDto): Promise<{ user: Omit<User, 'password'>, accessToken: string, refreshToken: string }>{
@@ -234,8 +234,8 @@ export class UserService {
 	
 	const { accessToken, refreshToken } = await this.generateTokens(user);
 	
-	const { password, ...userWithoutPassword } = user.toObject();
-	return { user: userWithoutPassword, accessToken, refreshToken }
+	const { password, refresh_token, ...userWithoutSecrets } = user.toObject();
+	return { user: userWithoutSecrets, accessToken, refreshToken }
 	
   }
   

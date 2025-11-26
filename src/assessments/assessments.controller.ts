@@ -1,4 +1,5 @@
-import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Request } from "express";
 import { AssessmentsService } from './assessments.service';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { GenerateQuestionsDto } from './dto/generate-questions.dto';
@@ -21,8 +22,9 @@ export class AssessmentsController {
   @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: 'Create a new assessment (tutor)' })
   @ApiResponse({ status: 201, description: 'Assessment created successfully' })
-  create(@Body() createAssessmentDto: CreateAssessmentDto) {
-    return this.assessmentsService.createAssessment(createAssessmentDto);
+  create(@Body() createAssessmentDto: CreateAssessmentDto, @Req() req: Request) {
+	  const userId = req.user.id;
+    return this.assessmentsService.createAssessment(createAssessmentDto, userId);
   }
 
   @UseGuards(AssessmentOwnerGuard)

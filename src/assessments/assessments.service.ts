@@ -16,9 +16,10 @@ export class AssessmentsService {
 		private readonly aiService: AiService,
 	){}
 	
-  async createAssessment(createAssessmentDto: CreateAssessmentDto) {
+  async createAssessment(createAssessmentDto: CreateAssessmentDto, id: Types.ObjectId) {
 	  const newAssessment = new this.assessmentModel({
 		  ...createAssessmentDto,
+		  createdBy: id,
 		  isPublished: false,
 		  questions: []
 	  })
@@ -54,6 +55,7 @@ export class AssessmentsService {
   }
   
   async generateQuestions(id: string, dto: GenerateQuestionsDto) {
+	  console.log(id)
 	  const assessment = await this.assessmentModel.findById(id).exec();
 	  if (!assessment) throw new NotFoundException("Assessment not found");
 

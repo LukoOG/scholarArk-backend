@@ -40,9 +40,4 @@ export class CreateCourseDto {
 	@IsBoolean()
 	@IsOptional()
 	isPublished?: boolean;
-
-	@IsString()
-	@IsNotEmpty()
-	@IsMongoId()
-	user_id: string; // ObjectId string
 }

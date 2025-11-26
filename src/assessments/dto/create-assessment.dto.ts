@@ -8,5 +8,4 @@ export class CreateAssessmentDto {
   @ApiPropertyOptional() @IsDateString() startAt: Date;
   @ApiPropertyOptional() @IsDateString() endAt: Date;
   @ApiProperty() @IsMongoId() course_id: string;
-  @ApiProperty() @IsMongoId() createdBy: string;
 }
