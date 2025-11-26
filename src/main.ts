@@ -25,7 +25,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  
+  /**
   const config = new DocumentBuilder()
     .setTitle('ScholarArk API')
     .setDescription('API documentation for ScholarArk — Courses & Users services')
@@ -36,6 +36,7 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+  **/
   
   app.enableCors({ origin: cors.origin });
 
