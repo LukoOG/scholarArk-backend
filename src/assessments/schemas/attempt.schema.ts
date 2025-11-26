@@ -9,7 +9,7 @@ export class Attempt {
   assessment_id: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  user_id: Types.ObjectId;
+  student_id: Types.ObjectId;
 
   @Prop({ type: Date, required: true })
   startedAt: Date;

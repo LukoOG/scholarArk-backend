@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AiService } from '../common/services/AI.service';
 import { Model, Types } from 'mongoose';
 import { Assessment, AssessmentDocument } from './schemas/assessments.schema';
+import { Attempt, AttemptDocument } from './schemas/attempt.schema';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { AddQuestionsDto } from './dto/add-questions.dto';
 import { GenerateQuestionsDto } from './dto/generate-questions.dto';
@@ -13,6 +14,7 @@ export class AssessmentsService {
 	constructor(
 		@InjectModel(Assessment.name)
 		private readonly assessmentModel: Model<AssessmentDocument>,
+		private readonly attemptModel: Model<AttemptDocument>,
 		private readonly aiService: AiService,
 	){}
 	
@@ -69,5 +71,39 @@ export class AssessmentsService {
 
 	  return assessment;
 	}
-
+	
+  async startAttempt(assessmentId: string, studentId: string){
+	  const assessment = await this.assessmentModel.findById(assessmentId).exec();
+	  if (!assessment) throw new NotFoundException("Assessment not found");
+	  if (!assessment.isPublished) throw new BadRequestException("Assessment not available");
+	  
+	  return this.attemptModel.create({
+		student_id: studentId,
+		assessment_id: assessment._id.toString(),
+		startedAt: new Date(),
+		questionsSnapshot: assessment.questions,
+		answers: []
+	  }) 
+  };
+  
+  async submitAttempt(assessmentId: string, studentId: string, answers: any[]){	  
+	  //TODO: check time && other conditions
+	  const attempt = await this.attemptModel.findOne({
+		student: studentId,
+		assessment: assessmentId,
+	  });
+	  
+	  if(!attempt) throw new ForbiddenException('Attempt not started');
+	  
+	  attempt.answers = answers;
+	  attempt.submittedAt = new Date();
+	  
+	  const score = this.calculateScore(attempt.questionsSnapshot, answers)
+	  
+	  attempt.score = score;
+	  
+	  await attempt.save();
+	  
+	  return { score }
+  };
 }
