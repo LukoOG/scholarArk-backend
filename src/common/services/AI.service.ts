@@ -19,6 +19,9 @@ export class AiService {
 
     const chat = await this.model.models.generateContent({
       model: 'gemini-2.0-flash',
+	  config:{
+		responseMimeType: "application/json",  
+	  },
       contents: `
         Generate ${count} ${questionType ?? "mixed"} questions.
         Difficulty: ${difficulty ?? "medium"}.

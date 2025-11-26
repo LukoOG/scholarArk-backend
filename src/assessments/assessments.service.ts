@@ -55,11 +55,12 @@ export class AssessmentsService {
   }
   
   async generateQuestions(id: string, dto: GenerateQuestionsDto) {
-	  console.log(id)
 	  const assessment = await this.assessmentModel.findById(id).exec();
 	  if (!assessment) throw new NotFoundException("Assessment not found");
 
 	  const aiResponse = await this.aiService.generateQuestions(dto);
+	  
+	  console.log(aiResponse);
 
 	  const parsed = JSON.parse(aiResponse);
 
