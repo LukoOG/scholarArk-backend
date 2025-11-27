@@ -17,7 +17,7 @@ import { CoursesModule } from './courses/courses.module';
 import { AssessmentsModule } from './assessments/assessments.module';
 
 @Module({
-  imports: 
+  imports: [
   /**
 	CacheModule.register({
 		isGlobal: true,
