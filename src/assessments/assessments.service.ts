@@ -5,7 +5,9 @@ import { Model, Types } from 'mongoose';
 import { Assessment, AssessmentDocument } from './schemas/assessments.schema';
 import { Attempt, AttemptDocument } from './schemas/attempt.schema';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
+import { UpdateAssessmentDto } from './dto/update-assessment.dto';
 import { AddQuestionsDto } from './dto/add-questions.dto';
+import { UpdateQuestionsDto } from './dto/update-questions.dto';
 import { GenerateQuestionsDto } from './dto/generate-questions.dto';
 
 @Injectable()
@@ -14,6 +16,7 @@ export class AssessmentsService {
 	constructor(
 		@InjectModel(Assessment.name)
 		private readonly assessmentModel: Model<AssessmentDocument>,
+		@InjectModel(Attempt.name)
 		private readonly attemptModel: Model<AttemptDocument>,
 		private readonly aiService: AiService,
 	){}
@@ -56,21 +59,35 @@ export class AssessmentsService {
     return assessment;
   }
   
+  async updateAssessmentById(assessmentId: string, updateAssessmentDto: UpdateAssessmentDto){
+	const assessment = await this.assessmentModel.findByIdAndUpdate(assessmentId,  updateAssessmentDto, { new: true }).exec();
+    if (!assessment) throw new NotFoundException('Assessment not found');
+    return assessment;
+  }
+  
   async generateQuestions(id: string, dto: GenerateQuestionsDto) {
-	  const assessment = await this.assessmentModel.findById(id).exec();
-	  if (!assessment) throw new NotFoundException("Assessment not found");
+		const assessment = await this.assessmentModel.findById(id).exec();
+		if (!assessment) throw new NotFoundException("Assessment not found");
 
-	  const aiResponse = await this.aiService.generateQuestions(dto);
-	  
-	  console.log(aiResponse);
+		const aiResponse = await this.aiService.generateQuestions(dto);
 
-	  const parsed = JSON.parse(aiResponse);
+		console.log(aiResponse);
 
-	  assessment.questions.push(...parsed.questions);
-	  await assessment.save();
+		const parsed = JSON.parse(aiResponse);
 
-	  return assessment;
+		assessment.questions.push(...parsed.questions);
+		await assessment.save();
+
+		return assessment;
 	}
+	
+  async updateQuestions(assessmentId: string, dto: UpdateQuestionsDto){
+	  const assessment = await this.assessmentModel.findById(assessmentId).exec();
+	  
+	  if (!assessment) throw new NotFoundException("Assessment not found");
+	  
+	  return assessment
+  }
 	
   async startAttempt(assessmentId: string, studentId: string){
 	  const assessment = await this.assessmentModel.findById(assessmentId).exec();
@@ -93,12 +110,12 @@ export class AssessmentsService {
 		assessment: assessmentId,
 	  });
 	  
-	  if(!attempt) throw new ForbiddenException('Attempt not started');
+	  if(!attempt) throw new NotFoundException('Attempt not started');
 	  
 	  attempt.answers = answers;
 	  attempt.submittedAt = new Date();
 	  
-	  const score = this.calculateScore(attempt.questionsSnapshot, answers)
+	  const score = 2//this.calculateScore(attempt.questionsSnapshot, answers)
 	  
 	  attempt.score = score;
 	  

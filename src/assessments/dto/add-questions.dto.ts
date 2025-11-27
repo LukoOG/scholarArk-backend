@@ -8,7 +8,7 @@ class OptionDto {
   @IsString() text: string;
 }
 
-class QuestionDto {
+export class QuestionDto {
   @IsEnum(QuestionType) type: QuestionType;
   @ApiProperty({ example: "What is 2 + 2? " }) @IsString() question: string;
   @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => OptionDto) options?: OptionDto[]; // MCQ

@@ -1,9 +1,11 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { Types } from "mongoose";
 import { Request } from "express";
 import { AssessmentsService } from './assessments.service';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
+import { UpdateAssessmentDto } from './dto/update-assessment.dto';
 import { GenerateQuestionsDto } from './dto/generate-questions.dto';
+import { UpdateQuestionsDto } from './dto/update-questions.dto';
 import { AddQuestionsDto } from './dto/add-questions.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
@@ -37,7 +39,15 @@ export class AssessmentsController {
   ) {
     return this.assessmentsService.addQuestions(id, addQuestionsDto);
   }
-
+  
+  @UseGuards(AssessmentOwnerGuard)
+  @Patch(':id/questions')
+  @Roles(UserRole.TUTOR)
+  @ApiOperation({ summary: "Edit assessment's questions (tutor)" })
+  updateQuestions(@Param('id') id: string, @Body() updateQuestionsDto: UpdateQuestionsDto){
+	return this.assessmentsService.updateQuestions(id, updateQuestionsDto);  
+  }
+  
   @UseGuards(AssessmentOwnerGuard)
   @Post(':id/publish')
   @Roles(UserRole.TUTOR)
@@ -54,25 +64,40 @@ export class AssessmentsController {
   }
   
   @UseGuards(AssessmentOwnerGuard)
+  @Patch(':id')
+  @Roles(UserRole.TUTOR)
+  @ApiOperation({ summary: "Update assessment's questions (tutor)" })
+  updateAssessment(@Param('id') id: string, @Body() updateAssessmentDto: UpdateAssessmentDto){
+	return this.assessmentsService.updateAssessmentById(id, updateAssessmentDto);  
+  }
+  
+  @UseGuards(AssessmentOwnerGuard)
   @Post(':id/generate-questions')
   @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: "Generate questions using AI" })
-  genereateQuestions(@Param('id') id: string, @Body() dto: GenerateQuestionsDto){
+  generateQuestions(@Param('id') id: string, @Body() dto: GenerateQuestionsDto){
 	return this.assessmentsService.generateQuestions(id, dto)
   }
   
-  //Student related endpoints
+  ///Student related endpoints
   @Post(':id/start')
   @Roles(UserRole.STUDENT)
   @ApiOperation({ summary: "Start an attempt (studens)" })
   startAttempt(@Param('id') assessmentId: string, @GetUser('id') studentId: string){
 	return this.assessmentsService.startAttempt(assessmentId, studentId)  
   }
-  
+/**
+  @Get(':id/attemptId')
+  @Roles(UserRole.STUDENT)
+  @ApiOperation({ summary: "Get an ongoing attempt (studens)" })
+  getAttempt(@Param('id') assessmentId: string, @GetUser('id') studentId: string){
+	return this.assessmentsService.getAttempt(assessmentId, studentId)
+  }
+  **/
   @Post(':id/submit')
   @Roles()
   @ApiOperation({ summary: "Submit answers for an attempt (student)" })
-  submitAttempt(@Param('id') assessmentId: string, @GetUser('id') studentId: string, @Body() body: { answers: any[] },){
+  submitAttempt(@Param('id') assessmentId: string, @GetUser('id') studentId: string, @Body() body: any[]){
 	return this.assessmentsService.submitAttempt(assessmentId, studentId, body)  
   };
   

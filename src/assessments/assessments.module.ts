@@ -4,12 +4,14 @@ import { AssessmentsService } from './assessments.service';
 import { AssessmentsController } from './assessments.controller';
 import { AiService } from '../common/services/AI.service'; 
 import { Assessment, AssessmentSchema } from './schemas/assessments.schema';
+import { Attempt, AttemptSchema} from './schemas/attempt.schema';
 import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Assessment.name, schema: AssessmentSchema },
+      { name: Attempt.name, schema: AttemptSchema },
     ]),
 	UserModule
   ],
