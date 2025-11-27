@@ -15,6 +15,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AdminModule } from './admin/admin.module';
 import { CoursesModule } from './courses/courses.module';
 import { AssessmentsModule } from './assessments/assessments.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { AssessmentsModule } from './assessments/assessments.module';
     AdminModule,
     CoursesModule,
     AssessmentsModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [

@@ -174,7 +174,7 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>, private readonly jwtService: JwtService) {}
+  constructor(@InjectModel(User.name) public userModel: Model<User>, private readonly jwtService: JwtService) {}
   
   private async generateTokens(user: User){
 	const payload = {
