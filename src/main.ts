@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-//import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 
 import helmet from 'helmet';
@@ -25,7 +25,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  /**
+  
   const config = new DocumentBuilder()
     .setTitle('ScholarArk API')
     .setDescription('API documentation for ScholarArk — Courses & Users services')
@@ -36,9 +36,9 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
-  **/
   
-  //app.enableCors({ origin: cors.origin });
+  
+  app.enableCors({ origin: cors.origin });
 
   await app.listen(port, () => {
     console.log(`Api is listening on port ${port}.`);
