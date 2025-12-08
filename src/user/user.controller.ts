@@ -111,7 +111,7 @@ export class UserController {
     },
   })
   async create(@Body() signupDto: SignupDto) {
-    const user = this.userService.create(signupDto);
+    const user = await this.userService.create(signupDto);
 	return ResponseHelper.success(user, HttpStatus.CREATED)
   }
   
@@ -135,7 +135,7 @@ export class UserController {
     },
   })
   async login(@Body() loginDto: LoginDto) {
-    const user = this.userService.login(loginDto);
+    const user = await this.userService.login(loginDto);
 	return ResponseHelper.success(user)
   }
   

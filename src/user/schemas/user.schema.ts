@@ -14,6 +14,7 @@ export class User {
 	///
 	_id?: Types.ObjectId;  
 	
+	/*
   @Prop({
     type: String,
     required: true,
@@ -22,7 +23,8 @@ export class User {
     unique: true,
   })
   username: string;
-  ///
+  */
+  
   @Prop()
   first_name: string;
   
