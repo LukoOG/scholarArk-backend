@@ -153,6 +153,24 @@ export class UserController {
   async refresh(@Body('refreshToken') refreshToken: string ){
 	return this.userService.refreshTokens(refreshToken);
   }
+  
+  @Post('/google')
+  @HttpCode(HttpStatus.Ok)
+  @ApiOperation({ summary: "Endponit to Login/Register user via Google Oauth" })
+  @ApiBody({ schema: { properties: { idToken: { type: 'string' } } } })
+  @ApiResponse({
+	  status: 200,
+	  description: "User successfully logged in",
+	  schema: {
+		  example: {
+			  accessToken: 'eyJHkip143InR5...'
+			  refreshToken: 'eyJHkip143InR5...'
+		  }
+	  }
+  })
+  async googleOauth(@Body token: { [key]: string } ){
+	return this.userService.googleSignIn(token)
+  }
 
   @Get()
   findAll(@Query('role') role?: 'student' | 'tutor') {

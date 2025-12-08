@@ -31,6 +31,12 @@ export class User {
   
   @Prop({ type: Email })
   email: Email;
+  
+  @Prop()
+  googleId?: string;
+  
+  @Prop({ default: "local" })
+  authProvider: "local" | "google" | "apple";
 
   @Prop({ type: Phone })
   phone?: Phone;
@@ -55,13 +61,16 @@ export class User {
   
   @Prop()
   profile_pic: string;
-  ///
+  
   @Prop()
   password?: string;
-
+  
+  /*
   @Prop({ type: Nonce })
   nonce?: Nonce;
-
+  */
+  
+  
   @Prop({ type: Wallet })
   wallet?: Wallet;
   

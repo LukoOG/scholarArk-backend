@@ -160,6 +160,8 @@ export class UserService {
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
+import { ConfigService } from '@nestjs/config';
+import { EnvironmentVariables } from '../config/environment-variables'
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { SignupDto } from './dto/signup.dto';
@@ -174,14 +176,19 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) public userModel: Model<User>, private readonly jwtService: JwtService) {}
+  constructor(
+	  @InjectModel(User.name) 
+	  public userModel: Model<User>, 
+	  private readonly jwtService: JwtService,
+	  private readonly configService: ConfigService<EnvironmentVariables>,
+	) {}
   
   private async generateTokens(user: User){
 	const payload = {
 		sub: user._id.toString(),
 		username: user.username,
 		role: user.role,
-		typ: 'user',
+		typ: 'user', 
 	};
 
 	const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '15m' });
@@ -271,6 +278,29 @@ export class UserService {
 	  const user = await this.validateRefreshToken(payload.sub, refreshToken);
 
 	  return this.generateTokens(user);
+	}
+	
+	async loginWithGoogle(idToken: string){
+		const ticket = await this.googleClient.verifyIdToken({
+			idToken,
+			audience: configService.get('GOOGLE_CLIENT_ID'),
+		})
+		
+		const payload = ticket.getPayload();
+		const { sub, email, name } = payload;
+		
+		let user = await this.userModel.findOne({ googleId: sub }).exec();
+		
+		if(!user){
+			user = await this.userModel.create({
+				email: { value: email, verified: true },
+				username: name,
+				googleId: sub,
+				authProvider: "google",
+			})
+		}
+		
+		return this.generateTokens(user)
 	}
 
   async findAll(role?: 'student' | 'tutor'): Promise<User[]> {

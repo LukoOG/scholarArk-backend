@@ -54,4 +54,10 @@ export class EnvironmentVariables {
   @IsPositive()
   @IsOptional()
   PAYSTACK_MINIMUM_BALANCE: number;
+  
+  @IsString()
+  GEMINI_API_KEY: string;
+  
+  @IsString()
+  GOOGLE_CLIENT_ID: string;
 }
