@@ -35,11 +35,11 @@ async function bootstrap() {
     .addTag('courses')
     .build();
 	
-	console.log("Swagger config created...")
+	//console.log("Swagger config created...")
   const document = SwaggerModule.createDocument(app, config);
-  	console.log("Swagger document created...")
+  	//console.log("Swagger document created...")
   SwaggerModule.setup('api/docs', app, document);
-  	console.log("Swagger moutned...")
+  	//console.log("Swagger mounted...")
   
   app.enableCors({ origin: cors.origin });
 

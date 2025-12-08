@@ -85,6 +85,7 @@ import { UserService } from './user.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ResponseHelper } from '../common/helpers/api-response.helper';
 
 @ApiTags('Users')
 @Controller('users')
@@ -110,7 +111,8 @@ export class UserController {
     },
   })
   async create(@Body() signupDto: SignupDto) {
-    return this.userService.create(signupDto);
+    const user = this.userService.create(signupDto);
+	return ResponseHelper.success(user, HttpStatus.CREATED)
   }
   
   @Post('login')
@@ -133,7 +135,8 @@ export class UserController {
     },
   })
   async login(@Body() loginDto: LoginDto) {
-    return this.userService.login(loginDto);
+    const user = this.userService.login(loginDto);
+	return ResponseHelper.success(user)
   }
   
   @Post('refresh')
