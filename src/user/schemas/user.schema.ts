@@ -13,8 +13,7 @@ export type UserDocument = HydratedDocument<User>;
 export class User {
 	///
 	_id?: Types.ObjectId;  
-	
-	/*
+
   @Prop({
     type: String,
     required: true,
@@ -22,8 +21,7 @@ export class User {
     lowercase: true,
     unique: true,
   })
-  username: string;
-  */
+  username?: string;
   
   @Prop()
   first_name: string;
