@@ -20,10 +20,19 @@ export class Attempt {
   @Prop({ type: Array, required: true })
   // snapshot of questions asked (so grading is deterministic)
   questionsSnapshot: any[];
-
-  @Prop({ type: Array, required: true })
-  // user's answers (align with snapshot order)
-  answers: any[];
+  
+  @Prop({
+	  type: [
+		{
+		  questionId: String,
+		  answer: Schema.Types.Mixed,
+		},
+	  ],
+	})
+	answers: {
+	  questionId: string;
+	  answer: string | string[];
+	}[];
 
   @Prop({ default: 0 })
   score: number;

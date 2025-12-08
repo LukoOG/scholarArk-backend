@@ -4,11 +4,13 @@ import { AiService } from '../common/services/AI.service';
 import { Model, Types } from 'mongoose';
 import { Assessment, AssessmentDocument } from './schemas/assessments.schema';
 import { Attempt, AttemptDocument } from './schemas/attempt.schema';
+import { Question } from './schemas/question.schema';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { UpdateAssessmentDto } from './dto/update-assessment.dto';
 import { AddQuestionsDto } from './dto/add-questions.dto';
 import { UpdateQuestionsDto } from './dto/update-questions.dto';
 import { GenerateQuestionsDto } from './dto/generate-questions.dto';
+import { SubmitAttemptDto } from './dto/attempt.dto';
 
 @Injectable()
 export class AssessmentsService {
@@ -21,8 +23,16 @@ export class AssessmentsService {
 		private readonly aiService: AiService,
 	){}
 	
-  private calculateScore (snapshot: [], answers: []){
+  private calculateScore (snapshot: Question[], answers: SubmitAttemptDto[]){
+	  let score = 0;
+	  const answerLen = answers.length;
+	  for(let i = 0; i < answerLen; i++){
+		if(answers[i] === snapshot[i].correctAnswer){
+			score++
+		}
+	  }
 	  
+	  return score
   }
   
   async createAssessment(createAssessmentDto: CreateAssessmentDto, id: Types.ObjectId) {
@@ -139,16 +149,56 @@ export class AssessmentsService {
 	  if (!assessment) throw new NotFoundException("Assessment not found");
 	  if (!assessment.isPublished) throw new BadRequestException("Assessment not available");
 	  
+	  const existing = await this.assessmentModel.findOne({
+		  assessment_id: assessmentId,
+		  student_id: studentId,
+		  submittedAt: null,
+	  })
+	  
+	  if(existing) return existing;
+	  
+	  const sanitizedQuestions = assessment.questions.map((q)=>{
+		  const { correctAnswer, ...rest } = q;
+		  return rest
+	  })
+	  
 	  return this.attemptModel.create({
 		student_id: studentId,
 		assessment_id: assessment._id.toString(),
 		startedAt: new Date(),
-		questionsSnapshot: assessment.questions,
+		questionsSnapshot: sanitizedQuestions,
 		answers: []
 	  }) 
   };
   
-  async submitAttempt(assessmentId: string, studentId: string, answers: any[]){	  
+  async editAttempt(attemptId: string, studentId: string, submitAttemptDto: SubmitAttemptDto) {
+	  const attempt = await this.attemptModel.findOne({
+		  id: attemptId,
+		  student_id: studentId,
+		  submittedAt: null,
+		}).exec();
+
+	  if (!attempt) throw new NotFoundException('Active attempt not found');
+
+	  submitAttemptDto.answers.forEach((incoming) => {
+		const existingIndex = attempt.answers.findIndex(
+		  (a) => a.questionId === incoming.questionId
+		);
+
+		if (existingIndex !== -1) {
+		  attempt.answers[existingIndex] = incoming;
+		} else {
+		  attempt.answers.push(incoming);
+		}
+	  });
+
+	  await attempt.save();
+
+	  return { message: 'Progress saved' };
+	}
+
+  
+  async submitAttempt(assessmentId: string, studentId: string, answers: SubmitAttemptDto[]){	  
 	  //TODO: check time && other conditions
 	  const attempt = await this.attemptModel.findOne({
 		student: studentId,
@@ -160,7 +210,7 @@ export class AssessmentsService {
 	  attempt.answers = answers;
 	  attempt.submittedAt = new Date();
 	  
-	  const score = 2//this.calculateScore(attempt.questionsSnapshot, answers)
+	  const score = this.calculateScore(attempt.questionsSnapshot, answers)
 	  
 	  attempt.score = score;
 	  
