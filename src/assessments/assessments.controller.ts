@@ -28,6 +28,14 @@ export class AssessmentsController {
   create(@Body() createAssessmentDto: CreateAssessmentDto, @GetUser('id') userId: Types.ObjectId) {
     return this.assessmentsService.createAssessment(createAssessmentDto, userId);
   }
+  
+  @UseGuards(AssessmentOwnerGuard)
+  @Patch(':id')
+  @Roles(UserRole.TUTOR)
+  @ApiOperation({ summary: "Edit assessment (tutor)" })
+  updateAssessment(@Param('id') id: string, @Body() updateAssessmentDto: UpdateAssessmentDto){
+	return this.assessmentsService.updateAssessmentById(id, updateAssessmentDto);  
+  }
 
   @UseGuards(AssessmentOwnerGuard)
   @Post(':id/questions')
@@ -39,14 +47,23 @@ export class AssessmentsController {
   ) {
     return this.assessmentsService.addQuestions(id, addQuestionsDto);
   }
-  
+
   @UseGuards(AssessmentOwnerGuard)
   @Patch(':id/questions')
   @Roles(UserRole.TUTOR)
-  @ApiOperation({ summary: "Edit assessment's questions (tutor)" })
-  updateQuestions(@Param('id') id: string, @Body() updateQuestionsDto: UpdateQuestionsDto){
+  @ApiOperation({ summary: "Update assessment's questions (tutor)" })
+  updateAssessmentQuestions(@Param('id') id: string, @Body() updateQuestionsDto: UpdateQuestionsDto){
 	return this.assessmentsService.updateQuestions(id, updateQuestionsDto);  
   }
+  
+  @UseGuards(AssessmentOwnerGuard)
+  @Post(':id/generate-questions')
+  @Roles(UserRole.TUTOR)
+  @ApiOperation({ summary: "Generate questions using AI" })
+  generateQuestions(@Param('id') id: string, @Body() dto: GenerateQuestionsDto){
+	return this.assessmentsService.generateQuestions(id, dto)
+  }
+  
   
   @UseGuards(AssessmentOwnerGuard)
   @Post(':id/publish')
@@ -62,23 +79,13 @@ export class AssessmentsController {
   getAssessment(@Param('id') id: string) {
     return this.assessmentsService.getAssessmentById(id);
   }
-  
-  @UseGuards(AssessmentOwnerGuard)
-  @Patch(':id')
+
+  @Delete(':id')
   @Roles(UserRole.TUTOR)
-  @ApiOperation({ summary: "Update assessment's questions (tutor)" })
-  updateAssessment(@Param('id') id: string, @Body() updateAssessmentDto: UpdateAssessmentDto){
-	return this.assessmentsService.updateAssessmentById(id, updateAssessmentDto);  
-  }
-  
-  @UseGuards(AssessmentOwnerGuard)
-  @Post(':id/generate-questions')
-  @Roles(UserRole.TUTOR)
-  @ApiOperation({ summary: "Generate questions using AI" })
-  generateQuestions(@Param('id') id: string, @Body() dto: GenerateQuestionsDto){
-	return this.assessmentsService.generateQuestions(id, dto)
-  }
-  
+  @ApiOperation({ summary: 'Delete a batch of questions (tutors)' })
+  deleteAssessmentQuestions(@Param('id') id: string @Body() ids: string[]) {
+    return this.assessmentsService.softDeleteQuestions(id, ids);
+  }  
   ///Student related endpoints
   @Post(':id/start')
   @Roles(UserRole.STUDENT)
@@ -86,6 +93,7 @@ export class AssessmentsController {
   startAttempt(@Param('id') assessmentId: string, @GetUser('id') studentId: string){
 	return this.assessmentsService.startAttempt(assessmentId, studentId)  
   }
+  
 /**
   @Get(':id/attemptId')
   @Roles(UserRole.STUDENT)

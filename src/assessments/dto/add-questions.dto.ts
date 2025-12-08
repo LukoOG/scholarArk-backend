@@ -1,4 +1,4 @@
-import { IsString, IsArray, IsOptional, ValidateNested, IsEnum, IsNumber } from 'class-validator';
+import { IsString, IsArray, IsOptional, ValidateNested, IsEnum, IsNumber, IsMongoId } from 'class-validator';
 import { Type } from 'class-transformer';
 import { QuestionType } from '../schemas/assessments.schema';
 import { ApiProperty } from '@nestjs/swagger';
@@ -9,6 +9,7 @@ class OptionDto {
 }
 
 export class QuestionDto {
+  @IsOptional() @IsMongoId() id?: string;
   @IsEnum(QuestionType) type: QuestionType;
   @ApiProperty({ example: "What is 2 + 2? " }) @IsString() question: string;
   @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => OptionDto) options?: OptionDto[]; // MCQ

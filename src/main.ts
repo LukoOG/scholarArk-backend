@@ -26,6 +26,7 @@ async function bootstrap() {
     }),
   );
   
+  console.log("Swagger started...")
   const config = new DocumentBuilder()
     .setTitle('ScholarArk API')
     .setDescription('API documentation for ScholarArk — Courses & Users services')
@@ -33,10 +34,12 @@ async function bootstrap() {
     .addTag('users')
     .addTag('courses')
     .build();
-
+	
+	console.log("Swagger config created...")
   const document = SwaggerModule.createDocument(app, config);
+  	console.log("Swagger document created...")
   SwaggerModule.setup('api/docs', app, document);
-  
+  	console.log("Swagger moutned...")
   
   app.enableCors({ origin: cors.origin });
 

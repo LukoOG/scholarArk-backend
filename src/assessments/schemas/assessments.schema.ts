@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
+import { Question, QuestionSchema } from "./question.schema";
 
 export type AssessmentDocument = HydratedDocument<Assessment>;
 
@@ -33,10 +34,8 @@ export class Assessment {
   isPublished: boolean;
 
   
-  @Prop({ type: [{ 
-    type: Object,
-  }] })
-  questions: any[]; 
+  @Prop({ type: [QuestionSchema] })
+  questions: Question[]; 
 
   @Prop({ default: 0 })
   maxScore: number;

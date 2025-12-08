@@ -32,8 +32,6 @@ import { PaymentModule } from './payment/payment.module';
     ThrottlerModule.forRoot({
       throttlers: [
         { name: 'l0', limit: 4, ttl: 60 * 1_000 },
-        /**{ name: 'l1', limit: 10, ttl: 10 * 60 * 1_000 },
-        { name: 'l2', limit: 20, ttl: 60 * 60 * 1_000 },**/
       ],
     }),
     MongooseModule.forRootAsync({

@@ -21,6 +21,10 @@ export class AssessmentsService {
 		private readonly aiService: AiService,
 	){}
 	
+  private calculateScore (snapshot: [], answers: []){
+	  
+  }
+  
   async createAssessment(createAssessmentDto: CreateAssessmentDto, id: Types.ObjectId) {
 	  const newAssessment = new this.assessmentModel({
 		  ...createAssessmentDto,
@@ -86,7 +90,52 @@ export class AssessmentsService {
 	  
 	  if (!assessment) throw new NotFoundException("Assessment not found");
 	  
-	  return assessment
+	  const existingQuestions = assessment.questions;
+	  
+	  const newQuestions = dto.questions.forEach((incoming) => {
+		if(incoming.id){
+			const index = existingQuestions.findIndex((q) => q._id.toString() == incoming.id);
+			
+			if(index !== -1){
+				existingQuestions[index] = {
+					...existingQuestions[index],
+					...incoming,
+					_id: incoming.id
+				}
+			}
+			
+			else if(index === -1){ //index not found -> add
+				existingQuestions.push(incoming as any)
+			}
+			
+			else if(index){
+				existingQuestions.push(incoming as any)
+			}
+		}
+	  });
+	  
+	  await assessment.save();
+	  return assessment;
+  }
+  
+  async softDeleteQuestions(assessmentId: string, ids: string[]){
+	  const assessment = await this.assessmentModel.findById(assessmentId).exec();
+	  if (!assessment) throw new NotFoundException("Assessment not found");
+	  if(!ids || !ids.length) throw new BadRequestException("No question ids provided")
+	  
+	  const questions = assessment.questions;
+	  
+	  const deletedCount = 0;
+	  assessment.questions.forEach((question) => {
+		if(ids.includes(question._id.toString())){
+			question.isDeleted = true
+			deletedCount++
+		}  
+	  });
+	  
+	  await assessment.save();
+	  
+	  return { message: "Questions deleted", deletedCount }
   }
 	
   async startAttempt(assessmentId: string, studentId: string){
@@ -115,7 +164,7 @@ export class AssessmentsService {
 	  attempt.answers = answers;
 	  attempt.submittedAt = new Date();
 	  
-	  const score = 2//this.calculateScore(attempt.questionsSnapshot, answers)
+	  const score = this.calculateScore(attempt.questionsSnapshot, answers)
 	  
 	  attempt.score = score;
 	  
