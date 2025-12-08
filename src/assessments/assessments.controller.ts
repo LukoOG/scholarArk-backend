@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Delete, Param, UseGuards, Req } from '@nestjs/common';
 import { Types } from "mongoose";
 import { Request } from "express";
 import { AssessmentsService } from './assessments.service';
@@ -83,7 +83,7 @@ export class AssessmentsController {
   @Delete(':id')
   @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: 'Delete a batch of questions (tutors)' })
-  deleteAssessmentQuestions(@Param('id') id: string @Body() ids: string[]) {
+  deleteAssessmentQuestions(@Param('id') id: string, @Body() ids: string[]) {
     return this.assessmentsService.softDeleteQuestions(id, ids);
   }  
   ///Student related endpoints

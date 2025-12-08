@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
+import { GoogleClientService } from '../common/services/google.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { preSave, preValidate } from './schemas/middleware';
@@ -32,7 +33,7 @@ import { TMP_DIR } from 'src/config';
       },
     ]),
   ],
-  providers: [UserService],
+  providers: [UserService, GoogleClientService],
   exports: [UserService],
   controllers: [UserController],
 })

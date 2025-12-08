@@ -40,7 +40,8 @@ export class AssessmentsService {
 	  const assessment = await this.assessmentModel.findById(assessmentId).exec()
 	  if (!assessment) throw new NotFoundException('Assessment not found')
 		  
-	  addQuestionsDto.questions.forEach((question) => assessment.questions.push(question))
+	  addQuestionsDto.questions.map((question)=>{ const q ={...question, isDeleted: false}; return q})
+	  .forEach((question) => assessment.questions.push(question))
 	  
 	  await assessment.save()
 	  
@@ -92,25 +93,20 @@ export class AssessmentsService {
 	  
 	  const existingQuestions = assessment.questions;
 	  
-	  const newQuestions = dto.questions.forEach((incoming) => {
-		if(incoming.id){
-			const index = existingQuestions.findIndex((q) => q._id.toString() == incoming.id);
-			
+	  dto.questions.forEach((incoming) => {
+		if(incoming._id){
+			const index = existingQuestions.findIndex((q) => q._id.toString() == incoming._id.toString());
 			if(index !== -1){
 				existingQuestions[index] = {
 					...existingQuestions[index],
-					...incoming,
-					_id: incoming.id
+					...incoming
 				}
 			}
-			
-			else if(index === -1){ //index not found -> add
-				existingQuestions.push(incoming as any)
+			else { //index not found -> add
+				existingQuestions.push({ ...incoming, isDeleted: false })
 			}
-			
-			else if(index){
-				existingQuestions.push(incoming as any)
-			}
+		} else{
+			existingQuestions.push({ ...incoming, isDeleted: false })
 		}
 	  });
 	  
@@ -125,7 +121,7 @@ export class AssessmentsService {
 	  
 	  const questions = assessment.questions;
 	  
-	  const deletedCount = 0;
+	  let deletedCount = 0;
 	  assessment.questions.forEach((question) => {
 		if(ids.includes(question._id.toString())){
 			question.isDeleted = true
@@ -164,7 +160,7 @@ export class AssessmentsService {
 	  attempt.answers = answers;
 	  attempt.submittedAt = new Date();
 	  
-	  const score = this.calculateScore(attempt.questionsSnapshot, answers)
+	  const score = 2//this.calculateScore(attempt.questionsSnapshot, answers)
 	  
 	  attempt.score = score;
 	  

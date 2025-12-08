@@ -1,9 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { QuestionType } from './assessment.schema';
+import { QuestionType } from './assessments.schema';
 
 @Schema({ _id: true }) 
 export class Question {
+   @Prop()
+   _id?: Types.ObjectId;
+  
   @Prop({ required: true, enum: QuestionType })
   type: QuestionType;
 
@@ -19,7 +22,7 @@ export class Question {
   @Prop({ default: 1 })
   points?: number;
   
-  @Prop({ default: false })
+  @Prop({ required: true, default: false })
   isDeleted: boolean
 }
 

@@ -155,7 +155,7 @@ export class UserController {
   }
   
   @Post('/google')
-  @HttpCode(HttpStatus.Ok)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Endponit to Login/Register user via Google Oauth" })
   @ApiBody({ schema: { properties: { idToken: { type: 'string' } } } })
   @ApiResponse({
@@ -163,13 +163,13 @@ export class UserController {
 	  description: "User successfully logged in",
 	  schema: {
 		  example: {
-			  accessToken: 'eyJHkip143InR5...'
-			  refreshToken: 'eyJHkip143InR5...'
+			  accessToken: 'eyJHkip143InR5...',
+			  refreshToken: 'eyJHkip143InR5...',
 		  }
 	  }
   })
-  async googleOauth(@Body token: { [key]: string } ){
-	return this.userService.googleSignIn(token)
+  async googleOauth(@Body() token: string ){
+	return this.userService.loginWithGoogle(token)
   }
 
   @Get()

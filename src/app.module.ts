@@ -34,13 +34,13 @@ import { PaymentModule } from './payment/payment.module';
         { name: 'l0', limit: 4, ttl: 60 * 1_000 },
       ],
     }),
-    MongooseModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory(configService: ConfigService<Config, true>) {
-        const mongoConfig = configService.get('mongo', { infer: true });
-        return { uri: mongoConfig.uri };
-      },
-    }),
+	MongooseModule.forRootAsync({
+		inject: [ConfigService],
+		useFactory(configService: ConfigService<Config, true>){
+			const mongoConfig = configService.get('mongo', { infer: true });
+			return { uri: mongoConfig.uri }
+		}
+	}),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory(configService: ConfigService<Config, true>) {

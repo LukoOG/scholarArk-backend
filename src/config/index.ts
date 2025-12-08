@@ -22,6 +22,8 @@ export interface Config {
   mongo: { uri: string };
   cors: { origin: string[] | string };
   jwt: { secret: string; issuer: string; audience: string; expiresIn: string };
+  gemini: string;
+  google_client_id: string;
 }
 
 export function configuration() {
@@ -54,6 +56,8 @@ export function configuration() {
       audience: env.JWT_AUDIENCE || websiteUrl,
       expiresIn: env.JWT_EXPIRES_IN || '30d',
     },
+	google_client_id: env.GOOGLE_CLIENT_ID,
+	gemini: env.GEMINI_API_KEY,
   };
 
   return config;

@@ -159,9 +159,10 @@ export class UserService {
 
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { GoogleClientService } from '../common/services/google.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
-import { EnvironmentVariables } from '../config/environment-variables'
+import { Config } from '../config'
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { SignupDto } from './dto/signup.dto';
@@ -180,7 +181,8 @@ export class UserService {
 	  @InjectModel(User.name) 
 	  public userModel: Model<User>, 
 	  private readonly jwtService: JwtService,
-	  private readonly configService: ConfigService<EnvironmentVariables>,
+	  private readonly configService: ConfigService<Config>,
+	  private readonly googleClient: GoogleClientService,
 	) {}
   
   private async generateTokens(user: User){
@@ -281,12 +283,8 @@ export class UserService {
 	}
 	
 	async loginWithGoogle(idToken: string){
-		const ticket = await this.googleClient.verifyIdToken({
-			idToken,
-			audience: configService.get('GOOGLE_CLIENT_ID'),
-		})
+		const payload = await this.googleClient.verifyIdToken(idToken)
 		
-		const payload = ticket.getPayload();
 		const { sub, email, name } = payload;
 		
 		let user = await this.userModel.findOne({ googleId: sub }).exec();

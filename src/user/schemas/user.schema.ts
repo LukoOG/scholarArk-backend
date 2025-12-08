@@ -65,11 +65,8 @@ export class User {
   @Prop()
   password?: string;
   
-  /*
   @Prop({ type: Nonce })
-  nonce?: Nonce;
-  */
-  
+  nonce?: Nonce;  
   
   @Prop({ type: Wallet })
   wallet?: Wallet;

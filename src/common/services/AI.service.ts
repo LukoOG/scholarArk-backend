@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EnvironmentVariables } from '../config/environment-variables'
+import { Config } from '../../config'
 import { GenerateQuestionsDto } from 'src/assessments/dto/generate-questions.dto';
 import { GoogleGenAI } from '@google/genai';
 import type { GenerateContentResponse } from "@google/genai";
@@ -12,9 +12,9 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 export class AiService {
   private model: GoogleGenAI;
 
-  constructor(private readonly configService: ConfigService<EnvironmentVariables>) {
+  constructor(private readonly configService: ConfigService<Config, true>) {
 	
-    this.model = new GoogleGenAI({ apiKey: configService.get('GEMINI_API_KEY') });
+    this.model = new GoogleGenAI({ apiKey: configService.get('gemini', { infer: true }) });
   }
 
   async generateQuestions(dto: GenerateQuestionsDto) {
