@@ -20,6 +20,8 @@ import { TMP_DIR } from 'src/config';
         name: User.name,
         useFactory() {
           const schema = UserSchema;
+		  
+		  schema.set('toObject', { virtuals: true });
 
           for (const method of userMethods) schema.method(method.name, method);
 

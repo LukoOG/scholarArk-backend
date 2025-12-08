@@ -163,7 +163,7 @@ import { GoogleClientService } from '../common/services/google.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
 import { Config } from '../config'
-import { Model } from 'mongoose';
+import { Model, HydratedDocument } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -185,10 +185,11 @@ export class UserService {
 	  private readonly googleClient: GoogleClientService,
 	) {}
   
-  private async generateTokens(user: User){
+  private async generateTokens(user: HydratedDocument<User>){
 	const payload = {
 		sub: user._id.toString(),
-		username: user.username,
+		//username: user.username,
+		name: user.fullName,
 		role: user.role,
 		typ: 'user', 
 	};

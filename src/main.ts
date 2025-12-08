@@ -3,6 +3,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 
+import { ApiExceptionFilter } from './common/filters/api-exception.filter';
+
 import helmet from 'helmet';
 
 import { AppModule } from './app.module';
@@ -25,6 +27,8 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+  
+  app.useGlobalFilters(new ApiExceptionFilter());
   
   console.log("Swagger started...")
   const config = new DocumentBuilder()

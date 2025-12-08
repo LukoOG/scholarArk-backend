@@ -73,9 +73,12 @@ export class User {
   
   @Prop()
   refresh_token?: string;
-
+  
   @Prop({ type: Number, min: 0, default: 0 })
   unreadNotifications?: number;
+  
+  //virtuals
+  fullName?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
