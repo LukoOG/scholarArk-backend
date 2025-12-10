@@ -68,7 +68,4 @@ export class CompleteSignupDto {
   @IsString()
   profile_pic?: string;	
   
-  @ApiProperty()
-  @IsOptional()
-  
 }

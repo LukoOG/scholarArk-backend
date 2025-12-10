@@ -14,7 +14,7 @@ export class UpdateUserDto extends PartialType(CompleteSignupDto) {
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  topicIds? string[];
+  topicIds?: string[];
   
   @ApiPropertyOptional({ type: [String], description: 'Selected preference IDs' })
   @IsOptional()

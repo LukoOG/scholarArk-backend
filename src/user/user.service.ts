@@ -4,7 +4,7 @@ import { GoogleClientService } from '../common/services/google.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
 import { Config } from '../config'
-import { Model, HydratedDocument } from 'mongoose';
+import { Model, HydratedDocument, Types } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { SignupDto, CompleteSignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -162,30 +162,30 @@ export class UserService {
 		...profileData
 	  } = updateUserDto;
 
-	  const user = await this.userModel.findById(id).exec();
-	  if (!user) throw new UserNotFoundException();
+	  // Build the update object
+	  const updatePayload: any = {
+		...profileData,
+	  };
 
-	  // 1. Apply profile updates
-	  Object.assign(user, profileData);
+	  if (goalIds) updatePayload.goals = goalIds.map(id => new Types.ObjectId(id));
+	  if (topicIds) updatePayload.topics = topicIds.map(id => new Types.ObjectId(id));
+	  if (preferenceIds) updatePayload.preferences = preferenceIds.map(id => new Types.ObjectId(id));
 
-	  // 2. Apply preferences/goals/topics
-	  if (goalIds) user.goals = goalIds.map(id => new Types.ObjectId(id));
-	  if (topicIds) user.topics = topicIds.map(id => new Types.ObjectId(id));
-	  if (preferenceIds) user.preferences = preferenceIds.map(id => new Types.ObjectId(id));
+	  // Set completion flags
+	  if (Object.keys(profileData).length > 0) updatePayload.isProfileComplete = true;
+	  if (goalIds || topicIds || preferenceIds) updatePayload.isPreferencesComplete = true;
 
-	  // 3. Mark completion flags
-	  if (Object.keys(profileData).length > 0) {
-		user.isProfileComplete = true;
-	  }
+	  // Perform atomic update
+	  const updatedUser = await this.userModel.findByIdAndUpdate(
+		id,
+		{ $set: updatePayload },
+		{ new: true, runValidators: true },
+	  ).exec();
 
-	  if (goalIds || topicIds || preferenceIds) {
-		user.isPreferencesComplete = true;
-	  }
+	  if (!updatedUser) throw new UserNotFoundException();
 
-	  await user.save();
-	  return user;
+	  return updatedUser;
 	}
-
 
   async delete(id: string): Promise<void> {
     const res = await this.userModel.findByIdAndDelete(id).exec();

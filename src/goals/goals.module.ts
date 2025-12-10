@@ -8,10 +8,5 @@ import { Goal, GoalSchema } from './schemas/goal.schema';
       { name: Goal.name, schema: GoalSchema },
     ]),
   ],
-  /*
-  controllers: [GoalsController],
-  providers: [GoalsService],
-  exports: [GoalsService],
-  */
 })
 export class GoalsModule {}
