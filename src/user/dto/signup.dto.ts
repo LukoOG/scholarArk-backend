@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer'
-import { ValidateNested, IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsEmail, IsStrongPassword } from 'class-validator';
+import { ValidateNested, IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsEmail, IsStrongPassword, IsMongoId } from 'class-validator';
 import { Gender, UserRole } from 'src/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -12,10 +12,22 @@ export class EmailDto {
 }
 
 export class SignupDto {
+  @ApiProperty({ example: { value: 'user@example.com', verified: false } })
+  @ValidateNested()
+  @Type(() => EmailDto)
+  email: EmailDto;
+
+
   @ApiProperty()
   @IsString()
-  username: string;
+  @IsStrongPassword(
+		{ minLength: 8, minSymbols: 0 },
+		{ message: "Password must be at least 8 characters long" },
+	)
+  password: string;
+}
 
+export class CompleteSignupDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
@@ -26,11 +38,6 @@ export class SignupDto {
   @IsString()
   last_name?: string;
   
-  @ApiProperty({ example: { value: 'user@example.com', verified: false } })
-  @ValidateNested()
-  @Type(() => EmailDto)
-  email: EmailDto;
-
   @ApiProperty()
   @IsOptional()
   @IsEnum(Gender)
@@ -59,13 +66,9 @@ export class SignupDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  profile_pic?: string;
-
+  profile_pic?: string;	
+  
   @ApiProperty()
-  @IsString()
-  @IsStrongPassword(
-		{ minLength: 8, minSymbols: 0 },
-		{ message: "Password must be at least 8 characters long" },
-	)
-  password: string;
+  @IsOptional()
+  
 }

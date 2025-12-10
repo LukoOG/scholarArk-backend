@@ -25,13 +25,13 @@ export class Attempt {
 	  type: [
 		{
 		  questionId: String,
-		  answer: Schema.Types.Mixed,
+		  answer: String//Schema.Types.Mixed,
 		},
 	  ],
 	})
 	answers: {
 	  questionId: string;
-	  answer: string | string[];
+	  answer: string;
 	}[];
 
   @Prop({ default: 0 })

@@ -23,17 +23,17 @@ export class AssessmentsService {
 		private readonly aiService: AiService,
 	){}
 	
-  private calculateScore (snapshot: Question[], answers: SubmitAttemptDto[]){
+	private calculateScore(snapshot: any[], answers: { questionId: string; answer: string; }[]) {
 	  let score = 0;
-	  const answerLen = answers.length;
-	  for(let i = 0; i < answerLen; i++){
-		if(answers[i] === snapshot[i].correctAnswer){
-			score++
+
+	  for (let i = 0; i < snapshot.length; i++) {
+		if (answers[i].answer === snapshot[i].correctAnswer) {
+		  score++;
 		}
 	  }
-	  
-	  return score
-  }
+
+	  return score;
+	}
   
   async createAssessment(createAssessmentDto: CreateAssessmentDto, id: Types.ObjectId) {
 	  const newAssessment = new this.assessmentModel({
@@ -198,7 +198,7 @@ export class AssessmentsService {
 	}
 
   
-  async submitAttempt(assessmentId: string, studentId: string, answers: SubmitAttemptDto[]){	  
+  async submitAttempt(assessmentId: string, studentId: string, dto: SubmitAttemptDto){	  
 	  //TODO: check time && other conditions
 	  const attempt = await this.attemptModel.findOne({
 		student: studentId,
@@ -207,10 +207,10 @@ export class AssessmentsService {
 	  
 	  if(!attempt) throw new NotFoundException('Attempt not started');
 	  
-	  attempt.answers = answers;
+	  attempt.answers = dto.answers;
 	  attempt.submittedAt = new Date();
 	  
-	  const score = this.calculateScore(attempt.questionsSnapshot, answers)
+	  const score = this.calculateScore(attempt.questionsSnapshot, dto.answers)
 	  
 	  attempt.score = score;
 	  

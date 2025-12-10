@@ -16,6 +16,9 @@ import { AdminModule } from './admin/admin.module';
 import { CoursesModule } from './courses/courses.module';
 import { AssessmentsModule } from './assessments/assessments.module';
 import { PaymentModule } from './payment/payment.module';
+import { GoalsModule } from './goals/goals.module';
+import { TopicsModule } from './topics/topics.module';
+import { PreferencesModule } from './preferences/preferences.module';
 
 @Module({
   imports: [
@@ -74,6 +77,9 @@ import { PaymentModule } from './payment/payment.module';
     CoursesModule,
     AssessmentsModule,
     PaymentModule,
+    GoalsModule,
+    TopicsModule,
+    PreferencesModule,
   ],
   controllers: [AppController],
   providers: [

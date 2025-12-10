@@ -13,16 +13,7 @@ export type UserDocument = HydratedDocument<User>;
 export class User {
 	///
 	_id?: Types.ObjectId;  
-
-  @Prop({
-    type: String,
-    required: true,
-    trim: true,
-    lowercase: true,
-    unique: true,
-  })
-  username?: string;
-  
+	
   @Prop()
   first_name: string;
   
@@ -50,21 +41,31 @@ export class User {
   @Prop({ type: String, enum: UserRole, default: UserRole.STUDENT })
   role: UserRole;
   
-  @Prop()
-  address?: string;
+  @Prop({ type: [Types.ObjectId], ref: "Topic", default: [] })
+  topicsIds: string[];
+  
+  @Prop({ type: [Types.ObjectId], ref: "Preference", default: [] })
+  preferencesIds: string[];
+  
+  @Prop({ type: [Types.ObjectId], ref: "Goal", default: [] })
+  goalsIds: string[];
   
   @Prop()
   stars?: number;
-  
-  @Prop()
-  highest_qualification?: string;
-  
+
   @Prop()
   profile_pic: string;
   
   @Prop()
   password?: string;
   
+  @Prop({
+	  enum: ['ACCOUNT_CREATED', 'PROFILE_COMPLETED', 'PREFERENCES_COMPLETED'],
+	  default: 'ACCOUNT_CREATED',
+	})
+
+	onboardingStatus: string;
+
   @Prop({ type: Nonce })
   nonce?: Nonce;  
   

@@ -1,162 +1,3 @@
-/*
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { JwtService } from '@nestjs/jwt';
-import { FilterQuery, Model, Types } from 'mongoose';
-import * as crypto from 'node:crypto';
-
-import { User } from './schemas/user.schema';
-import { UserMethods } from './schemas/methods';
-import { SignupDto } from './dto/signup.dto';
-import { LoginDto } from './dto/login.dto';
-import { GetUsersDto } from './dto/get-users.dto';
-import {
-  UserAlreadyExistsException,
-  UserNotFoundException,
-} from './exceptions';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { VerifyEmailDto } from './dto/verify-email.dto';
-
-@Injectable()
-export class UserService {
-  private readonly logger: Logger = new Logger(UserService.name);
-
-  constructor(
-    @InjectModel(User.name)
-    readonly userModel: Model<User, object, UserMethods, { fullName: string }>,
-    private readonly jwtService: JwtService,
-  ) { }
-
-  // note: write admin module first
-  async getAllUsers() { }
-
-  async getUsers(dto: GetUsersDto) {
-    const { q } = dto;
-
-    const filter: FilterQuery<User> = {};
-
-    if (q) {
-      filter.$or = [
-        { username: { $regex: q, $options: 'i' } },
-        { 'name.first': { $regex: q, $options: 'i' } },
-        { 'name.last': { $regex: q, $options: 'i' } },
-      ];
-    }
-
-    const users = await this.userModel
-      .find(filter)
-      .sort({ createdAt: 1 })
-      .lean()
-      .exec();
-
-    return { message: 'Users fetched.', data: { users } };
-  }
-
-  async signup(dto: SignupDto) {
-    let user = await this.userModel
-      .findOne({
-        $or: [
-          { username: dto.username },
-          { 'email.value': dto['email.value'] },
-        ],
-      })
-      .exec();
-
-    if (user) throw new UserAlreadyExistsException();
-
-    user = await this.userModel.create(dto);
-
-    const token = await this.jwtService.signAsync({
-      sub: user.id,
-      typ: 'user',
-    });
-
-    return { message: 'User signup successful!', data: { user, token } };
-  }
-
-  async login(dto: LoginDto) {
-    const user = await this.userModel
-      .findOne({ 'email.value': dto.email })
-      .exec();
-
-    if (!user || !(await user.verifyHash('password', dto.password)))
-      throw new BadRequestException({ message: 'Invalid credentials!' });
-
-    const token = await this.jwtService.signAsync({
-      sub: user.id,
-      typ: 'user',
-    });
-
-    return { message: 'User login successful!', data: { user, token } };
-  }
-
-  async verifyEmail(dto: VerifyEmailDto) {
-    const { email, otp } = dto;
-
-    const user = await this.userModel.findOne({ 'email.value': email }).exec();
-
-    if (!user) throw new UserNotFoundException();
-
-    if (user.get('email.verified'))
-      throw new BadRequestException({ message: 'Email already verified.' });
-
-    const isValid = await user.verifyNonce(otp);
-
-    if (isValid === 'expired')
-      throw new BadRequestException({ message: 'OTP has expired.' });
-
-    if (!isValid) throw new BadRequestException({ message: 'OTP is invalid' });
-
-    user.set('email.verified', true);
-    await user.save();
-
-    return { message: 'Email verified!' };
-  }
-
-  async getUserProfile(userId: Types.ObjectId) {
-    const user = await this.userModel
-      .findById(userId)
-      .select('-password')
-      .lean()
-      .exec();
-
-    return { message: 'User profile fetched!', data: { user } };
-  }
-
-  async updateUser(userId: Types.ObjectId, dto: UpdateUserDto) {
-    if (
-      dto['username'] &&
-      (await this.userModel.findOne({ username: dto['username'] }).exec())
-    )
-      throw new UserAlreadyExistsException();
-
-    const result = await this.userModel
-      .updateOne({ _id: userId }, { $set: dto })
-      .exec();
-
-    if (result.matchedCount < 1) throw new UserNotFoundException();
-
-    return { message: 'User updated!' };
-  }
-
-  async upload(userId: Types.ObjectId, files: Express.Multer.File[]) {
-    if (files.length === 0)
-      throw new BadRequestException('No files were sent.');
-
-    const urls: string[] = [];
-
-    for (const file of files) {
-      const key = crypto.randomUUID().toString();
-
-    }
-
-    return { message: 'Files Uploaded Successful!', data: { urls } };
-  }
-
-  async deleteProfile(userId: Types.ObjectId, dto) { }
-}
-*/
-
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { GoogleClientService } from '../common/services/google.service';
@@ -165,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { Config } from '../config'
 import { Model, HydratedDocument } from 'mongoose';
 import { User } from './schemas/user.schema';
-import { SignupDto } from './dto/signup.dto';
+import { SignupDto, CompleteSignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRole } from '../common/enums';
@@ -202,28 +43,26 @@ export class UserService {
 	return { accessToken, refreshToken };
   }
 
-  async create(signupDto: SignupDto): Promise<{ user: Omit<User, 'password'>, accessToken: string, refreshToken: string }> {
+  async register(signupDto: SignupDto): Promise<{ user: Omit<User, 'password'>, accessToken: string, refreshToken: string }> {
 	let user = await this.userModel
       .findOne({
         $or: [
-          { username: signupDto.username },
           { 'email.value': signupDto.email?.value },
         ],
       })
       .exec();
 
     if (user) throw new UserAlreadyExistsException();
-	const { role = UserRole.STUDENT, password: plainPassword, ...rest } = signupDto; //Ensures default role is default if no role is provided
+	const { password: plainPassword, ...rest } = signupDto; 
     
 	const hashedPassword = await bcrypt.hash(plainPassword, 10)
 	
 	const createdUser = new this.userModel({
 		...rest,
 		password: hashedPassword,
-		role
 	});
     const savedUser = await createdUser.save();
-	
+
 	const { accessToken, refreshToken } = await this.generateTokens(savedUser);
 	
 	const { password, refresh_token, ...userWithoutSecrets } = savedUser.toObject();
@@ -240,7 +79,7 @@ export class UserService {
 	
 	
 	const isMatch = await bcrypt.compare(plainPassword, user.password);
-    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+    if (!isMatch) throw new UnauthorizedException('Invalid password');
 	
 	const { accessToken, refreshToken } = await this.generateTokens(user);
 	
@@ -291,9 +130,11 @@ export class UserService {
 		let user = await this.userModel.findOne({ googleId: sub }).exec();
 		
 		if(!user){
+			//client sends more fields other than id-token based on need
 			user = await this.userModel.create({
 				email: { value: email, verified: true },
-				username: name,
+				//username: name,
+				first_name: name,
 				googleId: sub,
 				authProvider: "google",
 			})
@@ -313,13 +154,40 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const updated = await this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).exec();
-    if (!updated) throw new NotFoundException('User not found');
-    return updated;
-  }
+	async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+	  const {
+		goalIds,
+		topicIds,
+		preferenceIds,
+		...profileData
+	  } = updateUserDto;
 
-  async remove(id: string): Promise<void> {
+	  const user = await this.userModel.findById(id).exec();
+	  if (!user) throw new UserNotFoundException();
+
+	  // 1. Apply profile updates
+	  Object.assign(user, profileData);
+
+	  // 2. Apply preferences/goals/topics
+	  if (goalIds) user.goals = goalIds.map(id => new Types.ObjectId(id));
+	  if (topicIds) user.topics = topicIds.map(id => new Types.ObjectId(id));
+	  if (preferenceIds) user.preferences = preferenceIds.map(id => new Types.ObjectId(id));
+
+	  // 3. Mark completion flags
+	  if (Object.keys(profileData).length > 0) {
+		user.isProfileComplete = true;
+	  }
+
+	  if (goalIds || topicIds || preferenceIds) {
+		user.isPreferencesComplete = true;
+	  }
+
+	  await user.save();
+	  return user;
+	}
+
+
+  async delete(id: string): Promise<void> {
     const res = await this.userModel.findByIdAndDelete(id).exec();
     if (!res) throw new NotFoundException('User not found');
   }

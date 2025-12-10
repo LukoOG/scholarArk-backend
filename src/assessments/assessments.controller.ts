@@ -93,7 +93,7 @@ export class AssessmentsController {
   @ApiOperation({ summary: 'Delete a batch of questions (tutors)' })
   async deleteAssessmentQuestions(@Param('id') id: string, @Body() ids: string[]) {
     const result = await this.assessmentsService.softDeleteQuestions(id, ids);
-	return ResponseHelper.success(result, HttpStatus.DELETED);
+	return ResponseHelper.success(result, HttpStatus.OK);
   }  
   ///Student related endpoints
   @Post(':id/start')
@@ -135,8 +135,8 @@ export class AssessmentsController {
       },
     },
   })
-  async editAttempt(@Param('id') attemptId: string, @GetUser('id') studentId: string, @Body() answers: string[]){
-	const result =await this.assessmentsService.editAttempt(attemptId, studentId);
+  async editAttempt(@Param('id') attemptId: string, @GetUser('id') studentId: string, @Body() submitAttemptDto: SubmitAttemptDto){
+	const result =await this.assessmentsService.editAttempt(attemptId, studentId, submitAttemptDto);
 	return ResponseHelper.success(result, 200)
   }
   

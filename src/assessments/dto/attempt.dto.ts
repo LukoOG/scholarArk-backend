@@ -2,5 +2,5 @@
 export class StartAttemptDto {}
 
 export class SubmitAttemptDto {
-  answers: { questionId: string; answer: string | string[] }[];
+  answers: { questionId: string; answer: string }[];
 }
