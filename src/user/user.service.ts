@@ -154,7 +154,8 @@ export class UserService {
     return user;
   }
 
-	async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+	async update(id: Types.ObjectId, updateUserDto: UpdateUserDto): Promise<User> {
+		//console.log(id)
 	  const {
 		goalIds,
 		topicIds,

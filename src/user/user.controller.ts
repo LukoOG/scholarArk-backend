@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { UserService } from './user.service';
@@ -7,6 +7,8 @@ import { LoginDto } from './dto/login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ResponseHelper } from '../common/helpers/api-response.helper';
 import { GetUser } from '../common/decorators'
+import { UserGuard } from '../user/user.guard';
+import { Types } from 'mongoose';
 
 @ApiTags('Users')
 @Controller('users')
@@ -115,15 +117,10 @@ export class UserController {
    const response = await this.userService.findOne(id);
 	return ResponseHelper.success(response)   
   }
-
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    const response = await this.userService.update(id, updateUserDto);
-	return ResponseHelper.success(response)	
-  }
   
+  @UseGuards(UserGuard)
   @Patch('me')
-  async updateMe(@GetUser('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async updateMe(@GetUser('id') id: Types.ObjectId, @Body() updateUserDto: UpdateUserDto) {
     const response = await this.userService.update(id, updateUserDto);
 	return ResponseHelper.success(response)	
   }
