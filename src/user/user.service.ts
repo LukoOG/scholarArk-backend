@@ -184,6 +184,8 @@ export class UserService {
 	  ).exec();
 
 	  if (!updatedUser) throw new UserNotFoundException();
+	  
+	  const { password, refresh_token, ...userWithoutSecrets } = updatedUser.toObject();
 
 	  return updatedUser;
 	}
