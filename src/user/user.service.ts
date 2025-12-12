@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { Config } from '../config'
 import { Model, HydratedDocument, Types } from 'mongoose';
 import { User } from './schemas/user.schema';
-import { SignupDto, CompleteSignupDto } from './dto/signup.dto';
+import { SignupDto, CompleteSignupDto, OauthSignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRole } from '../common/enums';
@@ -53,7 +53,7 @@ export class UserService {
       .exec();
 
     if (user) throw new UserAlreadyExistsException();
-	const { password: plainPassword, ...rest } = signupDto; 
+	const { role = UserRole.STUDENT, password: plainPassword, ...rest } = signupDto; 
     
 	const hashedPassword = await bcrypt.hash(plainPassword, 10)
 	
@@ -61,8 +61,9 @@ export class UserService {
 		...rest,
 		password: hashedPassword,
 	});
+	
     const savedUser = await createdUser.save();
-
+	
 	const { accessToken, refreshToken } = await this.generateTokens(savedUser);
 	
 	const { password, refresh_token, ...userWithoutSecrets } = savedUser.toObject();
@@ -122,7 +123,9 @@ export class UserService {
 	  return this.generateTokens(user);
 	}
 	
-	async loginWithGoogle(idToken: string){
+	async loginWithGoogle(dto: OauthSignupDto){
+		const { token: idToken, role = UserRole.STUDENT } = dto;
+		
 		const payload = await this.googleClient.verifyIdToken(idToken)
 		
 		const { sub, email, name } = payload;
@@ -133,8 +136,8 @@ export class UserService {
 			//client sends more fields other than id-token based on need
 			user = await this.userModel.create({
 				email: { value: email, verified: true },
-				//username: name,
 				first_name: name,
+				role,
 				googleId: sub,
 				authProvider: "google",
 			})

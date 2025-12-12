@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, Delete, Patch, Query, HttpCode, Htt
 import { ApiTags, ApiResponse, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { UserService } from './user.service';
-import { SignupDto } from './dto/signup.dto';
+import { SignupDto, OauthSignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ResponseHelper } from '../common/helpers/api-response.helper';
@@ -36,8 +36,12 @@ export class UserController {
     },
   })
   async register(@Body() signupDto: SignupDto) {
-    const user = await this.userService.register(signupDto);
-	return ResponseHelper.success(user, HttpStatus.CREATED)
+	  try{
+		  const user = await this.userService.register(signupDto);
+		  return ResponseHelper.success(user, HttpStatus.CREATED)
+	  }catch(error){
+		  console.error(error)
+	  }
   }
   
   @Post('login')
@@ -101,8 +105,8 @@ export class UserController {
 		  }
 	  }
   })
-  async googleOauth(@Body() token: string ){
-	const tokens = await this.userService.loginWithGoogle(token)
+  async googleOauth(@Body() dto: OauthSignupDto ){
+	const tokens = await this.userService.loginWithGoogle(dto)
 	return ResponseHelper.success(tokens)
   }
 

@@ -25,7 +25,24 @@ export class SignupDto {
 		{ message: "Password must be at least 8 characters long" },
 	)
   password: string;
+  
+  @ApiProperty()
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
 }
+
+export class OauthSignupDto {
+  @ApiProperty()
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
+  
+  @ApiProperty()
+  @IsString()
+  token: string;
+}
+
 
 export class CompleteSignupDto {
   @ApiProperty()
@@ -47,11 +64,6 @@ export class CompleteSignupDto {
   @IsOptional()
   @IsDateString()
   birthday?: Date;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
 
   @ApiProperty()
   @IsOptional()
