@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiResponse, ApiOperation, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiCreatedResponse, ApiBadRequestResponse, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { UserService } from './user.service';
 import { SignupDto, OauthSignupDto } from './dto/signup.dto';
@@ -17,24 +17,32 @@ export class UserController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({
-    status: 201,
-    description: 'User Created Successfully',
-    schema: {
-      example: {
-		data:{
-		  user: {
-          _id: '6730a8cfb8c2a12b4e9b25cd',
-          username: 'emmanuel',
-          email: { value: 'emma@test.com', verified: true },
-          role: 'STUDENT',
-        },
-        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5...',
-        refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5...',
+	@ApiCreatedResponse({
+	  description: 'User created successfully',
+	  schema: {
+		example: {
+		  data: {
+			user: {
+			  _id: '6730a8cfb8c2a12b4e9b25cd',
+			  email: { value: 'emma@test.com', verified: false },
+			  role: 'STUDENT',
+			},
+			accessToken: 'eyJhbGciOiJIUzI1NiIsInR5...',
+			refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5...',
+		  },
 		},
-	  }
-    },
-  })
+	  },
+	})
+	@ApiBadRequestResponse({
+	  description: 'Validation failed or user already exists',
+	  schema: {
+		example: {
+		  statusCode: 400,
+		  message: 'User already exists',
+		  error: 'Bad Request',
+		},
+	  },
+	})
   async register(@Body() signupDto: SignupDto) {
 	  try{
 		  const user = await this.userService.register(signupDto);
@@ -72,20 +80,35 @@ export class UserController {
   
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "Refresh user tokens after access token expiry" })
-  @ApiBody({ schema: { properties: { refreshToken: { type: 'string' } } } })
-  @ApiResponse({
-	  status: 200,
-	  description: "tokens refreshed",
+	@ApiBody({
 	  schema: {
-		  example: {
-			data:{
-			  accessToken: 'eyJhbGciOiJIUzI1NiIsInR5...',
-			  refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5...', 
-			}
-		  }
+		properties: {
+		  refreshToken: { type: 'string' },
+		},
+		required: ['refreshToken'],
 	  },
-  })
+	})
+	@ApiOkResponse({
+	  description: 'Tokens refreshed successfully',
+	  schema: {
+		example: {
+		  data: {
+			accessToken: 'newAccessTokenHere...',
+			refreshToken: 'newRefreshTokenHere...',
+		  },
+		},
+	  },
+	})
+	@ApiUnauthorizedResponse({
+	  description: 'Invalid or expired refresh token',
+	  schema: {
+		example: {
+		  statusCode: 401,
+		  message: 'Invalid refresh token',
+		  error: 'Unauthorized',
+		},
+	  },
+	})
   async refresh(@Body('refreshToken') refreshToken: string ){
 	const tokens = await this.userService.refreshTokens(refreshToken);
 	return ResponseHelper.success(tokens)
@@ -93,18 +116,35 @@ export class UserController {
   
   @Post('/google')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "Endponit to Login/Register user via Google Oauth" })
-  @ApiBody({ schema: { properties: { idToken: { type: 'string' } } } })
-  @ApiResponse({
-	  status: 200,
-	  description: "User successfully logged in",
+	@ApiOperation({ summary: 'Login/Register using Google OAuth token' })
+	@ApiBody({ type: OauthSignupDto })
+	@ApiOkResponse({
+	  description: 'User logged in via Google OAuth',
 	  schema: {
-		  example: {
-			  accessToken: 'eyJHkip143InR5...',
-			  refreshToken: 'eyJHkip143InR5...',
-		  }
-	  }
-  })
+		example: {
+		  data: {
+					  user: {
+          _id: '6730a8cfb8c2a12b4e9b25cd',
+          username: 'emmanuel',
+          email: { value: 'emma@test.com', verified: true },
+          role: 'STUDENT',
+        },
+			accessToken: 'eyJHkip143InR5...',
+			refreshToken: 'eyJHkip143InR5...',
+		  },
+		},
+	  },
+	})
+	@ApiUnauthorizedResponse({
+	  description: 'Invalid Google token',
+	  schema: {
+		example: {
+		  statusCode: 401,
+		  message: 'Invalid Google ID token',
+		  error: 'Unauthorized',
+		},
+	  },
+	})
   async googleOauth(@Body() dto: OauthSignupDto ){
 	const tokens = await this.userService.loginWithGoogle(dto)
 	return ResponseHelper.success(tokens)
@@ -124,6 +164,46 @@ export class UserController {
   
   @UseGuards(UserGuard)
   @Patch('me')
+  @ApiBearerAuth()
+  @ApiOperation({
+	  summary: 'Complete user registration or update user profile',
+	  description: `
+	This endpoint is used for **two purposes**:
+
+	1. **Complete Registration Flow**  
+	   After registering or signing in with Google, users must finish onboarding by supplying preferences, topics, goals, etc.
+
+	2. **Regular Profile Update**  
+	   Allows an authenticated user to edit their profile information.
+
+	📌 **Mobile Developers:**  
+	You MUST pass the access token in the request header:  
+	\`Authorization: Bearer <access_token>\`
+	  `,
+	})
+  @ApiBody({
+    type: UpdateUserDto,
+    description: 'Fields required to complete user profile',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile completed successfully',
+    schema: {
+      example: {
+        data: {
+          user: {
+            _id: '6730b2cfb8c2a12b4e9b25cd',
+            username: 'emmanuel',
+            email: { value: 'emma@test.com', verified: true },
+            role: 'STUDENT',
+            preferences: [],
+            goals: ['master backend engineering'],
+          topics: ['nestjs', 'mongodb'],
+          },
+        },
+      },
+    },
+  })
   async updateMe(@GetUser('id') id: Types.ObjectId, @Body() updateUserDto: UpdateUserDto) {
     const response = await this.userService.update(id, updateUserDto);
 	return ResponseHelper.success(response)	

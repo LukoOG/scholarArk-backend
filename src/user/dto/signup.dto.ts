@@ -43,7 +43,7 @@ export class OauthSignupDto {
   token: string;
 }
 
-
+/*
 export class CompleteSignupDto {
   @ApiProperty()
   @IsOptional()
@@ -81,3 +81,4 @@ export class CompleteSignupDto {
   profile_pic?: string;	
   
 }
+*/

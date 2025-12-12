@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { Config } from '../config'
 import { Model, HydratedDocument, Types } from 'mongoose';
 import { User } from './schemas/user.schema';
-import { SignupDto, CompleteSignupDto, OauthSignupDto } from './dto/signup.dto';
+import { SignupDto, OauthSignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRole } from '../common/enums';

@@ -37,6 +37,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('users')
     .addTag('courses')
+	.addBearerAuth()
     .build();
 	
 	//console.log("Swagger config created...")
