@@ -29,8 +29,8 @@ export class UserService {
   private async generateTokens(user: HydratedDocument<User>){
 	const payload = {
 		sub: user._id.toString(),
-		//username: user.username,
-		name: user.fullName,
+		//name: user.fullName,
+		email: user.email.value,
 		role: user.role,
 		typ: 'user', 
 	};

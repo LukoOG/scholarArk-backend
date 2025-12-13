@@ -22,6 +22,7 @@ import { TMP_DIR } from 'src/config';
           const schema = UserSchema;
 		  
 		  schema.set('toObject', { virtuals: true });
+		  schema.set('toJSON', { virtuals: true });
 
           for (const method of userMethods) schema.method(method.name, method);
 
