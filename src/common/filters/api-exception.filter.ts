@@ -22,7 +22,8 @@ export class ApiExceptionFilter implements ExceptionFilter {
       errorResponse = exception.getResponse();
     }
 
-    const res = ResponseHelper.error(errorResponse, status);
+    let res = ResponseHelper.error(errorResponse, status);
+	if (errorResponse.message) res = ResponseHelper.error(errorResponse.message, status)
     response.status(status).json(res);
   }
 }
