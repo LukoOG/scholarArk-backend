@@ -44,12 +44,8 @@ export class UserController {
 	  },
 	})
   async register(@Body() signupDto: SignupDto) {
-	  try{
-		  const user = await this.userService.register(signupDto);
-		  return ResponseHelper.success(user, HttpStatus.CREATED)
-	  }catch(error){
-		  console.error(error)
-	  }
+	  const user = await this.userService.register(signupDto);
+	  return ResponseHelper.success(user, HttpStatus.CREATED)
   }
   
   @Post('login')
