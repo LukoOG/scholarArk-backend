@@ -5,9 +5,8 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { AuthService } from '../auth/auth.service';
 import { Request } from 'express';
-import { UserService } from './user.service';
 import { isValidObjectId, Types } from 'mongoose';
 import { UserNotFoundException } from './exceptions';
 
@@ -16,8 +15,7 @@ export type UserPopulatedRequest = Request & { user: { id: Types.ObjectId } };
 @Injectable()
 export class UserGuard implements CanActivate {
   constructor(
-    private readonly jwtService: JwtService,
-    private readonly userService: UserService,
+    private readonly authService: AuthService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -28,24 +26,7 @@ export class UserGuard implements CanActivate {
     if (!token)
       throw new BadRequestException({ message: 'Token not present!' });
 
-    let payload: { sub: string; typ: string };
-    try {
-      payload = await this.jwtService.verifyAsync(token);
-
-      if (!isValidObjectId(payload.sub) || payload.typ !== 'user')
-        throw new Error();
-    } catch {
-      throw new UnauthorizedException({ message: 'Invalid token!' });
-    }
-	
-	/*
-    const user = await this.userService.userModel
-      .findById(payload.sub)
-      .select('_id')
-      .lean()
-      .exec();
-	  */
-	const user = await this.userService.findOne(payload.sub)
+	const user = await this.authService.validateUserFromToken(token)
 
     if (!user) throw new UserNotFoundException();
 

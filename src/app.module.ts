@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { APP_GUARD } from '@nestjs/core';
+import { redisStore } from 'cache-manager-ioredis-yet';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -19,15 +20,24 @@ import { PaymentModule } from './payment/payment.module';
 import { GoalsModule } from './goals/goals.module';
 import { TopicsModule } from './topics/topics.module';
 import { PreferencesModule } from './preferences/preferences.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-  /**
 	CacheModule.register({
 		isGlobal: true,
+		useFactory: async (configService: ConfigService<Config, true>) => {
+			const cacheConfig = configService.get('redis', { infer: true });
+			
+			return {store: await redisStore({
+				host: cacheConfig.host,
+				port: Number(cacheConfig.port),
+				password: cacheConfig.password,
+				ttl: 60,
+			})}
+		}
 		
 	}),
-	**/
     EventEmitterModule.forRoot({
       wildcard: false,
       verboseMemoryLeak: false,
@@ -80,6 +90,7 @@ import { PreferencesModule } from './preferences/preferences.module';
     GoalsModule,
     TopicsModule,
     PreferencesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [

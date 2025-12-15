@@ -1,4 +1,6 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from '../common/multer/multer.config';
 import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiCreatedResponse, ApiBadRequestResponse, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { UserService } from './user.service';
@@ -15,7 +17,9 @@ import { Types } from 'mongoose';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  
   @Post('register')
+  @UseInterceptors(FileInterceptor('profile_pic', multerConfig))
   @ApiOperation({ summary: 'Register a new user' })
 	@ApiCreatedResponse({
 	  description: 'User created successfully',
@@ -43,8 +47,8 @@ export class UserController {
 		},
 	  },
 	})
-  async register(@Body() signupDto: SignupDto) {
-	  const user = await this.userService.register(signupDto);
+  async register(@Body() signupDto: SignupDto, @UploadedFile() file?: Express.Multer.File) {
+	  const user = await this.userService.register(signupDto, file);
 	  return ResponseHelper.success(user, HttpStatus.CREATED)
   }
   
@@ -159,7 +163,15 @@ export class UserController {
   }
   
   @UseGuards(UserGuard)
+  @Get('me')
+  async findOneMe(@GetUser('id') id: string) {
+   const response = await this.userService.findOne(id);
+	return ResponseHelper.success(response)   
+  }
+  
+  @UseGuards(UserGuard)
   @Patch('me')
+  @UseInterceptors(FileInterceptor('profile_pic', multerConfig))
   @ApiBearerAuth()
   @ApiOperation({
 	  summary: 'Complete user registration or update user profile',
@@ -200,13 +212,15 @@ export class UserController {
       },
     },
   })
-  async updateMe(@GetUser('id') id: Types.ObjectId, @Body() updateUserDto: UpdateUserDto) {
-    const response = await this.userService.update(id, updateUserDto);
+  async updateMe(@GetUser('id') id: Types.ObjectId, @Body() updateUserDto: UpdateUserDto, @UploadedFile() file?: Express.Multer.File) {
+    const response = await this.userService.update(id, updateUserDto, file);
 	return ResponseHelper.success(response)	
   }
-
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
+  
+  @UseGuards(UserGuard)
+  @Delete('me')
+  @ApiBearerAuth()
+  async removeMe(@GetUser('id') id: Types.ObjectId) {
     const response = await this.userService.delete(id);
 	return ResponseHelper.success({ message :"User deleted" }, HttpStatus.OK)
   }

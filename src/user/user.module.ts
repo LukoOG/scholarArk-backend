@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
+import { AuthModule } from '../auth/auth.module';
 import { GoogleClientService } from '../common/services/google.service';
+import { CloudinaryModule } from '../common/cloudinary/cloudinary.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { preSave, preValidate } from './schemas/middleware';
@@ -35,6 +37,8 @@ import { TMP_DIR } from 'src/config';
         },
       },
     ]),
+	CloudinaryModule,
+	AuthModule
   ],
   providers: [UserService, GoogleClientService],
   exports: [UserService],

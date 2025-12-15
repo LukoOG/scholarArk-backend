@@ -3,6 +3,7 @@ import { PaymentService } from './payment.service';
 import { PaymentController } from './payment.controller';
 import { Mongoose } from 'mongoose';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AuthModule } from '../auth/auth.module';
 import { Payment, PaymentSchema } from './schemas/payment.schema';
 import { UserModule } from 'src/user/user.module';
 
@@ -16,7 +17,8 @@ import { UserModule } from 'src/user/user.module';
         }
       ]
     ),
-    UserModule
+    UserModule,
+	AuthModule
   ],
   controllers: [PaymentController],
   providers: [PaymentService],

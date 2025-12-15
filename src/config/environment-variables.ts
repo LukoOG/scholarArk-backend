@@ -60,4 +60,22 @@ export class EnvironmentVariables {
   
   @IsString()
   GOOGLE_CLIENT_ID: string;
+  
+  @IsString()
+  CLOUDINARY_CLOUD_NAME: string;
+  
+  @IsString()
+  CLOUDINARY_API_KEY: string;
+  
+  @IsString()
+  CLOUDINARY_API_SECRET: string;
+  
+  @IsString()
+  REDIS_HOST: string;
+  
+  @IsNumber()
+  REDIS_PORT: number;
+  
+  @IsString()
+  REDIS_PASSWORD: string;
 }

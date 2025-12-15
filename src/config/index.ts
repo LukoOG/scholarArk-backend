@@ -24,6 +24,8 @@ export interface Config {
   jwt: { secret: string; issuer: string; audience: string; expiresIn: string };
   gemini: string;
   google_client_id: string;
+  cloudinary: { cloud_name: string, key: string, secret: string };
+  redis: { host: string, port: number, password: string }
 }
 
 export function configuration() {
@@ -58,6 +60,12 @@ export function configuration() {
     },
 	google_client_id: env.GOOGLE_CLIENT_ID,
 	gemini: env.GEMINI_API_KEY,
+	cloudinary: {
+			cloud_name: env.CLOUDINARY_CLOUD_NAME, 
+			key: env.CLOUDINARY_API_KEY, 
+			secret: env.CLOUDINARY_API_SECRET, 
+		},
+	redis: { host: env.REDIS_HOST, port: env.REDIS_PORT, password: env.REDIS_PASSWORD },
   };
 
   return config;
