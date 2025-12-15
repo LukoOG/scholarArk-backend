@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { GoogleClientService } from '../common/services/google.service';
 import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
@@ -137,7 +137,15 @@ export class UserService {
 		
 		const payload = await this.googleClient.verifyIdToken(idToken)
 		
-		const { sub, email, name } = payload;
+		
+		if (!payload?.email) {
+		  throw new BadRequestException(
+			'Google account has no accessible email. Ensure email scope is granted.',
+		  );
+		}
+		
+		const { sub, email, name, picture } = payload;
+		console.log(payload)
 		
 		let user = await this.userModel.findOne({ googleId: sub }).exec();
 		
@@ -147,6 +155,7 @@ export class UserService {
 				email: { value: email, verified: true },
 				first_name: name,
 				role,
+				profile_pic: picture,
 				googleId: sub,
 				authProvider: "google",
 			});
