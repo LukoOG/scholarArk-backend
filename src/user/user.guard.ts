@@ -26,11 +26,9 @@ export class UserGuard implements CanActivate {
     if (!token)
       throw new BadRequestException({ message: 'Token not present!' });
 
-	const user = await this.authService.validateUserFromToken(token)
+	const { id, role } = await this.authService.validateUserFromToken(token)
 
-    if (!user) throw new UserNotFoundException();
-
-    request['user'] = { id: user._id, role: user.role };
+    request['user'] = { id: id, role: role };
 
     return true;
   }

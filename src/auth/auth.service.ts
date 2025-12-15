@@ -3,6 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { User, UserDocument } from '../user/schemas/user.schema'
+import { UserRole } from '../common/enums';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +14,7 @@ export class AuthService {
     private readonly userModel: Model<UserDocument>,
   ) {}
 
-  async validateUserFromToken(token: string) {
+  async validateUserFromToken(token: string): Promise<{ id: Types.ObjectId, role: UserRole }> {
     const payload = await this.jwtService.verifyAsync(token);
 
     if (!isValidObjectId(payload.sub) || payload.typ !== 'user') {
@@ -27,7 +29,10 @@ export class AuthService {
 
     if (!user) throw new UnauthorizedException('User not found');
 
-    return user;
+    return {
+		id: user._id,
+		role: user.role,
+	}
   }
 }
 
