@@ -220,6 +220,50 @@ export class UserController {
   @UseGuards(UserGuard)
   @Delete('me')
   @ApiBearerAuth()
+  @ApiOperation({
+	  summary: 'Delete current user account',
+	  description:
+		'Deletes the authenticated user account. Requires a valid access token in the Authorization header.',
+	})
+	@ApiResponse({
+	  status: 200,
+	  description: 'User account successfully deleted',
+	  schema: {
+		example: {
+		  data: {
+			message: 'User deleted',
+		  },
+		  statusCode: 200,
+		  error: null,
+		},
+	  },
+	})
+	@ApiResponse({
+	  status: 401,
+	  description: 'Unauthorized – invalid or missing access token',
+	  schema: {
+		example: {
+		  data: null,
+		  statusCode: 401,
+		  error: {
+			message: 'Invalid token',
+		  },
+		},
+	  },
+	})
+	@ApiResponse({
+	  status: 404,
+	  description: 'User not found',
+	  schema: {
+		example: {
+		  data: null,
+		  statusCode: 404,
+		  error: {
+			message: 'User not found',
+		  },
+		},
+	  },
+	})
   async removeMe(@GetUser('id') id: Types.ObjectId) {
     const response = await this.userService.delete(id);
 	return ResponseHelper.success({ message :"User deleted" }, HttpStatus.OK)
