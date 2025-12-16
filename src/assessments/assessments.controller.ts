@@ -13,13 +13,13 @@ import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { Roles, GetUser } from '../common/decorators';
 import { RolesGuard } from '../common/guards';
 import { AssessmentOwnerGuard } from './assessments.guard';
-import { UserGuard } from '../user/user.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { UserRole } from '../common/enums';
 import { ResponseHelper } from '../common/helpers/api-response.helper';
 
 @ApiTags('assessments')
 @Controller('assessments')
-@UseGuards(UserGuard, RolesGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class AssessmentsController {
   constructor(private readonly assessmentsService: AssessmentsService) {}
 

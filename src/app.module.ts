@@ -11,6 +11,7 @@ import { AppService } from './app.service';
 import { Config, configuration, validateEnv } from './config';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AdminModule } from './admin/admin.module';
@@ -20,7 +21,6 @@ import { PaymentModule } from './payment/payment.module';
 import { GoalsModule } from './goals/goals.module';
 import { TopicsModule } from './topics/topics.module';
 import { PreferencesModule } from './preferences/preferences.module';
-import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [

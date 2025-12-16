@@ -5,15 +5,15 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../auth.service';
 import { Request } from 'express';
 import { isValidObjectId, Types } from 'mongoose';
-import { UserNotFoundException } from './exceptions';
+import { UserNotFoundException } from '../../user/exceptions';
 
 export type UserPopulatedRequest = Request & { user: { id: Types.ObjectId } };
 
 @Injectable()
-export class UserGuard implements CanActivate {
+export class AuthGuard implements CanActivate {
   constructor(
     private readonly authService: AuthService
   ) {}

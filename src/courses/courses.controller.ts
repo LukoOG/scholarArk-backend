@@ -15,15 +15,7 @@ import { Course } from './schemas/courses.schema';
 import { Request } from 'express';
 
 import { GetUser } from '../common/decorators'
-import { UserGuard } from '../user/user.guard';
-/**Using global declaration
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: string;
-    role: string;
-  };
-}
-**/
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 @ApiTags('Courses') 
 @ApiBearerAuth('access-token')
@@ -49,7 +41,7 @@ export class CoursesController {
   }
 
   @Get()
-  @UseGuards(UserGuard)
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Get recommended courses' })
   @ApiResponse({ status: 200, description: 'List of all courses', type: [Course] })
   async recommended(@GetUser('id') userId: Types.ObjectId) {

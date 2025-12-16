@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { Identifier, PaymentService } from './payment.service';
 import { PaymentTransactionDto } from './dto/payment.transaction.dto';
-import { UserGuard, UserPopulatedRequest } from 'src/user/user.guard';
+import { AuthGuard, UserPopulatedRequest } from 'src/auth/guards/auth.guard';
 
 @Controller('payment')
 export class PaymentController {
@@ -9,7 +9,7 @@ export class PaymentController {
 
 
   @Post()
-  @UseGuards(UserGuard)
+  @UseGuards(AuthGuard)
   async initializeTransaction(
     @Req() req: UserPopulatedRequest,
     @Body() dto: PaymentTransactionDto
@@ -18,7 +18,7 @@ export class PaymentController {
   }
 
   @Get()
-  @UseGuards(UserGuard)
+  @UseGuards(AuthGuard)
   async getTransactions(
     @Req() req: UserPopulatedRequest,
   ) {
@@ -26,7 +26,7 @@ export class PaymentController {
   }
 
   @Get(":id")
-  @UseGuards(UserGuard)
+  @UseGuards(AuthGuard)
   async getTransaction(
     @Req() req: UserPopulatedRequest,
     @Param("id") id: Identifier
@@ -35,7 +35,7 @@ export class PaymentController {
   }
 
   @Get(":id/update")
-  @UseGuards(UserGuard)
+  @UseGuards(AuthGuard)
   async updateTransaction(
     @Req() req: UserPopulatedRequest,
     @Param("id") id: Identifier,

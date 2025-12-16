@@ -5,10 +5,15 @@ import { Email, Name, Nonce, Phone, Wallet } from 'src/common/schemas';
 
 export type UserDocument = HydratedDocument<User>;
 
-/**
- * All attributes are not required by default.
- * We will modify to suit the app's requirements.
- */
+
+type AuthProviders = {
+  local: boolean;
+  google: boolean;
+  apple?: boolean;
+  facebook?: boolean;
+};
+
+
 @Schema({ timestamps: true })
 export class User {
 	///
@@ -23,11 +28,25 @@ export class User {
   @Prop({ type: Email })
   email: Email;
   
-  @Prop()
+  @Prop({ type: String, unique: true, sparse: true })
   googleId?: string;
   
-  @Prop({ default: "local" })
-  authProvider: "local" | "google" | "apple";
+  @Prop({
+	  type: {
+		local: { type: Boolean, default: false },
+		google: { type: Boolean, default: false },
+		apple: { type: Boolean, default: false },
+		facebook: { type: Boolean, default: false },
+	  },
+	  default: () => ({
+		local: false,
+		google: false,
+		apple: false,
+		facebook: false,
+	  }),
+	})
+	authProviders: AuthProviders;
+
 
   @Prop({ type: Phone })
   phone?: Phone;
