@@ -54,7 +54,7 @@ export class UserService {
 	  // Build the update object
 	  const updatePayload: any = {
 		...profileData,
-		profilee_pic: profilePicUrl
+		profile_pic: profilePicUrl
 	  };
 
 	  if (goalIds) updatePayload.goals = goalIds.map(id => new Types.ObjectId(id));
