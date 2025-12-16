@@ -40,7 +40,7 @@ export class UserService {
 		let profilePicUrl: string | undefined
 		
 		if(file){
-			let profilePicUrl = await this.cloudinaryService.uploadImage(file, 'users/profile-pics')
+			profilePicUrl = await this.cloudinaryService.uploadImage(file, 'users/profile-pics');
 		};
 		
 		//console.log(id)

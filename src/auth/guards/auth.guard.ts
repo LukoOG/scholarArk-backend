@@ -23,8 +23,7 @@ export class AuthGuard implements CanActivate {
 
     const token = this.extractTokenFromHeader(request);
 
-    if (!token)
-      throw new BadRequestException({ message: 'Token not present!' });
+    if (!token) throw new BadRequestException('Authorization token missing!');
 
 	const { id, role } = await this.authService.validateUserFromToken(token)
 

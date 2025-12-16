@@ -15,6 +15,7 @@ import {
   UserNotFoundException,
 } from '../user/exceptions';
 import * as bcrypt from 'bcrypt';
+import { TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken';
 
 const defaultAuthProviders = {
   local: false,
@@ -35,24 +36,34 @@ export class AuthService {
   ) {}
 
   async validateUserFromToken(token: string): Promise<{ id: Types.ObjectId, role: UserRole }> {
-    const payload = await this.jwtService.verifyAsync(token);
+	try{
+		const payload = await this.jwtService.verifyAsync(token);
+		if (!isValidObjectId(payload.sub) || payload.typ !== 'user') {
+		  throw new UnauthorizedException('Invalid token');
+		}
 
-    if (!isValidObjectId(payload.sub) || payload.typ !== 'user') {
-      throw new UnauthorizedException('Invalid token');
-    }
+		const user = await this.userModel
+		  .findById(payload.sub)
+		  .select('_id role')
+		  .lean()
+		  .exec();
 
-    const user = await this.userModel
-      .findById(payload.sub)
-      .select('_id role')
-      .lean()
-      .exec();
+		if (!user) throw new UnauthorizedException('User not found');
 
-    if (!user) throw new UnauthorizedException('User not found');
-
-    return {
-		id: user._id,
-		role: user.role,
-	}
+		return {
+			id: user._id,
+			role: user.role,
+		}
+	}catch(error){
+		if(error instanceof TokenExpiredError){
+			console.error(error)
+			throw new UnauthorizedException('Token Expired')
+		};
+		
+		if(error instanceof JsonWebTokenError){
+			throw new UnauthorizedException('Invalid Token')
+		};
+	};
   }
   
     private async generateTokens(user: HydratedDocument<User>){
