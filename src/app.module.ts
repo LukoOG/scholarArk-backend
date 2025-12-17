@@ -21,6 +21,8 @@ import { PaymentModule } from './payment/payment.module';
 import { GoalsModule } from './goals/goals.module';
 import { TopicsModule } from './topics/topics.module';
 import { PreferencesModule } from './preferences/preferences.module';
+import { MailModule } from './mail/mail.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -91,6 +93,8 @@ import { PreferencesModule } from './preferences/preferences.module';
     TopicsModule,
     PreferencesModule,
     AuthModule,
+    MailModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

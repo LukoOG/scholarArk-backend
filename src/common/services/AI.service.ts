@@ -6,8 +6,6 @@ import { GoogleGenAI } from '@google/genai';
 import type { GenerateContentResponse } from "@google/genai";
 import { retryRequest } from "../utils"
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
 @Injectable()
 export class AiService {
   private model: GoogleGenAI;

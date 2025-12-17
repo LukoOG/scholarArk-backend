@@ -25,7 +25,8 @@ export interface Config {
   gemini: string;
   google_client_id: string;
   cloudinary: { cloud_name: string, key: string, secret: string };
-  redis: { host: string, port: number, password: string }
+  redis: { host: string, port: number, password: string };
+  resend: string;
 }
 
 export function configuration() {
@@ -66,6 +67,7 @@ export function configuration() {
 			secret: env.CLOUDINARY_API_SECRET, 
 		},
 	redis: { host: env.REDIS_HOST, port: env.REDIS_PORT, password: env.REDIS_PASSWORD },
+	resend: env.RESEND_API_KEY,
   };
 
   return config;

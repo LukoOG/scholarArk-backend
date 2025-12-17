@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model } from 'mongoose';
 import { GoogleClientService } from '../common/services/google.service';
@@ -15,6 +15,7 @@ import {
   UserNotFoundException,
 } from '../user/exceptions';
 import * as bcrypt from 'bcrypt';
+import { randomBytes, createHash } from 'crypto';
 import { TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken';
 
 const defaultAuthProviders = {
@@ -55,12 +56,12 @@ export class AuthService {
 			role: user.role,
 		}
 	}catch(error){
-		if(error instanceof TokenExpiredError){
+		if(error instanceof TokenExpiredError || error?.name === 'TokenExpiredError'){
 			console.error(error)
 			throw new UnauthorizedException('Token Expired')
 		};
 		
-		if(error instanceof JsonWebTokenError){
+		if(error instanceof JsonWebTokenError || error?.name === 'JsonWebTokenError'){
 			throw new UnauthorizedException('Invalid Token')
 		};
 	};
@@ -232,6 +233,37 @@ export class AuthService {
 		const { refresh_token, ...safeUser } = createdUser.toObject();
 		
 		return { user: safeUser, ...tokens }
+	}
+	
+	async sendResetLink(email: string){
+		const user = await this.userModel.findOne({ email: email }).exec();
+		
+		if(!user) throw new ForbiddenException();
+		
+		const rawToken = randomBytes(32).toString('hex');
+		const hashedToken = createHash('256').update(rawToken).digest('hex');
+		
+		user.passwordResetToken = hashedToken;
+		user.passwordResetExpires = new Date(Date.now() + (15 * 60 * 1000) )
+
+		await user.save();
+	}
+	
+	async resetPassword(token: string, password: string){
+		const hashed = createHash('256').update(token).digest('hex');
+		
+		const user = await this.userModel.findOne({
+			passwordResetToken: hashed,
+			passWordResetExpires: { $gt: new Date() },
+		}).exec();
+		
+		if(!user) throw new BadRequestException('Invalid or expired reset link');
+		
+		user.password = await bcrypt.hash(password, 12);
+		user.passwordResetToken = undefined;
+		user.passwordResetExpires = undefined;
+		
+		await user.save();
 	}
 }
 

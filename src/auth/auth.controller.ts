@@ -6,6 +6,7 @@ import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { SignupDto } from './dto/signup.dto';
 import { OauthDto } from './dto/oauth.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/password.dto';
 import { ResponseHelper } from '../common/helpers/api-response.helper';
 import { GetUser } from '../common/decorators'
 import { AuthGuard } from './guards/auth.guard';
@@ -166,4 +167,23 @@ export class AuthController {
 	const result = await this.authService.loginWithGoogle(dto)
 	return ResponseHelper.success(result)
   }
+  
+  @Post('forgot-password')
+  @ApiOperation({
+	  summary:"Endpoint to request forgot password link",
+	  description:"",
+  })
+  @ApiBody({ type: ForgotPasswordDto })
+  async forgotPassword(@Body() dto: ForgotPasswordDto){
+	await this.authService.sendResetLink(dto.email)
+	return ResponseHelper.success({ message: "reset link sent if email exists" })
+  }
+  
+  @Post('reset-password')
+  @ApiOperation({ summary: "Reset user password" })
+  @ApiBody({ type: ResetPasswordDto })
+  async resetPassword(@Body() dto: ResetPasswordDto){
+	await this.authService.resetPassword(dto.token, dto.password)
+	return ResponseHelper.success({ message: "Password Reset!" }) 
+  } 
 }

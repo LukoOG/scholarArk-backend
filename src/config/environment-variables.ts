@@ -78,4 +78,7 @@ export class EnvironmentVariables {
   
   @IsString()
   REDIS_PASSWORD: string;
+  
+  @IsString()
+  RESEND_API_KEY: string;
 }

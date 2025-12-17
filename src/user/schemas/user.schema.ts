@@ -99,6 +99,13 @@ export class User {
   
   //virtuals
   fullName?: string;
+  
+  ///
+  @Prop()
+  passwordResetToken?: string;
+  
+  @Prop({ type: Date })
+  passwordResetExpires?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
