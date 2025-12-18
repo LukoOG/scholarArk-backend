@@ -26,7 +26,7 @@ export class SignupDto {
 	)
   password: string;
   
-  @ApiProperty()
+  @ApiProperty({ example: "student" })
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;

@@ -81,19 +81,37 @@ export class UserService {
 	  return updatedUser;
 	}
 	
-	async saveFcmToken(userId: Types.ObjectId, dto: SaveFcmTokenDto) {
+	async saveFcmToken(
+	  userId: Types.ObjectId,
+	  dto: SaveFcmTokenDto,
+	) {
+	  const { fcmToken, device, remindersEnabled } = dto;
+
+	  // 1. Upsert device token
 	  await this.fcmTokenModel.findOneAndUpdate(
-		{ token: dto.fcmToken },
+		{ token: fcmToken },
 		{
 		  userId,
-		  token: dto.fcmToken,
-		  device: dto.device,
+		  token: fcmToken,
+		  device,
 		  isActive: true,
-		  lastSeenAt: new Date(),		  
+		  lastSeenAt: new Date(),
 		},
-		{ upsert: true, new: true },
+		{
+		  upsert: true,
+		  new: true,
+		  setDefaultsOnInsert: true,
+		},
 	  );
+
+	  // 2. Optionally update user preferences
+	  if (typeof remindersEnabled === 'boolean') {
+		await this.userModel.findByIdAndUpdate(userId, {
+		  remindersEnabled,
+		});
+	  }
 	}
+
 
   async delete(id: Types.ObjectId): Promise<void> {
     const res = await this.userModel.findByIdAndDelete(id).exec();

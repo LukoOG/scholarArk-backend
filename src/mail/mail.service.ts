@@ -15,19 +15,22 @@ export class MailService {
 	}
 	
   async sendPasswordReset(email: string, token: string) {
-    return this.resend.emails.send({
-      from: 'ScholarArk <no-reply@scholarark.com>',
-      to: email,
-      subject: 'Reset your password',
-	  //REACT TEMPLATE LATER
-      html: `
-        <p>You requested a password reset.</p>
-        <p>
-		  <p> OTP is: ${token}
-        </p>
-        <p>This link expires in 15 minutes.</p>
-      `,
-    });
+    try{
+		await this.resend.emails.send({
+			from: "ScholarArk <noreply@scholarark.com>",
+			to: email,
+			subject: "Password Reset OTP!"
+			html: `
+			<p>You requested a password reset.</p>
+			<p>
+			  <p> OTP is: ${token}
+			</p>
+			<p>This link expires in 15 minutes.</p>
+		  `
+		})
+	}catch(error){
+		
+	};
   }
 
   async sendWelcomeEmail(email: string, name?: string) {

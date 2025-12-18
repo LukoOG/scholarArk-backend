@@ -1,8 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ValidateNested, IsArray, IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsEmail, IsStrongPassword, IsMongoId } from 'class-validator';
 import { Gender, UserRole } from 'src/common/enums';
-import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUserDto {
   // Profile fields
