@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from 'src/user/schemas/user.schema';
+import { UserFcmToken, UserFcmTokenDocument } from 'src/user/schemas/user-fcm-token.schema';
 import { Model, Types, HydratedDocument } from 'mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { FirebaseService } from './firebase/firebase.service';
@@ -9,6 +10,7 @@ import { FirebaseService } from './firebase/firebase.service';
 export class NotificationsService {
 	constructor(
 		@InjectModel(User.name) private userModel: Model<UserDocument>,
+		@InjectModel(UserFcmToken.name) private fcmTokenModel: Model<UserFcmTokenDocument>,
 		private readonly firebaseService: FirebaseService
 	){};
 
@@ -17,30 +19,39 @@ export class NotificationsService {
 		console.log("sending daily reminders");
 		
 		const users = await this.userModel.find({
-			fcmToken: { $exists: true, $ne: null },
-			remindersEnabled: true,
+			remindersEnabled: true
 		})
-				
-		/*
-		const tokens = users.map(u => u.fcmToken);
+		.select('_id first_name')
+		.lean();
 		
-		await this.firebaseService.sendNotification(tokens, {
-			title: "Daily Schedule Reminder",
-			body: "Don't forget to continue your courses today"
+		const userIds = users.map(u => u._id);
+		
+		const tokens = 	await this.fcmTokenModel.find({
+			userId: { $in: userIds },
+			isActive: true,
 		})
-		*/
+		.lean();
 		
-		for(const user of users){
-			await this.firebaseService.sendNotification(
-				[user.fcmToken],
-				{
-					title: `Hey there ${user.first_name}👋`,
-					body: "Make sure you finish up your courses today",
-					//can pass data of course Id for mobile devs to deep link
-				}
-			)
-		};
+		const tokenMap = new Map<string, string[]>();
+
+		for (const t of tokens) {
+		  const key = t.userId.toString();
+		  if (!tokenMap.has(key)) tokenMap.set(key, []);
+		  tokenMap.get(key)!.push(t.token);
+		}
 		
+		for (const user of users) {
+		  const userTokens = tokenMap.get(user._id.toString());
+		  if (!userTokens?.length) continue;
+
+		  await this.firebaseService.sendNotification(userTokens, {
+			title: `Hey ${user.first_name} 👋`,
+			body: "Don't forget to continue your courses today!",
+			data: {
+			  type: 'DAILY_REMINDER',
+			},
+		  });
+		}
 	};
 	
 

@@ -113,6 +113,9 @@ export class User {
 	  expiry: Date
   }
   
+  @Prop({ type: Boolean, default: false })
+  remindersEnabled: boolean;
+  
   @Prop()
   fcmToken?: string
 }

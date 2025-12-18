@@ -6,9 +6,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { FirebaseService } from './firebase/firebase.service';
 
 import { User, UserSchema } from 'src/user/schemas/user.schema';
+import { UserFcmToken, UserFcmTokenSchema } from 'src/user/schemas/user-fcm-token.schema';
 
 @Module({
-  imports: [ MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]) ],
+  imports: [ MongooseModule.forFeature(
+	  [
+		{ name: User.name, schema: UserSchema },
+		{ name: UserFcmToken.name, schema: UserFcmTokenSchema },
+		]) ],
   providers: [NotificationsService, FirebaseService],
   controllers: [NotificationsController],
 })

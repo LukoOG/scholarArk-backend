@@ -86,8 +86,10 @@ export class UserService {
 		{ token: dto.fcmToken },
 		{
 		  userId,
-		  isActive: true,
+		  token: dto.token,
 		  device: dto.device,
+		  isActive: true,
+		  lastSeenAt: new Date(),		  
 		},
 		{ upsert: true, new: true },
 	  );
