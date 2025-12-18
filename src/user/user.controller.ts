@@ -5,6 +5,7 @@ import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiCreatedR
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { SaveFcmTokenDto } from './dto/save-fcm-token.dto';
 import { ResponseHelper } from '../common/helpers/api-response.helper';
 import { GetUser } from '../common/decorators'
 import { AuthGuard } from 'src/auth/guards/auth.guard';
@@ -81,6 +82,15 @@ export class UserController {
     const response = await this.userService.update(id, updateUserDto, file);
 	return ResponseHelper.success(response)	
   }
+  
+	@UseGuards(AuthGuard)
+	@Patch('me/fcm-token')
+	@ApiBearerAuth()
+	@ApiOperation({ description: "save fcm token for user (per device)" })
+	async saveToken(@GetUser('id') id: Types.ObjectId, @Body() dto: SaveFcmTokenDto){
+		await this.userService.saveFcmToken(id, dto)
+		return ResponseHelper.success({ message: "Token saved!" })
+	}
   
   @UseGuards(AuthGuard)
   @Delete('me')

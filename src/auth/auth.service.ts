@@ -4,6 +4,7 @@ import { isValidObjectId, Model } from 'mongoose';
 import { GoogleClientService } from '../common/services/google.service';
 import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 import { JwtService } from '@nestjs/jwt';
+import { MailService } from 'src/mail/mail.service';
 import { User, UserDocument } from '../user/schemas/user.schema'
 import { UserRole } from '../common/enums';
 import { Types, HydratedDocument } from 'mongoose';
@@ -34,6 +35,7 @@ export class AuthService {
     private readonly userModel: Model<UserDocument>,
 	private readonly googleClient: GoogleClientService,
 	private readonly cloudinaryService: CloudinaryService,
+	private readonly mailService: MailService,
   ) {}
 
   async validateUserFromToken(token: string): Promise<{ id: Types.ObjectId, role: UserRole }> {
@@ -110,6 +112,8 @@ export class AuthService {
 		profile_pic: profilePicUrl,
 		authProviders: { ...defaultAuthProviders, local: true }
 	});
+	
+	this.mailService.sendWelcomeEmail(createdUser.email.value, "Champ");
 	
     const savedUser = await createdUser.save();
 	
@@ -226,6 +230,8 @@ export class AuthService {
 				googleId,
 				authProviders: { ...defaultAuthProviders, google: true }
 			});
+			
+		this.mailService.sendWelcomeEmail(createdUser.email.value, createdUser.first_name);
 			
 		
 		const tokens = await this.generateTokens(createdUser);

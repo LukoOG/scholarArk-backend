@@ -5,6 +5,7 @@ import { GoogleClientService } from '../common/services/google.service';
 import { CloudinaryModule } from '../common/cloudinary/cloudinary.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
+import { UserFcmToken, UserFcmTokenSchema } from './schemas/user-fcm-token.schema';
 import { preSave, preValidate } from './schemas/middleware';
 import { userMethods } from './schemas/methods';
 import { UserController } from './user.controller';
@@ -36,6 +37,12 @@ import { TMP_DIR } from 'src/config';
           return schema;
         },
       },
+	  {
+		  name: UserFcmToken.name,
+		  useFactory(){
+			  return UserFcmTokenSchema
+		  }
+	  },
     ]),
 	CloudinaryModule,
 	AuthModule

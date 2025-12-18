@@ -4,7 +4,6 @@ import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth } from '@nes
 import { GetUser } from '../common/decorators'
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Types } from 'mongoose';
-import { SaveFcmTokenDto } from './dto/save-fcm-token.dto';
 import { NotificationsService } from './notifications.service'
 
 @ApiTags('Notifications')
@@ -12,12 +11,5 @@ import { NotificationsService } from './notifications.service'
 export class NotificationsController {
 	constructor(private readonly notificationsService: NotificationsService){}
 	
-	@UseGuards(AuthGuard) //make controller-level if need be later
-	@Patch('me/fcm-token')
-	@ApiBearerAuth()
-	@ApiOperation({ description: "save fcm token for user (per device)" })
-	async saveToken(@GetUser('id') id: Types.ObjectId, @Body() dto: SaveFcmTokenDto){
-		await this.notificationsService.saveFcmToken(id, dto)
-	}
 	
 }

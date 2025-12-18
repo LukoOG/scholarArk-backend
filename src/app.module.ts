@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { redisStore } from 'cache-manager-ioredis-yet';
 
@@ -84,6 +85,7 @@ import { NotificationsModule } from './notifications/notifications.module';
       isGlobal: true,
       cache: true,
     }),
+	ScheduleModule.forRoot(),
     UserModule,
     AdminModule,
     CoursesModule,

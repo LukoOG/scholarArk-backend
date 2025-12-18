@@ -106,6 +106,9 @@ export class User {
   
   @Prop({ type: Date })
   passwordResetExpires?: Date;
+  
+  @Prop()
+  fcmToken?: string
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

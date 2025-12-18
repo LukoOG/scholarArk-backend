@@ -1,4 +1,3 @@
-// src/notifications/firebase.service.ts
 import * as admin from 'firebase-admin';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 

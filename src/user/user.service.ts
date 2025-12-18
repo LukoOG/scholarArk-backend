@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { SaveFcmTokenDto } from './dto/save-fcm-token.dto';
 import { GoogleClientService } from '../common/services/google.service';
 import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 import { InjectModel } from '@nestjs/mongoose';
@@ -8,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { Config } from '../config'
 import { Model, HydratedDocument, Types } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
+import { UserFcmToken, UserFcmTokenDocument } from './schemas/user-fcm-token.schema';
 import { UserRole } from '../common/enums';
 import {
   UserAlreadyExistsException,
@@ -18,11 +20,11 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UserService {
   constructor(
-	  @InjectModel(User.name) 
-	  public userModel: Model<UserDocument>, 
+	  @InjectModel(User.name) public userModel: Model<UserDocument>, 
 	  private readonly jwtService: JwtService,
 	  private readonly configService: ConfigService<Config>,
 	  private readonly cloudinaryService: CloudinaryService,
+	  @InjectModel(UserFcmToken.name) private fcmTokenModel: Model<UserFcmTokenDocument>
 	) {}
 
   async findAll(role?: 'student' | 'tutor'): Promise<User[]> {
@@ -77,6 +79,18 @@ export class UserService {
 	  const { password, refresh_token, ...userWithoutSecrets } = updatedUser.toObject();
 
 	  return updatedUser;
+	}
+	
+	async saveFcmToken(userId: Types.ObjectId, dto: SaveFcmTokenDto) {
+	  await this.fcmTokenModel.findOneAndUpdate(
+		{ token: dto.fcmToken },
+		{
+		  userId,
+		  isActive: true,
+		  device: dto.device,
+		},
+		{ upsert: true, new: true },
+	  );
 	}
 
   async delete(id: Types.ObjectId): Promise<void> {

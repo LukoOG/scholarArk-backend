@@ -35,14 +35,19 @@ export class MailService {
   async sendWelcomeEmail(email: string, name?: string) {
 	  try{
 		await this.resend.emails.send({
-			from: "",
+			from: "ScholarArk <noreply@scholarark.com>",
 			to: email,
-			subject: "Welcome to Scholar Ark",
+			subject: "Welcome to Scholar Ark 🎉",
 			html: `
-			`
-		})  
+			  <h2>Welcome${name ? `, ${name}` : ''}!</h2>
+			  <p>We’re excited to have you on ScholarArk.</p>
+			  <p>You can now explore courses, assessments and reminders.</p>
+			  <br />
+			  <p>🚀 The ScholarArk Team</p>
+			`,
+		  });  
 	  }catch(error){
-		  
+		this.logger.error(`Failed to send email to ${email}`, error)  
 	  }
   }
 }
