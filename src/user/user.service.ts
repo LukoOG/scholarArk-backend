@@ -86,7 +86,7 @@ export class UserService {
 		{ token: dto.fcmToken },
 		{
 		  userId,
-		  token: dto.token,
+		  token: dto.fcmToken,
 		  device: dto.device,
 		  isActive: true,
 		  lastSeenAt: new Date(),		  

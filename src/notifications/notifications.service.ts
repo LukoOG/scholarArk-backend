@@ -14,7 +14,7 @@ export class NotificationsService {
 		private readonly firebaseService: FirebaseService
 	){};
 
-	@Cron(CronExpression.EVERY_DAY_AT_8AM)
+	@Cron(CronExpression.EVERY_DAY_AT_5PM)
 	async sendDailyReminders(){
 		console.log("sending daily reminders");
 		

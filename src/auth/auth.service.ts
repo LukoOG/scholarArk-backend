@@ -251,8 +251,8 @@ export class AuthService {
 		
 		user.passwordReset = {
 			otpHash: hashedOtp,
-			expiry: new Date(Date.now() + (15 * 60 * 1000) 
-		)
+			expiry: new Date(Date.now() + (15 * 60 * 1000)),
+		};
 		
 		this.mailService.sendPasswordReset(user.email.value, otp)
 

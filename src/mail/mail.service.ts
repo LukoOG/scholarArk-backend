@@ -23,9 +23,6 @@ export class MailService {
       html: `
         <p>You requested a password reset.</p>
         <p>
-          <!--- <a href="${resetLink}">
-            Reset your password
-          </a> --->
 		  <p> OTP is: ${token}
         </p>
         <p>This link expires in 15 minutes.</p>
