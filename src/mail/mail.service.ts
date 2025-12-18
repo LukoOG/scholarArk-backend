@@ -18,7 +18,7 @@ export class MailService {
     try{
 		await this.resend.emails.send({
 			from: "ScholarArk <noreply@scholarark.com>",
-			to: email,
+			to: [email],
 			subject: "Password Reset OTP!",
 			html: `
 			<p>You requested a password reset.</p>
@@ -37,7 +37,7 @@ export class MailService {
 	  try{
 		await this.resend.emails.send({
 			from: "ScholarArk <noreply@scholarark.com>",
-			to: email,
+			to: [email],
 			subject: "Welcome to Scholar Ark 🎉",
 			html: `
 			  <h2>Welcome${name ? `, ${name}` : ''}!</h2>
