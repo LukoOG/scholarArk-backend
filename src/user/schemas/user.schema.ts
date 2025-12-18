@@ -101,11 +101,17 @@ export class User {
   fullName?: string;
   
   ///
-  @Prop()
-  passwordResetToken?: string;
-  
-  @Prop({ type: Date })
-  passwordResetExpires?: Date;
+  @Prop({ 
+	type: { 
+		otpHash: { type: String }, 
+		expiry: { type: Date } 
+		},
+		_id: false,
+	})
+  passwordReset: {
+	  otpHash: string,
+	  expiry: Date
+  }
   
   @Prop()
   fcmToken?: string

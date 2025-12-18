@@ -11,10 +11,10 @@ export class ForgotPasswordDto {
 
 export class ResetPasswordDto {
   @ApiProperty({
-    example: 'reset-token-from-email',
+    example: '456343',
   })
   @IsString()
-  token: string;
+  otp: string;
 
   @ApiProperty({
     example: 'NewStrongPassword123',

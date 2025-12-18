@@ -170,20 +170,31 @@ export class AuthController {
   
   @Post('forgot-password')
   @ApiOperation({
-	  summary:"Endpoint to request forgot password link",
-	  description:"",
-  })
-  @ApiBody({ type: ForgotPasswordDto })
+	  summary: "Request password reset link",
+	  description: `
+		Sends a password reset link to the user's email address.
+		If the email exists, a reset link is sent.
+		If the email does not exist, the same success response is returned.
+		This is intentional to prevent email enumeration attacks.
+		`,
+	})
+	@ApiBody({ type: ForgotPasswordDto })
   async forgotPassword(@Body() dto: ForgotPasswordDto){
-	await this.authService.sendResetLink(dto.email)
+	await this.authService.sendReset(dto.email)
 	return ResponseHelper.success({ message: "reset link sent if email exists" })
   }
   
   @Post('reset-password')
-  @ApiOperation({ summary: "Reset user password" })
-  @ApiBody({ type: ResetPasswordDto })
+  @ApiOperation({
+	  summary: "Reset user password",
+	  description: `
+		Resets the user's password using a valid reset token.
+		The token is obtained from the password reset email.
+		`,
+	})
+	@ApiBody({ type: ResetPasswordDto })
   async resetPassword(@Body() dto: ResetPasswordDto){
-	await this.authService.resetPassword(dto.token, dto.password)
+	await this.authService.resetPassword(dto.otp, dto.password)
 	return ResponseHelper.success({ message: "Password Reset!" }) 
   } 
 }

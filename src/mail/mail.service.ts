@@ -14,7 +14,7 @@ export class MailService {
 		this.resend = new Resend(this.configService.get("resend", { infer: true }))
 	}
 	
-  async sendPasswordReset(email: string, resetLink: string) {
+  async sendPasswordReset(email: string, token: string) {
     return this.resend.emails.send({
       from: 'ScholarArk <no-reply@scholarark.com>',
       to: email,
@@ -23,9 +23,10 @@ export class MailService {
       html: `
         <p>You requested a password reset.</p>
         <p>
-          <a href="${resetLink}">
+          <!--- <a href="${resetLink}">
             Reset your password
-          </a>
+          </a> --->
+		  <p> OTP is: ${token}
         </p>
         <p>This link expires in 15 minutes.</p>
       `,

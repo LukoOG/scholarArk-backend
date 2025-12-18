@@ -83,13 +83,13 @@ export class UserController {
 	return ResponseHelper.success(response)	
   }
   
-	@UseGuards(AuthGuard)
-	@Patch('me/fcm-token')
-	@ApiBearerAuth()
-	@ApiOperation({ description: "save fcm token for user (per device)" })
-	async saveToken(@GetUser('id') id: Types.ObjectId, @Body() dto: SaveFcmTokenDto){
-		await this.userService.saveFcmToken(id, dto)
-		return ResponseHelper.success({ message: "Token saved!" })
+  @UseGuards(AuthGuard)
+  @Patch('me/fcm-token')
+  ApiBearerAuth()
+  @ApiOperation({ description: "save fcm token for user (per device)" })
+  async saveToken(@GetUser('id') id: Types.ObjectId, @Body() dto: SaveFcmTokenDto){
+	  await this.userService.saveFcmToken(id, dto)
+	  return ResponseHelper.success({ message: "Token saved!" })
 	}
   
   @UseGuards(AuthGuard)

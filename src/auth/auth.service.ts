@@ -16,7 +16,7 @@ import {
   UserNotFoundException,
 } from '../user/exceptions';
 import * as bcrypt from 'bcrypt';
-import { randomBytes, createHash } from 'crypto';
+import { randomInt, createHash } from 'crypto';
 import { TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken';
 
 const defaultAuthProviders = {
@@ -241,33 +241,36 @@ export class AuthService {
 		return { user: safeUser, ...tokens }
 	}
 	
-	async sendResetLink(email: string){
-		const user = await this.userModel.findOne({ email: email }).exec();
+	async sendReset(email: string){
+		const user = await this.userModel.findOne({ 'email.value': email }).exec();
 		
-		if(!user) throw new ForbiddenException();
+		if(!user) return;
 		
-		const rawToken = randomBytes(32).toString('hex');
-		const hashedToken = createHash('256').update(rawToken).digest('hex');
+		const otp = randomInt(100000, 1_000_000).toString();
+		const hashedOtp = createHash('sha256').update(otp).digest('hex');
 		
-		user.passwordResetToken = hashedToken;
-		user.passwordResetExpires = new Date(Date.now() + (15 * 60 * 1000) )
+		user.passwordReset = {
+			otpHash: hashedOtp,
+			expiry: new Date(Date.now() + (15 * 60 * 1000) 
+		)
+		
+		this.mailService.sendPasswordReset(user.email.value, otp)
 
 		await user.save();
 	}
 	
-	async resetPassword(token: string, password: string){
-		const hashed = createHash('256').update(token).digest('hex');
+	async resetPassword(otp: string, password: string){
+		const hashed = createHash('sha256').update(otp).digest('hex');
 		
 		const user = await this.userModel.findOne({
-			passwordResetToken: hashed,
-			passWordResetExpires: { $gt: new Date() },
+			'passwordReset.otpHash': hashed,
+			'passwordReset.expiry': { $gt: new Date() },
 		}).exec();
 		
 		if(!user) throw new BadRequestException('Invalid or expired reset link');
 		
 		user.password = await bcrypt.hash(password, 12);
-		user.passwordResetToken = undefined;
-		user.passwordResetExpires = undefined;
+		user.passwordReset = undefined;
 		
 		await user.save();
 	}
