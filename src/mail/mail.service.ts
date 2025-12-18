@@ -1,15 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Resend } from 'resend';
 import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config'
+import { Resend } from 'resend'; 
 
 @Injectable()
 export class MailService {
+	
+	private readonly resend: Resend;
+	private readonly logger = new Logger(MailService.name);
 	constructor(
 		private readonly configService: ConfigService<Config, true>
-	){}
-  private resend = new Resend(this.configService.get("resend", { infer: true }));
-
+	){
+		this.resend = new Resend(this.configService.get("resend", { infer: true }))
+	}
+	
   async sendPasswordReset(email: string, resetLink: string) {
     return this.resend.emails.send({
       from: 'ScholarArk <no-reply@scholarark.com>',

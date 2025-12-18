@@ -29,6 +29,7 @@ export class FirebaseService implements OnModuleInit {
       notification: {
         title: payload.title,
         body: payload.body,
+		//image: "url of image to send"
       },
       data: payload.data,
     });

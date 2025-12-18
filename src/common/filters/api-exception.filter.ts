@@ -43,7 +43,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
     const isServerError = status >= 500;
     const isDev = process.env.NODE_ENV !== 'production';
 
-    if (isServerError || isDev) {
+    //if (isServerError || isDev) {
       console.error('🚨 API ERROR');
       console.error('Status:', status);
       console.error('Request:', safeRequestLog);
@@ -54,7 +54,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
       } else {
         console.error('Error:', exception);
       }
-    }
+    //}
 
     response.status(status).json(
       ResponseHelper.error(
