@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsEnum } from 'class-validator';
+import { IsString, IsBoolean, IsEnum, IsOptional } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SaveFcmTokenDto {

@@ -19,7 +19,7 @@ export class MailService {
 		await this.resend.emails.send({
 			from: "ScholarArk <noreply@scholarark.com>",
 			to: email,
-			subject: "Password Reset OTP!"
+			subject: "Password Reset OTP!",
 			html: `
 			<p>You requested a password reset.</p>
 			<p>
