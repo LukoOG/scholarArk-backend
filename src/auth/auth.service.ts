@@ -70,20 +70,20 @@ export class AuthService {
   }
   
     private async generateTokens(user: HydratedDocument<User>){
-	const payload = {
-		sub: user._id.toString(),
-		name: user.fullName,
-		email: user.email.value,
-		role: user.role,
-		typ: 'user', 
-	};
+		const payload = {
+			sub: user._id.toString(),
+			name: user.fullName,
+			email: user.email.value,
+			role: user.role,
+			typ: 'user', 
+		};
 
-	const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '15m' });
-	const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
+		const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '15m' });
+		const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
 
-	await this.storeRefreshToken(user._id.toString(), refreshToken);
+		await this.storeRefreshToken(user._id.toString(), refreshToken);
 
-	return { accessToken, refreshToken };
+		return { accessToken, refreshToken };
   }
 
   async register(signupDto: SignupDto, file?: Express.Multer.File): Promise<{ user: Omit<User, 'password'>, accessToken: string, refreshToken: string }> {

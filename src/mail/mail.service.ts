@@ -29,7 +29,7 @@ export class MailService {
 		  `
 		})
 	}catch(error){
-		
+		this.logger.error(`Failed to send email to ${email}`, error)  
 	};
   }
 
