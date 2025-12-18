@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Resend } from 'resend';
 import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config'
-import { Resend } from 'resend'; 
 
 @Injectable()
 export class MailService {
@@ -34,11 +33,16 @@ export class MailService {
   }
 
   async sendWelcomeEmail(email: string, name?: string) {
-    return this.resend.emails.send({
-      from: 'ScholarArk <welcome@scholarark.com>',
-      to: email,
-      subject: 'Welcome to ScholarArk 🎓',
-      html: `<p>Welcome${name ? `, ${name}` : ''}!</p>`,
-    });
+	  try{
+		await this.resend.emails.send({
+			from: "",
+			to: email,
+			subject: "Welcome to Scholar Ark",
+			html: `
+			`
+		})  
+	  }catch(error){
+		  
+	  }
   }
 }
