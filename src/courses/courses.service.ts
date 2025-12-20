@@ -5,7 +5,7 @@ import { Course, CourseDocument } from './schemas/courses.schema';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 import {
   UserAlreadyExistsException,
   UserNotFoundException,
@@ -19,13 +19,19 @@ export class CoursesService {
   constructor(
     @InjectModel(Course.name) private courseModel: Model<CourseDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+	private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async create(createCourseDto: CreateCourseDto, id:Types.ObjectId): Promise<Course> {
-	  console.log('id', id)
+  async create(createCourseDto: CreateCourseDto, id:Types.ObjectId, file?: Express.Multer.File): Promise<Course> {
+	let resourceUrl: string | undefined;
+	
+	if(file){
+		resourceUrl = await this.cloudinaryService.uploadImage(file, 'users/profile-pics')
+	};
     const course = new this.courseModel({
 		...createCourseDto,
-		createdBy: id
+		createdBy: id,
+		resource: resourceUrl
 	});
 	
     return course.save();

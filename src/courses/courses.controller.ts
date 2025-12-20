@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseInterceptors, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
+import { multerConfig } from '../common/multer/multer.config';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { CourseFilterDto } from './dto/course-filter.dto';
 
@@ -24,11 +26,15 @@ export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
+  @UseInterceptors(FileInterceptor('resource', multerConfig))
   @ApiOperation({ summary: 'Create a new course' })
+  @ApiBearerAuth()
   @ApiResponse({ status: 201, description: 'Course created successfully', type: Course })
   @ApiResponse({ status: 400, description: 'Invalid request body' })
-  async create(@Body() createCourseDto: CreateCourseDto, @GetUser('id') userId: Types.ObjectId) { 
-    const result = await this.coursesService.create(createCourseDto, userId);
+  @ApiConsumes('multipart/form-data')
+  async create(@Body() createCourseDto: CreateCourseDto, @UploadedFile() resource: Express.Multer.File, @GetUser('id') userId: Types.ObjectId) { 
+    const result = await this.coursesService.create(createCourseDto, userId, resource);
 	return ResponseHelper.success(result)
   }
 

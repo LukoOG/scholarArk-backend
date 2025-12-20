@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, IsBoolean, IsMongoId } from 'class-validator';
+import { CourseCategory } from '../schemas/courses.schema'; 
 
 export class CreateCourseDto {
 	@ApiProperty({ example: 'Mathematics 101' })
@@ -16,6 +17,10 @@ export class CreateCourseDto {
 	@IsEnum(['Beginner', 'Intermediate', 'Advanced']) //till we properly define our enums
 	@IsOptional()
 	difficulty?: string;
+
+	@ApiProperty({ enum: CourseCategory, example: CourseCategory.SCIENCE })
+	@IsEnum(CourseCategory)
+	category: CourseCategory;
 
 	@ApiPropertyOptional({ example: 10000.00 })
 	@IsNumber()
