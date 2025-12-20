@@ -54,5 +54,5 @@ export class NotificationsService {
 		}
 	};
 	
-
+	//async welcomeNotification(){};
 }

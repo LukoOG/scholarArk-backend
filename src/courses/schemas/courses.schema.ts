@@ -8,14 +8,13 @@ export type CourseDocument = HydratedDocument<Course>;
 @Schema({ timestamps: true })
 export class Course {
 	@Prop({ type: Types.ObjectId, ref: 'User', required: true })
-	createdBy: Types.ObjectId;
+	tutor: Types.ObjectId;
 	
 	@Prop()
 	title: string;
 	
 	@Prop()
 	description: string;
-	
 	
 	@Prop({ enum: ['Beginner', 'Intermediate', 'Advanced'], default: 'Beginner' })
 	difficulty?: string;

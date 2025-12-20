@@ -29,7 +29,7 @@ export class MailService {
 		  `
 		})
 	}catch(error){
-		this.logger.error(`Failed to send email to ${email}`, error)  
+		this.logger.error(`Failed to send email to ${email}`, error?.stack ?? error?.message ?? JSON.stringify(error),)  
 	};
   }
 
@@ -48,7 +48,7 @@ export class MailService {
 			`,
 		  });  
 	  }catch(error){
-		this.logger.error(`Failed to send email to ${email}`, error)  
+		this.logger.error(`Failed to send email to ${email}`, error?.stack ?? error?.message ?? JSON.stringify(error),)  
 		console.error(`Failed to send email to ${email}`, error)  
 	  }
   }

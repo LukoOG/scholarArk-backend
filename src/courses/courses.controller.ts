@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseInterceptors, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
@@ -33,16 +33,57 @@ export class CoursesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all courses (paginated and filtered)' })
+  @ApiOperation({
+	  summary: 'Get all courses',
+	  description: `
+		Returns a paginated list of courses.
+
+		Supports filtering by:
+		- topics
+		- goals
+		- course level
+		- search keyword
+
+		This endpoint is **public** and does not require authentication.
+		Results are paginated to improve performance and support infinite scrolling on mobile.
+		`,
+	})
+	@ApiQuery({
+	  name: 'topicIds',
+	  required: false,
+	  description: 'Filter by topic IDs',
+	  example: ['64f17f0f6f0740d2d0bb6be3'],
+	})
+	@ApiQuery({
+	  name: 'goalIds',
+	  required: false,
+	  description: 'Filter by goal IDs',
+	  example: ['64f17f0f6f0740d2d0bb6be3'],
+	})
+	@ApiQuery({
+	  name: 'level',
+	  required: false,
+	  enum: ['Beginner', 'Intermediate', 'Advanced'],//CourseLevel,
+	  example: 'Beginner',
+	})
+	@ApiQuery({
+	  name: 'search',
+	  required: false,
+	  description: 'Search keyword (matches title or description)',
+	  example: 'javascript',
+	})
+	@ApiResponse({
+	  status: 200,
+	  description: 'Courses fetched successfully',
+	})
   @ApiResponse({ status: 200, description: 'List of all courses', type: [Course] })
   async findAll(@Query() pagination: PaginationDto, @Query() filters: CourseFilterDto ) {
     const result = await this.coursesService.findAll(pagination, filters);
 	return ResponseHelper.success(result)
   }
 
-  @Get()
+  @Get('recommended')
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Get recommended courses' })
   @ApiResponse({ status: 200, description: 'List of all courses', type: [Course] })
   async recommended(@GetUser('id') userId: Types.ObjectId) {
     const result = await this.coursesService.getRecommended(userId);

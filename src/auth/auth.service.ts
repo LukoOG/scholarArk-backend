@@ -108,6 +108,7 @@ export class AuthService {
 	
 	const createdUser = new this.userModel({
 		...rest,
+		role,
 		password: hashedPassword,
 		profile_pic: profilePicUrl,
 		authProviders: { ...defaultAuthProviders, local: true }
