@@ -72,6 +72,69 @@ export class NotificationsService {
       type: 'LATE_EVENING_REMINDER',
     });
   }
+  
+  @Cron('45 20 * * *')
+  async sendLateEveningReminder2() {
+    await this.sendBulkNotification({
+      title: 'Still time to learn ⏰',
+      body: 'Just 10–15 minutes of study can make a difference!',
+      type: 'LATE_EVENING_REMINDER',
+    });
+  }
+  
+  @Cron('50 20 * * *')
+  async sendLateEveningReminder3() {
+    await this.sendBulkNotification({
+      title: 'Still time to learn ⏰',
+      body: 'Just 10–15 minutes of study can make a difference!',
+      type: 'LATE_EVENING_REMINDER',
+    });
+  }
+  
+  @Cron('05 21 * * *')
+  async sendLateEveningReminder4() {
+    await this.sendBulkNotification({
+      title: 'Still time to learn ⏰',
+      body: 'Just 10–15 minutes of study can make a difference!',
+      type: 'LATE_EVENING_REMINDER',
+    });
+  }
+  
+  @Cron('10 21 * * *')
+  async sendLateEveningReminder5() {
+    await this.sendBulkNotification({
+      title: 'Still time to learn ⏰',
+      body: 'Just 10–15 minutes of study can make a difference!',
+      type: 'LATE_EVENING_REMINDER',
+    });
+  }
+  
+  @Cron('15 21 * * *')
+  async sendLateEveningReminder6() {
+    await this.sendBulkNotification({
+      title: 'Still time to learn ⏰',
+      body: 'Just 10–15 minutes of study can make a difference!',
+      type: 'LATE_EVENING_REMINDER',
+    });
+  }
+  
+  @Cron('30 21 * * *')
+  async sendLateEveningReminder7() {
+    await this.sendBulkNotification({
+      title: 'Still time to learn ⏰',
+      body: 'Just 10–15 minutes of study can make a difference!',
+      type: 'LATE_EVENING_REMINDER',
+    });
+  }
+  
+    @Cron('45 21 * * *')
+  async sendLateEveningReminder8() {
+    await this.sendBulkNotification({
+      title: 'Still time to learn ⏰',
+      body: 'Just 10–15 minutes of study can make a difference!',
+      type: 'LATE_EVENING_REMINDER',
+    });
+  }
 	
 private async sendBulkNotification(payload: {
     title: string;
