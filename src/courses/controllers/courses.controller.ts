@@ -4,16 +4,16 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiQuery, 
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
-import { multerConfig } from '../common/multer/multer.config';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { multerConfig } from '../../common/multer/multer.config';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 import { CourseFilterDto } from '../dto/course-filter.dto';
 
-import { ResponseHelper } from '../common/helpers/api-response.helper';
+import { ResponseHelper } from '../../common/helpers/api-response.helper';
 import { Types } from 'mongoose';
 import { CoursesService } from '../services/courses.service';
 import { CreateCourseDto } from '../dto/create-course.dto';
 import { UpdateCourseDto } from '../dto/update-course.dto';
-import { Course } from '../schemas/courses.schema';
+import { Course } from '../schemas/course.schema';
 import { Request } from 'express';
 
 import { GetUser } from '../../common/decorators'

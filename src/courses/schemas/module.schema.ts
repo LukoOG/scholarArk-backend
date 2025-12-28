@@ -1,3 +1,6 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument, Types } from 'mongoose';
+
 @Schema({ timestamps: true })
 export class CourseModule {
   @Prop({ type: Types.ObjectId, ref: 'Course', required: true, index: true })

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types, FilterQuery } from 'mongoose';
+import { InjectModel, InjectConnection } from '@nestjs/mongoose';
+import { Model, Types, FilterQuery, Connection, ClientSession } from 'mongoose';
 import { Course, CourseDocument } from '../schemas/course.schema';
 import { CourseModule, CourseModuleDocument } from '../schemas/module.schema';
 import { Lesson, LessonDocument } from '../schemas/lesson.schema';
@@ -11,10 +11,10 @@ import { CloudinaryService } from '../../common/cloudinary/cloudinary.service';
 import {
   UserAlreadyExistsException,
   UserNotFoundException,
-} from '../user/exceptions';
+} from '../../user/exceptions';
 
-import { PaginationDto } from '../common/dto/pagination.dto';
-import { CourseFilterDto } from './dto/course-filter.dto';
+import { PaginationDto } from '../../common/dto/pagination.dto';
+import { CourseFilterDto } from '../dto/course-filter.dto';
 
 @Injectable()
 export class CoursesService {
@@ -23,13 +23,13 @@ export class CoursesService {
     @InjectModel(CourseModule.name) private moduleModel: Model<CourseDocument>,
     @InjectModel(Lesson.name) private lessonModel: Model<CourseDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+	@InjectConnection() private readonly connection: Connection,
 	private readonly cloudinaryService: CloudinaryService,
-	private readonly connection: Connection,
   ) {}
 
-  async create(dto: CreateCourseDto, tutorId:Types.ObjectId, file?: Express.Multer.File): Promise<Course> {
+  async create(dto: CreateCourseDto, tutorId:Types.ObjectId, file?: Express.Multer.File){
 	let resourceUrl: string | undefined;
-	const session = this.connection.startSession();
+	const session: ClientSession = await this.connection.startSession();
 	
 	if(file){
 		resourceUrl = await this.cloudinaryService.uploadImage(file, 'users/profile-pics')
