@@ -27,13 +27,8 @@ export class CoursesService {
 	private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async create(dto: CreateCourseDto, tutorId:Types.ObjectId, file?: Express.Multer.File){
-	let resourceUrl: string | undefined;
+  async create(dto: CreateCourseDto, tutorId:Types.ObjectId): Promise<{ courseId: Types.ObjectId }>{
 	const session: ClientSession = await this.connection.startSession();
-	
-	if(file){
-		resourceUrl = await this.cloudinaryService.uploadImage(file, 'users/profile-pics')
-	};
 	
 	session.startTransaction();
 	try{
