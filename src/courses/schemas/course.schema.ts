@@ -1,0 +1,64 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument, Types } from 'mongoose';
+
+export type CourseDocument = HydratedDocument<Course>;
+
+export enum CourseCategory {
+  SCIENCE = 'science',
+  ARTS = 'arts',
+  COMMERCE = 'commerce',
+  TECHNOLOGY = 'technology',
+  HEALTH = 'health',
+}
+
+export enum CourseDifficulty {
+  BEGINNER = 'Beginner',
+  INTERMEDIATE = 'Intermediate',
+  ADVANCED = 'Advanced',
+}
+
+@Schema({ timestamps: true })
+export class Course {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
+  tutor: Types.ObjectId;
+
+  @Prop({ required: true })
+  title: string;
+
+  @Prop({ required: true })
+  description: string;
+
+  @Prop({ unique: true, index: true })
+  slug: string;
+
+  @Prop({ type: String, enum: CourseCategory, required: true })
+  category: CourseCategory;
+
+  @Prop({ type: String, enum: CourseDifficulty, default: CourseDifficulty.BEGINNER })
+  difficulty: CourseDifficulty;
+
+  @Prop({ default: 0 })
+  price: number;
+
+  @Prop({ default: 0 })
+  studentsEnrolled: number;
+
+  @Prop()
+  thumbnailUrl: string;
+
+  @Prop({ default: 0 })
+  rating: number;
+
+  @Prop({ default: 0 })
+  totalDuration: number; // seconds
+
+  @Prop({ default: false })
+  isPublished: boolean;
+
+  @Prop()
+  publishedAt?: Date;
+}
+
+export const CourseSchema = SchemaFactory.createForClass(Course);
+
+CourseSchema.index({ category: 1, difficulty: 1 });

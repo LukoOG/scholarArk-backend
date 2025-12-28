@@ -6,18 +6,18 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
 
 import { multerConfig } from '../common/multer/multer.config';
 import { PaginationDto } from '../common/dto/pagination.dto';
-import { CourseFilterDto } from './dto/course-filter.dto';
+import { CourseFilterDto } from '../dto/course-filter.dto';
 
 import { ResponseHelper } from '../common/helpers/api-response.helper';
 import { Types } from 'mongoose';
-import { CoursesService } from './courses.service';
-import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
-import { Course } from './schemas/courses.schema';
+import { CoursesService } from '../services/courses.service';
+import { CreateCourseDto } from '../dto/create-course.dto';
+import { UpdateCourseDto } from '../dto/update-course.dto';
+import { Course } from '../schemas/courses.schema';
 import { Request } from 'express';
 
-import { GetUser } from '../common/decorators'
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { GetUser } from '../../common/decorators'
+import { AuthGuard } from '../../auth/guards/auth.guard';
 
 @ApiTags('Courses') 
 @ApiBearerAuth('access-token')
@@ -33,8 +33,8 @@ export class CoursesController {
   @ApiResponse({ status: 201, description: 'Course created successfully', type: Course })
   @ApiResponse({ status: 400, description: 'Invalid request body' })
   @ApiConsumes('multipart/form-data')
-  async create(@Body() createCourseDto: CreateCourseDto, @UploadedFile() resource: Express.Multer.File, @GetUser('id') userId: Types.ObjectId) { 
-    const result = await this.coursesService.create(createCourseDto, userId, resource);
+  async create(@Body() createCourseDto: CreateCourseDto, @UploadedFile() resource: Express.Multer.File, @GetUser('id') tutorId: Types.ObjectId) { 
+    const result = await this.coursesService.create(createCourseDto, tutorId, resource);
 	return ResponseHelper.success(result)
   }
 
