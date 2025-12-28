@@ -33,8 +33,8 @@ export class CoursesController {
   @ApiResponse({ status: 201, description: 'Course created successfully', type: Course })
   @ApiResponse({ status: 400, description: 'Invalid request body' })
   @ApiConsumes('multipart/form-data')
-  async create(@Body() createCourseDto: CreateCourseDto, @UploadedFile() resource: Express.Multer.File, @GetUser('id') tutorId: Types.ObjectId) { 
-    const result = await this.coursesService.create(createCourseDto, tutorId, resource);
+  async create(@Body() createCourseDto: CreateCourseDto, @GetUser('id') tutorId: Types.ObjectId) { 
+    const result = await this.coursesService.create(createCourseDto, tutorId);
 	return ResponseHelper.success(result)
   }
 

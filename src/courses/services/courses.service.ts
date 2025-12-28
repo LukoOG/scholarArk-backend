@@ -76,7 +76,6 @@ export class CoursesService {
 							moduleId: module[0]._id,
 							title: lesson.title,
 							type: lesson.type,
-							videoUrl: lesson.videoUrl,
 							content: lesson.content,
 							duration: lesson.duration,
 							position: j + 1,
