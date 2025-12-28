@@ -120,18 +120,44 @@ export class CoursesService {
   }
 
   async findAll(pagination: PaginationDto, filters: CourseFilterDto ) {
-	const { page, limit } = pagination;
+	const { page = 1, limit = 20 } = pagination;
 	const skip = (page - 1) * limit;
 	
-	const query: FilterQuery<Course> = {};	
+	//const query: FilterQuery<Course> = {};
+	const query: any = {
+		isPublished: true,
+		isDeleted: { $ne: true },
+	};
+	
+	if(filters.topicIds?.length){
+		query.topicIds = { $in: filters.topicIds };
+	};
+	
+	if(filters.level){
+		query.difficulty = filters.level;
+	};
+	
+	if(filters.goalIds?.length){
+		query.goalIds = { $in: filters.goalIds }
+	};
+	
+	if(filters.search){
+		query.$or = [
+		  { title: { $regex: filters.search, $options: 'i' } },
+		  { description: { $regex: filters.search, $options: 'i' } },
+		];
+	};
 	
 	const [items, total] = await Promise.all([
 		this.courseModel
 		  .find(query)
+		  .select(
+			'title thumbnail_url price rating category difficulty students_enrolled'
+		  )
+		  .sort({ createdAt: -1 })
 		  .skip(skip)
 		  .limit(limit)
-		  .sort({ createdAt: -1 })
-		  .exec(),
+		  .lean(),
 
 		this.courseModel.countDocuments(query),
 	]);
