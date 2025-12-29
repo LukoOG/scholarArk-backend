@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
 import { Model, Types, FilterQuery, Connection, ClientSession } from 'mongoose';
-import { Course, CourseDocument } from '../schemas/course.schema';
+import { Course, CourseDocument, CourseListItem } from '../schemas/course.schema';
 import { CourseModule, CourseModuleDocument } from '../schemas/module.schema';
 import { Lesson, LessonDocument } from '../schemas/lesson.schema';
 import { User, UserDocument } from '../../user/schemas/user.schema';
@@ -15,6 +15,7 @@ import {
 
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { CourseFilterDto } from '../dto/course-filter.dto';
+import { PaginatedResponse } from '../../common/interfaces';
 
 @Injectable()
 export class CoursesService {
@@ -113,11 +114,10 @@ export class CoursesService {
 	};
   }
 
-  async findAll(pagination: PaginationDto, filters: CourseFilterDto ) {
+async findAll(pagination: PaginationDto, filters: CourseFilterDto ): Promise<PaginatedResponse<CourseListItem>> {
 	const { page = 1, limit = 20 } = pagination;
 	const skip = (page - 1) * limit;
 	
-	//const query: FilterQuery<Course> = {};
 	const query: any = {
 		isPublished: true,
 		isDeleted: { $ne: true },
@@ -151,7 +151,7 @@ export class CoursesService {
 		  .sort({ createdAt: -1 })
 		  .skip(skip)
 		  .limit(limit)
-		  .lean(),
+		  .lean<CourseListItem[]>(),
 
 		this.courseModel.countDocuments(query),
 	]);

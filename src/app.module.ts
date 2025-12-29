@@ -24,6 +24,7 @@ import { TopicsModule } from './topics/topics.module';
 import { PreferencesModule } from './preferences/preferences.module';
 import { MailModule } from './mail/mail.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { MetaModule } from './meta/meta.module';
 
 @Module({
   imports: [
@@ -97,6 +98,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     AuthModule,
     MailModule,
     NotificationsModule,
+    MetaModule,
   ],
   controllers: [AppController],
   providers: [

@@ -3,6 +3,17 @@ import { HydratedDocument, Types } from 'mongoose';
 
 export type CourseDocument = HydratedDocument<Course>;
 
+export interface CourseListItem {
+	_id: string;
+	title: string;
+	thumbnail_url: string;
+	price: number;
+	rating: number;
+	category: CourseCategory;
+	difficulty: string;
+	students_enrolled: number;
+}
+
 export enum CourseCategory {
   SCIENCE = 'science',
   ARTS = 'arts',
