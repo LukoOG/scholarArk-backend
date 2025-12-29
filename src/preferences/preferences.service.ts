@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, FilterQuery, Connection, ClientSession } from 'mongoose';
 import { Preference, PreferenceDocument } from './schemas/preference.schema';
 
-interface PreferenceItem {
+export interface PreferenceItem {
 	_id: Types.ObjectId;
 	key: string;
 	label: string;

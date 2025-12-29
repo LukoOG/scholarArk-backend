@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, FilterQuery, Connection, ClientSession } from 'mongoose';
 import { Goal, GoalDocument } from './schemas/goal.schema';
 
-interface GoalItem {
+export interface GoalItem {
 	_id: Types.ObjectId;
 	name: string;
 	description: string;
