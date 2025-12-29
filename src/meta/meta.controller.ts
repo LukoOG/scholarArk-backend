@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiOkResponse, } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, } from '@nestjs/swagger';
 import { TopicService } from '../topics/topics.service';
 import { GoalService } from '../goals/goals.service';
 import { PreferenceService } from '../preferences/preferences.service';
