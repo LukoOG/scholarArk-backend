@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiOkResponse, } from '@nestjs/swagger';
 import { TopicService } from '../topics/topics.service';
 import { GoalService } from '../goals/goals.service';
 import { PreferenceService } from '../preferences/preferences.service';
@@ -13,17 +13,32 @@ export class MetaController {
 		private readonly preferenceService: PreferenceService,
 	){}
 	
-	@Get()
+	@ApiOperation({
+	  summary: 'Get available topics',
+	  description: 'Used during user registration to select learning topics',
+	})
+	@ApiResponse({ status: 200, description: 'List of topics' })
+	@Get('topics')
 	async getTopics(){
 		return this.topicService.findActive()
 	}
 	
-	@Get()
+	@ApiOperation({
+	  summary: 'Get available goals',
+	  description: 'Used during user registration to select learning goals',
+	})
+	@ApiResponse({ status: 200, description: 'List of topics' })
+	@Get('goals')
 	async getGoals(){
 		return this.goalService.findActive()
 	}
 	
-	@Get()
+	@ApiOperation({
+	  summary: 'Get available preferences',
+	  description: 'Used during user registration to select learning preferences',
+	})
+	@ApiResponse({ status: 200, description: 'List of topics' })
+	@Get('preferences')
 	async getPreferences(){
 		return this.preferenceService.findActive()
 	}

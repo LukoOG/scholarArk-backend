@@ -12,7 +12,7 @@ export class PreferenceService {
   async findActive() {
     return this.preferenceModel
       .find({ isActive: true })
-      .select('key label description')
+      .select('_id key label description')
       .sort({ name: 1 })
       .lean();
   }
