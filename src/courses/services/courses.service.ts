@@ -14,7 +14,7 @@ import {
 } from '../../user/exceptions';
 
 import { PaginationDto } from '../../common/dto/pagination.dto';
-import { CourseFilterDto } from '../dto/course-filter.dto';
+import { CourseQueryDto } from '../dto/course-filter.dto';
 import { PaginatedResponse } from '../../common/interfaces';
 
 @Injectable()
@@ -114,8 +114,8 @@ export class CoursesService {
 	};
   }
 
-async findAll(pagination: PaginationDto, filters: CourseFilterDto ): Promise<PaginatedResponse<CourseListItem>> {
-	const { page = 1, limit = 20 } = pagination;
+async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
+	const { page = 1, limit = 20, topicIds, level, search, goalIds } = dto;
 	const skip = (page - 1) * limit;
 	
 	const query: any = {
@@ -123,22 +123,22 @@ async findAll(pagination: PaginationDto, filters: CourseFilterDto ): Promise<Pag
 		isDeleted: { $ne: true },
 	};
 	
-	if(filters.topicIds?.length){
-		query.topicIds = { $in: filters.topicIds };
+	if(topicIds?.length){
+		query.topicIds = { $in: topicIds };
 	};
 	
-	if(filters.level){
-		query.difficulty = filters.level;
+	if(level){
+		query.difficulty = level;
 	};
 	
-	if(filters.goalIds?.length){
-		query.goalIds = { $in: filters.goalIds }
+	if(goalIds?.length){
+		query.goalIds = { $in: goalIds }
 	};
 	
-	if(filters.search){
+	if(search){
 		query.$or = [
-		  { title: { $regex: filters.search, $options: 'i' } },
-		  { description: { $regex: filters.search, $options: 'i' } },
+		  { title: { $regex: search, $options: 'i' } },
+		  { description: { $regex: search, $options: 'i' } },
 		];
 	};
 	

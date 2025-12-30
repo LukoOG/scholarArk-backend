@@ -6,7 +6,7 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
 
 import { multerConfig } from '../../common/multer/multer.config';
 import { PaginationDto } from '../../common/dto/pagination.dto';
-import { CourseFilterDto } from '../dto/course-filter.dto';
+import { CourseQueryDto } from '../dto/course-filter.dto';
 
 import { ResponseHelper } from '../../common/helpers/api-response.helper';
 import { Types } from 'mongoose';
@@ -78,13 +78,26 @@ export class CoursesController {
 	  description: 'Search keyword (matches title or description)',
 	  example: 'javascript',
 	})
+	@ApiQuery({
+	  name: 'page',
+	  required: false,
+	  description: 'page of the pagination',
+	  example: '1',
+	})
+	@ApiQuery({
+	  name: 'limit',
+	  required: false,
+	  description: 'how much data should be returned per request',
+	  example: '10',
+	})
 	@ApiResponse({
 	  status: 200,
 	  description: 'Courses fetched successfully',
 	})
   @ApiResponse({ status: 200, description: 'List of all courses', type: [Course] })
-  async findAll(@Query() pagination: PaginationDto, @Query() filters: CourseFilterDto ) {
-    const result = await this.coursesService.findAll(pagination, filters);
+  async findAll(@Query() query: CourseQueryDto) {
+	  console.log('query', query)
+	const result = await this.coursesService.findAll(query);
 	return ResponseHelper.success(result)
   }
 

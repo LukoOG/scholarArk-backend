@@ -1,5 +1,6 @@
 import { IsArray, IsEnum, IsMongoId, IsOptional, IsString } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, IntersectionType } from '@nestjs/swagger';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export enum CourseLevel {
   BEGINNER = 'BEGINNER',
@@ -39,3 +40,8 @@ export class CourseFilterDto {
   @IsMongoId({ each: true })
   goalIds?: string[];
 }
+
+export class CourseQueryDto extends IntersectionType(
+  PaginationDto,
+  CourseFilterDto,
+) {}
