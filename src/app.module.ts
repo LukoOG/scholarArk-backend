@@ -27,6 +27,7 @@ import { PreferencesModule } from './preferences/preferences.module';
 import { MailModule } from './mail/mail.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { MetaModule } from './meta/meta.module';
+import { EnrollmentModule } from './enrollment/enrollment.module';
 
 @Module({
   imports: [
@@ -102,6 +103,7 @@ import { MetaModule } from './meta/meta.module';
     MailModule,
     NotificationsModule,
     MetaModule,
+    EnrollmentModule,
   ],
   controllers: [AppController],
   providers: [

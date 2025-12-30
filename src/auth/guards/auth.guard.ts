@@ -10,7 +10,7 @@ import { Request } from 'express';
 import { isValidObjectId, Types } from 'mongoose';
 import { UserNotFoundException } from '../../user/exceptions';
 
-export type UserPopulatedRequest = Request & { user: { id: Types.ObjectId } };
+export type UserPopulatedRequest = Request & { user: { id: Types.ObjectId, role: string } };
 
 @Injectable()
 export class AuthGuard implements CanActivate {
