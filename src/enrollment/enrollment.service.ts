@@ -14,9 +14,20 @@ export class EnrollmentService {
 		return this.enrollmentModel.create({
 			user: userId,
 			course: courseId,
-			status: 'active',
+			status: 'pending',
 			isPaid: false
 		})
+	}
+	
+	async activateEnrollment(userId: Types.ObjectId, courseId: Types.ObjectId, paymentId: Types.ObjectId){
+		return this.enrollmentModel.findOneAndUpdate(
+			{user: userId, course: courseId},
+			{
+				status: 'active',
+				isPaid: true,
+				payment: paymentId,
+			}
+		)
 	}
 	
 	async isEnrolled(userId: Types.ObjectId, courseId: Types.ObjectId){
