@@ -27,12 +27,12 @@ export class CoursesController {
 
   @Post()
   @UseGuards(AuthGuard)
-  @UseInterceptors(FileInterceptor('resource', multerConfig))
+  //@UseInterceptors(FileInterceptor('resource', multerConfig))
   @ApiOperation({ summary: 'Create a new course' })
   @ApiBearerAuth()
   @ApiResponse({ status: 201, description: 'Course created successfully', type: Course })
   @ApiResponse({ status: 400, description: 'Invalid request body' })
-  @ApiConsumes('multipart/form-data')
+  //@ApiConsumes('multipart/form-data')
   async create(@Body() createCourseDto: CreateCourseDto, @GetUser('id') tutorId: Types.ObjectId) { 
     const result = await this.coursesService.create(createCourseDto, tutorId);
 	return ResponseHelper.success(result)

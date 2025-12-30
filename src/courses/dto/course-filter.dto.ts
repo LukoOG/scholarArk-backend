@@ -1,12 +1,7 @@
 import { IsArray, IsEnum, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional, IntersectionType } from '@nestjs/swagger';
 import { PaginationDto } from '../../common/dto/pagination.dto';
-
-export enum CourseLevel {
-  BEGINNER = 'BEGINNER',
-  INTERMEDIATE = 'INTERMEDIATE',
-  ADVANCED = 'ADVANCED',
-}
+import { CourseDifficulty } from '../schemas/course.schema';
 
 export class CourseFilterDto {
   @ApiPropertyOptional({
@@ -22,8 +17,8 @@ export class CourseFilterDto {
 	  example: 'Beginner',
   })
   @IsOptional()
-  @IsEnum(CourseLevel)
-  level?: CourseLevel;
+  @IsEnum(CourseDifficulty)
+  level?: CourseDifficulty;
 
   @ApiPropertyOptional({
 	  example: 'javascript'
