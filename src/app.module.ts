@@ -4,8 +4,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ScheduleModule } from '@nestjs/schedule';
-import { APP_GUARD } from '@nestjs/core';
-import { redisStore } from 'cache-manager-ioredis-yet';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+//import { redisStore } from 'cache-manager-ioredis-yet';
+import * as redisStore from 'cache-manager-redis-store';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -33,12 +35,13 @@ import { MetaModule } from './meta/meta.module';
 		useFactory: async (configService: ConfigService<Config, true>) => {
 			const cacheConfig = configService.get('redis', { infer: true });
 			
-			return {store: await redisStore({
+			return {
+				store: redisStore,
 				host: cacheConfig.host,
 				port: Number(cacheConfig.port),
 				password: cacheConfig.password,
-				ttl: 60,
-			})}
+				ttl: 600,
+			}
 		}
 		
 	}),
@@ -106,6 +109,10 @@ import { MetaModule } from './meta/meta.module';
 		{
 			provide: APP_GUARD,
 			useClass: ThrottlerGuard,
+		},
+		{
+			provide: APP_INTERCEPTOR,
+			useClass: CacheInterceptor,
 		}
 	],
 })
