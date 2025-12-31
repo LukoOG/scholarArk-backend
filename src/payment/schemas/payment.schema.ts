@@ -10,6 +10,10 @@ export enum PaymentStatus {
     SUCCESS = "success"
 }
 
+export enum PaymentCurrency {
+	NAIRA = "NGN",
+	USDOLLARS = "USD",
+}
 
 @Schema({ timestamps: true })
 export class Payment {
@@ -22,8 +26,8 @@ export class Payment {
     @Prop({ type: Number, required: true, min: 1, immutable: true })
 	amount: number;
 
-	@Prop({ required: true })
-	currency: string; // "NGN"
+	@Prop({ enum: PaymentCurrency, required: true })
+	currency: PaymentCurrency;
 
 	@Prop({
 		enum: ['paystack'],
