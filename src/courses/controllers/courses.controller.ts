@@ -29,8 +29,8 @@ export class CoursesController {
   @ApiResponse({ status: 201, description: 'Course created successfully', type: Course })
   @ApiResponse({ status: 400, description: 'Invalid request body' })
   async create(@Body() createCourseDto: CreateCourseDto, @GetUser('id') tutorId: Types.ObjectId) { 
-    const result = await this.coursesService.create(createCourseDto, tutorId);
-	return ResponseHelper.success(result)
+    await this.coursesService.create(createCourseDto, tutorId);
+	return ResponseHelper.success({"message":"Course created successfully"})
   }
 
   @Get()

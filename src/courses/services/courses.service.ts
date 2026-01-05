@@ -17,6 +17,7 @@ import { PaginationDto } from '../../common/dto/pagination.dto';
 import { CourseQueryDto } from '../dto/course-filter.dto';
 import { PaginatedResponse } from '../../common/interfaces';
 import { CourseFullContent } from '../types/course-full-content.type';
+import { clearGlobalAppDefaultCred } from 'firebase-admin/lib/app/credential-factory';
 
 
 @Injectable()
@@ -66,29 +67,41 @@ export class CoursesService {
 				], 
 				{ session }
 			)
+
+			await this.courseModel.updateOne(
+				{_id: courseId},
+				{ $push: { modules: module[0]._id } },
+				{ session }
+			);
 			
 			let moduleDuration = 0;
 			
 			for(let j = 0; j < mod.lessons.length; j++){
-				const lesson = mod.lessons[j];
+				const modLesson = mod.lessons[j];
 				
-				await this.lessonModel.create(
+				const lesson = await this.lessonModel.create(
 					[
 						{
 							courseId,
 							moduleId: module[0]._id,
-							title: lesson.title,
-							type: lesson.type,
-							content: lesson.content,
-							duration: lesson.duration,
+							title: modLesson.title,
+							type: modLesson.type,
+							content: modLesson.content,
+							duration: modLesson.duration,
 							position: j + 1,
-							isPreview: lesson.isPreview ?? false,
+							isPreview: modLesson.isPreview ?? false,
 						}
 					],
 					{ session },
 				)
+
+				await this.moduleModel.updateOne(
+					{ _id: module[0]._id },
+					{ $push: { lessons: lesson[0]._id } },
+					{ session }
+				)
 				
-				moduleDuration += lesson.duration;
+				moduleDuration += modLesson.duration;
 			};
 			
 			await this.moduleModel.updateOne(

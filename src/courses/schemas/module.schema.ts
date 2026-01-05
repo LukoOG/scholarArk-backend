@@ -9,6 +9,9 @@ export class CourseModule {
   @Prop({ required: true })
   title: string;
 
+  @Prop({ type: [{ type: Types.ObjectId, ref: "Lesson"}], default: [] })
+  lessons: Types.ObjectId[]
+
   @Prop()
   description?: string;
 
