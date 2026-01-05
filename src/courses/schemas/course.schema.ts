@@ -34,7 +34,7 @@ export class Course {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   tutor: Types.ObjectId;
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: "Module"}], default: [] })
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Module' }], default: [] })
   modules: Types.ObjectId[]
 
   @Prop({ required: true })

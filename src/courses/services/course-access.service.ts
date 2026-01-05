@@ -20,6 +20,7 @@ export class CourseAccessService {
       .lean();
 
     if (!course) return false;
+    
 
     // Tutor always has access
     if (course.tutor.toString() === userId.toString()) {

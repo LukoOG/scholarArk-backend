@@ -214,19 +214,28 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 		})
 		.populate({
 			path: 'modules',
-			select: 'title order lessons',
+			strictPopulate: false,
+			select: 'title position lessons',
 			options: { sort: { order: 1 } },
 			populate: {
 				path: 'lessons',
-				select: 'title order type content',
+				select: 'title position type content',
 				options: { sort: { order: 1 } },
 			},
 		})
-		.lean<CourseFullContent>();
+		// .lean<CourseFullContent>();
 
 	if (!course) {
 		throw new NotFoundException('Course not found');
 	}
+const modules = await this.courseModel
+.findById(courseId)
+.populate("modules")
+  .exec();
+
+console.log(modules);
+
+
 
 	return course;
   }
