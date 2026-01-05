@@ -42,7 +42,9 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
 
       keyv.on('error', (err)=>console.error("Redis connection error: ", err))
 
-      return { store: keyv }
+      return {
+       stores: [keyv]
+      }
 
     }
 	

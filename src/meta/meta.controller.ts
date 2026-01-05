@@ -22,6 +22,7 @@ export class MetaController {
 	})
 	@ApiResponse({ status: 200, description: 'List of topics' })
 	@CacheKey('meta:topics')
+	@CacheTTL(30 * 1000)
 	@Get('topics')
 	async getTopics(){
 		// let cacheData = await this.cacheManager.get('meta:topics')
@@ -35,6 +36,7 @@ export class MetaController {
 	@ApiResponse({ status: 200, description: 'List of topics' })
 	
 	@CacheKey('meta:goals')
+	@CacheTTL(30 * 1000)
 	@Get('goals')
 	async getGoals(){
 		return this.goalService.findActive()
@@ -46,6 +48,7 @@ export class MetaController {
 	})
 	@ApiResponse({ status: 200, description: 'List of topics' })
 	@CacheKey('meta:preferences')
+	@CacheTTL(30 * 1000)
 	@Get('preferences')
 	async getPreferences(){
 		return this.preferenceService.findActive()
