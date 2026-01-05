@@ -5,7 +5,6 @@ import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
 import { multerConfig } from '../../common/multer/multer.config';
-import { PaginationDto } from '../../common/dto/pagination.dto';
 import { CourseQueryDto } from '../dto/course-filter.dto';
 
 import { ResponseHelper } from '../../common/helpers/api-response.helper';

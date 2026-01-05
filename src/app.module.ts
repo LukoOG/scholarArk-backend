@@ -37,15 +37,12 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
     useFactory: async (configService: ConfigService<Config, true>) => {
       let redisConfig = configService.get('redis', { infer: true });
       const redisUrl = `redis://default:${redisConfig.password}@${redisConfig.host}:${redisConfig.port}`;
-      console.log(redisUrl);
 
       const keyv = createKeyv(redisUrl, { namespace:"scholarark" });
 
       keyv.on('error', (err)=>console.error("Redis connection error: ", err))
 
-      return { 
-        stores: [keyv]
-      }
+      return { store: keyv }
 
     }
 	
