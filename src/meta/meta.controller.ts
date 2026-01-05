@@ -24,9 +24,7 @@ export class MetaController {
 	@CacheKey('meta:topics')
 	@Get('topics')
 	async getTopics(){
-		let cacheData = await this.cacheManager.get('meta:topics')
-		// console.log(this.cacheManager.stores);
-		// console.log(cacheData, 'here')
+		// let cacheData = await this.cacheManager.get('meta:topics')
 		return this.topicService.findActive()
 	}
 	
