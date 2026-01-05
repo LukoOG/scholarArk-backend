@@ -16,6 +16,8 @@ import {
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { CourseQueryDto } from '../dto/course-filter.dto';
 import { PaginatedResponse } from '../../common/interfaces';
+import { CourseFullContent } from '../types/course-full-content.type';
+
 
 @Injectable()
 export class CoursesService {
@@ -187,6 +189,33 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 		.limit(10)
 		.sort({ popularity: -1 })
 		.exec();
+  }
+
+  async getFullContent(courseId: Types.ObjectId){
+	  const course = await this.courseModel
+		.findById(courseId)
+		.select('title description tutor modules')
+		.populate({
+			path: 'tutor',
+			select: 'name',
+		})
+		.populate({
+			path: 'modules',
+			select: 'title order lessons',
+			options: { sort: { order: 1 } },
+			populate: {
+				path: 'lessons',
+				select: 'title order type content',
+				options: { sort: { order: 1 } },
+			},
+		})
+		.lean<CourseFullContent>();
+
+	if (!course) {
+		throw new NotFoundException('Course not found');
+	}
+
+	return course;
   }
 
   async findOne(id: string): Promise<Course> {

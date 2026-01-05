@@ -1,5 +1,4 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query, UseGuards, UploadedFile, UseInterceptors, HttpStatus } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -12,7 +11,6 @@ import { CoursesService } from '../services/courses.service';
 import { CreateCourseDto } from '../dto/create-course.dto';
 import { UpdateCourseDto } from '../dto/update-course.dto';
 import { Course } from '../schemas/course.schema';
-import { Request } from 'express';
 
 import { GetUser } from '../../common/decorators'
 import { AuthGuard } from '../../auth/guards/auth.guard';
@@ -137,11 +135,12 @@ export class CoursesController {
 	return ResponseHelper.success({ message: "Course deleted" })
   }
   
-//   @Get(':courseId/content')
-//   async getCourseContent(@Param('courseId') courseId: Types.ObjectId){
-// 	const response = this.coursesService.getFullContent(courseId)
-// 	return ResponseHelper.success(response, HttpStatus.OK)
-//   }
+  @Get(':courseId/content')
+  @UseGuards(AuthGuard, CourseAccessGuard)
+  async getCourseContent(@Param('courseId') courseId: Types.ObjectId){
+	const content = await this.coursesService.getFullContent(courseId)
+	return ResponseHelper.success(content, HttpStatus.OK)
+  }
 }
 
   //learning
