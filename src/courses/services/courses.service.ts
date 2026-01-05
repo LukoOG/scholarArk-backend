@@ -205,4 +205,14 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
     const result = await this.courseModel.findByIdAndDelete(id).exec();
     if (!result) throw new NotFoundException(`Course #${id} not found`);
   }
+
+  //
+  async isTutor(courseId: Types.ObjectId, userId: Types.ObjectId){
+	const isTutor = await this.courseModel
+	.findOne({ _id: courseId, tutor: userId })
+	.select('_id')
+	.lean()
+
+	return !!isTutor
+  }
 }

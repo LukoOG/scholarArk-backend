@@ -1,10 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query, UseGuards, UploadedFile, UseInterceptors, HttpStatus } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
-import { multerConfig } from '../../common/multer/multer.config';
 import { CourseQueryDto } from '../dto/course-filter.dto';
 
 import { ResponseHelper } from '../../common/helpers/api-response.helper';
@@ -17,7 +16,7 @@ import { Request } from 'express';
 
 import { GetUser } from '../../common/decorators'
 import { AuthGuard } from '../../auth/guards/auth.guard';
-import { CourseAccessGuard } from '../../enrollment/enrollment.guard';
+import { CourseAccessGuard } from '../guards/course.guard';
 
 @ApiTags('Courses') 
 @ApiBearerAuth('access-token')
@@ -107,6 +106,7 @@ export class CoursesController {
 	return ResponseHelper.success(result)
   }
 
+  //public access point
   @Get(':id')
   @ApiOperation({ summary: 'Get a course by ID' })
   @ApiParam({ name: 'id', example: '68f17f0f6f0740d2d0bb6be3', description: 'MongoDB ObjectId of the course' })
@@ -137,14 +137,18 @@ export class CoursesController {
 	return ResponseHelper.success({ message: "Course deleted" })
   }
   
+//   @Get(':courseId/content')
+//   async getCourseContent(@Param('courseId') courseId: Types.ObjectId){
+// 	const response = this.coursesService.getFullContent(courseId)
+// 	return ResponseHelper.success(response, HttpStatus.OK)
+//   }
+}
+
   //learning
   /**
-  @Get(':id/learn')
-  @UseGuards(AuthGuard, CourseAccessGuard)
-  @ApiOperation({ summary: 'Get learning content' })
-  async learn(@Param('id') id: string) {
-    const result = await this.coursesService.
-	return ResponseHelper.success(result)
-  }
+GET /courses/:courseId/content
+GET /courses/:courseId/modules
+GET /courses/:courseId/modules/:moduleId/lessons
+GET /lessons/:lessonId
   **/
-}
+  

@@ -26,15 +26,21 @@ export class EnrollmentService {
 				status: 'active',
 				isPaid: true,
 				payment: paymentId,
+			},
+			{
+				upsert: true,
+				new: true
 			}
 		)
 	}
 	
-	async isEnrolled(userId: Types.ObjectId, courseId: Types.ObjectId){
-		return this.enrollmentModel.exists({
+	async isEnrolled(userId: Types.ObjectId, courseId: Types.ObjectId): Promise<boolean>{
+		const enrollment = await this.enrollmentModel.findOne({
 			user: userId,
 			corse: courseId,
 			status: 'active'
 		})
+
+		return !!enrollment
 	}
 }

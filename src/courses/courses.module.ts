@@ -9,6 +9,9 @@ import { CourseModule, CourseModuleSchema } from './schemas/module.schema';
 import { Lesson, LessonSchema } from './schemas/lesson.schema';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { UserService } from '../user/user.service';
+import { CourseAccessService } from './services/course-access.service';
+import { CourseAccessGuard } from './guards/course.guard';
+import { EnrollmentModule } from 'src/enrollment/enrollment.module';
 
 @Module({
   imports: [
@@ -19,9 +22,10 @@ import { UserService } from '../user/user.service';
 		{ name: User.name, schema: UserSchema },
 	]),
 	AuthModule,
-	CloudinaryModule
+	CloudinaryModule,
+	EnrollmentModule
   ],
   controllers: [CoursesController],
-  providers: [CoursesService],
+  providers: [CoursesService, CourseAccessService, CourseAccessGuard],
 })
 export class CoursesModule {}

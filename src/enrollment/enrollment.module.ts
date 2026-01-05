@@ -4,6 +4,7 @@ import { EnrollmentService } from './enrollment.service';
 import { EnrollmentController } from './enrollment.controller';
 import { Enrollment, EnrollmentSchema } from './schemas/enrollment.schema';
 import { AuthModule } from '../auth/auth.module';
+import { CourseModule } from 'src/courses/schemas/module.schema';
 
 @Module({
   imports: [
@@ -14,5 +15,6 @@ import { AuthModule } from '../auth/auth.module';
   ],
   controllers: [EnrollmentController],
   providers: [EnrollmentService],
+  exports: [EnrollmentService]
 })
 export class EnrollmentModule {}
