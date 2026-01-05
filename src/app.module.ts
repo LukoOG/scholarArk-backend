@@ -5,8 +5,8 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-//import { redisStore } from 'cache-manager-ioredis-yet';
-import * as redisStore from 'cache-manager-redis-store';
+import Keyv from 'keyv';
+import { createKeyv } from '@keyv/redis';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
 import { AppController } from './app.controller';
@@ -31,21 +31,25 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
 
 @Module({
   imports: [
-	CacheModule.register({
+	CacheModule.registerAsync({
 		isGlobal: true,
-		useFactory: async (configService: ConfigService<Config, true>) => {
-			const cacheConfig = configService.get('redis', { infer: true });
-			
-			return {
-				store: redisStore,
-				host: cacheConfig.host,
-				port: Number(cacheConfig.port),
-				password: cacheConfig.password,
-				ttl: 600,
-			}
-		}
-		
-	}),
+    inject: [ConfigService],
+    useFactory: async (configService: ConfigService<Config, true>) => {
+      let redisConfig = configService.get('redis', { infer: true });
+      const redisUrl = `redis://default:${redisConfig.password}@${redisConfig.host}:${redisConfig.port}`;
+      console.log(redisUrl);
+
+      const keyv = createKeyv(redisUrl, { namespace:"scholarark" });
+
+      keyv.on('error', (err)=>console.error("Redis connection error: ", err))
+
+      return { 
+        stores: [keyv]
+      }
+
+    }
+	
+}),
     EventEmitterModule.forRoot({
       wildcard: false,
       verboseMemoryLeak: false,

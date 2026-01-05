@@ -44,6 +44,7 @@ export class User {
 		apple: false,
 		facebook: false,
 	  }),
+    _id: false
 	})
 	authProviders: AuthProviders;
 

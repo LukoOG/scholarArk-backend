@@ -1,9 +1,9 @@
-import { Controller, Get, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, UseInterceptors, Inject } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, } from '@nestjs/swagger';
 import { TopicService } from '../topics/topics.service';
 import { GoalService } from '../goals/goals.service';
 import { PreferenceService } from '../preferences/preferences.service';
-import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
+import { CacheInterceptor, CacheKey, CacheTTL, CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 
 @ApiTags('Meta')
 @Controller('meta')
@@ -13,6 +13,7 @@ export class MetaController {
 		private readonly topicService: TopicService,
 		private readonly goalService: GoalService,
 		private readonly preferenceService: PreferenceService,
+		@Inject(CACHE_MANAGER) private cacheManager: Cache,
 	){}
 	
 	@ApiOperation({
@@ -21,9 +22,11 @@ export class MetaController {
 	})
 	@ApiResponse({ status: 200, description: 'List of topics' })
 	@CacheKey('meta:topics')
-	@CacheTTL(60 * 60)
 	@Get('topics')
 	async getTopics(){
+		let cacheData = await this.cacheManager.get('meta:topics')
+		// console.log(this.cacheManager.stores);
+		// console.log(cacheData, 'here')
 		return this.topicService.findActive()
 	}
 	
@@ -32,8 +35,8 @@ export class MetaController {
 	  description: 'Used during user registration to select learning goals',
 	})
 	@ApiResponse({ status: 200, description: 'List of topics' })
+	
 	@CacheKey('meta:goals')
-	@CacheTTL(60 * 60)
 	@Get('goals')
 	async getGoals(){
 		return this.goalService.findActive()
@@ -45,7 +48,6 @@ export class MetaController {
 	})
 	@ApiResponse({ status: 200, description: 'List of topics' })
 	@CacheKey('meta:preferences')
-	@CacheTTL(60 * 60)
 	@Get('preferences')
 	async getPreferences(){
 		return this.preferenceService.findActive()
