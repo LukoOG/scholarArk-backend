@@ -24,8 +24,8 @@ import { clearGlobalAppDefaultCred } from 'firebase-admin/lib/app/credential-fac
 export class CoursesService {
   constructor(
     @InjectModel(Course.name) private courseModel: Model<CourseDocument>,
-    @InjectModel(CourseModule.name) private moduleModel: Model<CourseDocument>,
-    @InjectModel(Lesson.name) private lessonModel: Model<CourseDocument>,
+    @InjectModel(CourseModule.name) private moduleModel: Model<CourseModuleDocument>,
+    @InjectModel(Lesson.name) private lessonModel: Model<LessonDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
 	@InjectConnection() private readonly connection: Connection,
 	private readonly cloudinaryService: CloudinaryService,
@@ -59,7 +59,7 @@ export class CoursesService {
 			
 			const module = await this.moduleModel.create([
 					{
-						courseId,
+						course: courseId,
 						title: mod.title,
 						description: mod.description,
 						position: i + 1,
@@ -82,8 +82,8 @@ export class CoursesService {
 				const lesson = await this.lessonModel.create(
 					[
 						{
-							courseId,
-							moduleId: module[0]._id,
+							course: courseId,
+							module: module[0]._id,
 							title: modLesson.title,
 							type: modLesson.type,
 							content: modLesson.content,
@@ -214,29 +214,19 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 		})
 		.populate({
 			path: 'modules',
-			strictPopulate: false,
 			select: 'title position lessons',
-			options: { sort: { order: 1 } },
+			options: { sort: { position: 1 } },
 			populate: {
 				path: 'lessons',
 				select: 'title position type content',
-				options: { sort: { order: 1 } },
+				options: { sort: { position: 1 } },
 			},
 		})
-		// .lean<CourseFullContent>();
-
+		.lean<CourseFullContent>();
+		
 	if (!course) {
 		throw new NotFoundException('Course not found');
 	}
-const modules = await this.courseModel
-.findById(courseId)
-.populate("modules")
-  .exec();
-
-console.log(modules);
-
-
-
 	return course;
   }
 

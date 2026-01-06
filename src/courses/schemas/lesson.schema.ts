@@ -10,10 +10,10 @@ export enum LessonType {
 @Schema({ timestamps: true })
 export class Lesson {
   @Prop({ type: Types.ObjectId, ref: 'Course', required: true, index: true })
-  courseId: Types.ObjectId;
+  course: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'CourseModule', required: true, index: true })
-  moduleId: Types.ObjectId;
+  module: Types.ObjectId;
 
   @Prop({ required: true })
   title: string;
