@@ -17,36 +17,40 @@ export enum PaymentCurrency {
 
 @Schema({ timestamps: true })
 export class Payment {
-    @Prop({ type: Types.ObjectId, ref: "User", required: true })
-    user: Types.ObjectId;
-	
-    @Prop({ type: Types.ObjectId, ref: "Course", required: true })
-    course: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: "User", required: true })
+  user: Types.ObjectId;
 
-    @Prop({ type: Number, required: true, min: 1, immutable: true })
-	amount: number;
+  @Prop({ type: Types.ObjectId, ref: "Course", required: true })
+  course: Types.ObjectId;
 
-	@Prop({ enum: PaymentCurrency, required: true })
-	currency: PaymentCurrency;
+  @Prop({ type: Number, required: true, min: 1, immutable: true })
+  amount: number;
 
-	@Prop({
-		enum: ['paystack'],
-		default: 'paystack',
-	})
-	provider: 'paystack';
+  @Prop({ enum: PaymentCurrency, required: true })
+  currency: PaymentCurrency;
 
-    @Prop({ type: Number, immutable: true })
-    transactionId: number;
+  @Prop({
+  enum: ['paystack'],
+  default: 'paystack',
+  })
+  provider: 'paystack';
 
-  @Prop({ required: true })
+  @Prop({ type: Object })
+  providerPayload?: any;
+
+  @Prop({ type: Number, immutable: true })
+  transactionId: number;
+
+  @Prop({ required: true, unique: true })
   reference: string;
 
   @Prop({
-    enum: PaymentStatus,
-    default: PaymentStatus.INITIALIZED,
+  enum: PaymentStatus,
+  default: PaymentStatus.INITIALIZED,
   })
   status: PaymentStatus;
 }
 
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment)
+PaymentSchema.index({ reference: 1 }, { unique: true });

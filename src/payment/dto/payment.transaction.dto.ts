@@ -1,12 +1,15 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator"
-import { PaymentStatus } from "../schemas/payment.schema"
+import { IsEnum, IsNotEmpty, IsNumber, IsString, IsMongoId, IsEmail } from "class-validator"
+import { Types } from "mongoose"
+
 
 export class PaymentTransactionDto {
+    @IsMongoId()
+    courseId: Types.ObjectId
+
+    @IsEmail()
+    email: string
+    
     @IsNumber()
     @IsNotEmpty()
     amount : number
-
-    @IsString()
-    @IsEnum(PaymentStatus)
-    status : PaymentStatus
 }

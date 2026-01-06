@@ -42,6 +42,10 @@ export class EnvironmentVariables {
   JWT_EXPIRES_IN: string;
 
   @IsString()
+  @IsUrl()
+  PAYSTACK_BASE_URL: string;
+
+  @IsString()
   PAYSTACK_PUBLIC_KEY: string;
 
   @IsString()

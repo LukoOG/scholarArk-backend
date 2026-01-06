@@ -22,6 +22,7 @@ export interface Config {
   mongo: { uri: string };
   cors: { origin: string[] | string };
   jwt: { secret: string; issuer: string; audience: string; expiresIn: string };
+  paystack: { url: string, secret_key: string, public_key: string };
   gemini: string;
   google_client_id: string;
   cloudinary: { cloud_name: string, key: string, secret: string };
@@ -59,15 +60,16 @@ export function configuration() {
       audience: env.JWT_AUDIENCE || websiteUrl,
       expiresIn: env.JWT_EXPIRES_IN || '30d',
     },
-	google_client_id: env.GOOGLE_CLIENT_ID,
-	gemini: env.GEMINI_API_KEY,
-	cloudinary: {
-			cloud_name: env.CLOUDINARY_CLOUD_NAME, 
-			key: env.CLOUDINARY_API_KEY, 
-			secret: env.CLOUDINARY_API_SECRET, 
-		},
-	redis: { host: env.REDIS_HOST, port: env.REDIS_PORT, password: env.REDIS_PASSWORD },
-	resend: env.RESEND_API_KEY,
+    paystack: { url: env.PAYSTACK_BASE_URL, secret_key: env.PAYSTACK_SECRET_KEY, public_key: env.PAYSTACK_PUBLIC_KEY },
+    google_client_id: env.GOOGLE_CLIENT_ID,
+    gemini: env.GEMINI_API_KEY,
+    cloudinary: {
+        cloud_name: env.CLOUDINARY_CLOUD_NAME, 
+        key: env.CLOUDINARY_API_KEY, 
+        secret: env.CLOUDINARY_API_SECRET, 
+      },
+    redis: { host: env.REDIS_HOST, port: env.REDIS_PORT, password: env.REDIS_PASSWORD },
+    resend: env.RESEND_API_KEY,
   };
 
   return config;

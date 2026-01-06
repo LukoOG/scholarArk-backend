@@ -14,33 +14,33 @@ export class PaymentController {
     @Req() req: UserPopulatedRequest,
     @Body() dto: PaymentTransactionDto
   ) {
-    return await this.paymentService.initializeTransaction(req.user.id, dto)
+    return await this.paymentService.initializeCoursePayment(req.user.id, dto)
   }
 
-  @Get()
-  @UseGuards(AuthGuard)
-  async getTransactions(
-    @Req() req: UserPopulatedRequest,
-  ) {
-    return await this.paymentService.getTransactions(req.user.id)
-  }
+  // @Get()
+  // @UseGuards(AuthGuard)
+  // async getTransactions(
+  //   @Req() req: UserPopulatedRequest,
+  // ) {
+  //   return await this.paymentService.getTransactions(req.user.id)
+  // }
 
-  @Get(":id")
-  @UseGuards(AuthGuard)
-  async getTransaction(
-    @Req() req: UserPopulatedRequest,
-    @Param("id") id: Identifier
-  ) {
-    return await this.paymentService.getTransaction(req.user.id, id)
-  }
+  // @Get(":id")
+  // @UseGuards(AuthGuard)
+  // async getTransaction(
+  //   @Req() req: UserPopulatedRequest,
+  //   @Param("id") id: Identifier
+  // ) {
+  //   return await this.paymentService.getTransaction(req.user.id, id)
+  // }
 
-  @Get(":id/update")
-  @UseGuards(AuthGuard)
-  async updateTransaction(
-    @Req() req: UserPopulatedRequest,
-    @Param("id") id: Identifier,
-    @Body() dto: PaymentTransactionDto
-  ) {
-    return await this.paymentService.updateTransaction(req.user.id, id, dto)
-  }
+  // @Get(":id/update")
+  // @UseGuards(AuthGuard)
+  // async updateTransaction(
+  //   @Req() req: UserPopulatedRequest,
+  //   @Param("id") id: Identifier,
+  //   @Body() dto: PaymentTransactionDto
+  // ) {
+  //   return await this.paymentService.updateTransaction(req.user.id, id, dto)
+  // }
 }

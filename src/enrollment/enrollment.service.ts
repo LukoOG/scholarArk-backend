@@ -11,12 +11,15 @@ export class EnrollmentService {
 		@InjectModel(Enrollment.name) private enrollmentModel: Model<EnrollmentDocument>
 	){}
 	async enroll(userId: Types.ObjectId, courseId: Types.ObjectId){
-		console.log(userId, courseId)
+		const exists = await this.enrollmentModel.findOne({ user: userId, course: courseId });
+
+		if(exists) return exists;
+
 		return this.enrollmentModel.create({
 			user: userId,
 			course: courseId,
 			status: 'pending',
-			isPaid: false
+			isPaid: true
 		})
 	}
 	
