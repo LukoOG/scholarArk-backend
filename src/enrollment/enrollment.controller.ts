@@ -13,7 +13,7 @@ export class EnrollmentController {
   
   @UseGuards(AuthGuard)
   @Post('manual/:courseId')
-  async enroll(@GetUser('id') userId: Types.ObjectId, @Param('id') courseId: Types.ObjectId){
+  async enroll(@GetUser('id') userId: Types.ObjectId, @Param('courseId') courseId: Types.ObjectId){
 	const response = await this.enrollmentService.enroll(userId, courseId)
 	return ResponseHelper.success(response, HttpStatus.CREATED)
   }

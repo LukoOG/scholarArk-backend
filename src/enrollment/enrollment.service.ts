@@ -11,6 +11,7 @@ export class EnrollmentService {
 		@InjectModel(Enrollment.name) private enrollmentModel: Model<EnrollmentDocument>
 	){}
 	async enroll(userId: Types.ObjectId, courseId: Types.ObjectId){
+		console.log(userId, courseId)
 		return this.enrollmentModel.create({
 			user: userId,
 			course: courseId,
@@ -37,10 +38,10 @@ export class EnrollmentService {
 	async isEnrolled(userId: Types.ObjectId, courseId: Types.ObjectId): Promise<boolean>{
 		const enrollment = await this.enrollmentModel.findOne({
 			user: userId,
-			corse: courseId,
+			course: courseId,
 			status: 'active'
 		})
-
+		.exec();
 		return !!enrollment
 	}
 }

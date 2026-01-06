@@ -20,7 +20,6 @@ export class CourseAccessService {
       .lean();
 
     if (!course) return false;
-    
 
     // Tutor always has access
     if (course.tutor.toString() === userId.toString()) {
@@ -28,7 +27,7 @@ export class CourseAccessService {
     }
 
     // Must be published
-    if (!course.isPublished) return false;
+    //if (!course.isPublished) return false;
 
     // Must be enrolled
     return this.enrollmentService.isEnrolled(userId, courseId);
