@@ -231,7 +231,11 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
   }
 
   async findOne(id: string): Promise<Course> {
-    const course = await this.courseModel.findById(id).exec();
+    const course = await this.courseModel
+	.findById(id)
+	.select('-modules')
+	.exec();
+	
     if (!course) throw new NotFoundException(`Course #${id} not found`);
     return course;
   }
