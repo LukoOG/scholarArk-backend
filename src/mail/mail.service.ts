@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Resend } from 'resend';
 import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config'
+import { WelcomeEmail } from './templates/emails/welcome-email';
 
 @Injectable()
 export class MailService {
@@ -39,13 +40,7 @@ export class MailService {
 			from: "ScholarArk <noreply@scholarark.com>",
 			to: [email],
 			subject: "Welcome to Scholar Ark 🎉",
-			html: `
-			  <h2>Welcome${name ? `, ${name}` : ''}!</h2>
-			  <p>We’re excited to have you on ScholarArk.</p>
-			  <p>You can now explore courses, assessments and reminders.</p>
-			  <br />
-			  <p>🚀 The ScholarArk Team</p>
-			`,
+			react: WelcomeEmail({name})
 		  });  
 	  }catch(error){
 		this.logger.error(`Failed to send email to ${email}`, error?.stack ?? error?.message ?? JSON.stringify(error),)  
