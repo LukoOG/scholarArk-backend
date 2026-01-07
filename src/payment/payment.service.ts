@@ -6,6 +6,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Payment, PaymentCurrency, PaymentDocument, PaymentStatus } from './schemas/payment.schema';
 import { PaystackService } from './paystack/paystack.service';
 import { EnrollmentService } from 'src/enrollment/enrollment.service';
+import { CoursesService } from 'src/courses/services/courses.service';
 
 export type Identifier = string | Types.ObjectId | ObjectId
 
@@ -16,27 +17,31 @@ export class PaymentService {
     constructor(
         @InjectModel(Payment.name) public paymentModel: Model<PaymentDocument>,
         private readonly paystackService: PaystackService,
-        private readonly enrollmentService: EnrollmentService
+        private readonly enrollmentService: EnrollmentService,
+        private readonly courseService: CoursesService
     ) {
     }
 
-    async initializeCoursePayment(userId: Identifier, dto: PaymentTransactionDto) {
+    async initializeCoursePayment(userId: Identifier, email: string, dto: PaymentTransactionDto) {
         const reference = `SK_${Date.now()}_${userId}`;
 
-        const { courseId, email, amount } = dto
+        const { courseId, currency } = dto
+
+        //fetch amount from course
+        const amount = await this.courseService.getCoursePrice(courseId, currency)
 
         await this.paymentModel.create({
             user: userId,
             course: courseId,
             amount,
-            currency: PaymentCurrency.NAIRA,
+            currency: currency,
             reference,
             status: PaymentStatus.INITIALIZED,
         });
 
         return this.paystackService.initializeTransaction({
             email,
-            amount: amount * 100,
+            amount: amount * 100, //convert to minor units for paystack
             reference,
             metadata: { userId, courseId }
         })
@@ -47,14 +52,20 @@ export class PaymentService {
 
         if (!payment || payment.status === PaymentStatus.SUCCESS) return;
 
-        payment.status = PaymentStatus.SUCCESS;
-        payment.providerPayload = payload;
-        await payment.save();
+        const verification = await this.paystackService.verifyTransaction(reference);
 
-        await this.enrollmentService.enroll(
-            payment.user,
-            payment.course
-        )
+        if(verification.status){
+            payment.status = PaymentStatus.SUCCESS;
+            payment.providerPayload = payload;
+            await payment.save();
+
+            await this.enrollmentService.enroll(
+                payment.user,
+                payment.course
+            )
+        }
+
+        throw new BadRequestException('Transaction failed')
     }
 
     // async getTransactions(userId: Identifier) {

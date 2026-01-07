@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { CourseModule } from './module.schema';
+import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
 
 export type CourseDocument = HydratedDocument<Course>;
 
@@ -56,8 +57,10 @@ export class Course {
   @Prop({ type: String, enum: CourseDifficulty, default: CourseDifficulty.BEGINNER })
   difficulty: CourseDifficulty;
 
-  @Prop({ default: 0 })
-  price: number;
+  // @Prop({ default: 0 })
+  // price: number;
+  @Prop({ type: Map, of: Number, required: true })
+  prices: Map<PaymentCurrency, number>
 
   @Prop({ default: 0 })
   studentsEnrolled: number;

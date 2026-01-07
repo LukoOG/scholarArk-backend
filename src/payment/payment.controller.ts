@@ -1,7 +1,9 @@
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { Identifier, PaymentService } from './payment.service';
-import { PaymentTransactionDto } from './dto/payment.transaction.dto';
+import { PaymentTransactionDto, PaymentInitializationResponseDto } from './dto/payment.transaction.dto';
 import { AuthGuard, UserPopulatedRequest } from 'src/auth/guards/auth.guard';
+import { GetUser } from 'src/common/decorators';
 
 @Controller('payment')
 export class PaymentController {
@@ -9,12 +11,39 @@ export class PaymentController {
 
 
   @Post()
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Initialize course payment',
+    description: `
+  Initializes a Paystack payment transaction for a course.
+  Returns a payment authorization URL for the user to complete payment.
+  `,
+  })
+  @ApiBody({ type: PaymentTransactionDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Payment initialized successfully',
+    type: PaymentInitializationResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid course or payment data',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'User already enrolled in course',
+  })
   @UseGuards(AuthGuard)
   async initializeTransaction(
     @Req() req: UserPopulatedRequest,
+    @GetUser('email') email: string,
     @Body() dto: PaymentTransactionDto
   ) {
-    return await this.paymentService.initializeCoursePayment(req.user.id, dto)
+    return await this.paymentService.initializeCoursePayment(req.user.id, email, dto)
   }
 
   // @Get()

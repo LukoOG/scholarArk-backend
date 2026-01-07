@@ -9,8 +9,9 @@ import { AuthService } from '../auth.service';
 import { Request } from 'express';
 import { isValidObjectId, Types } from 'mongoose';
 import { UserNotFoundException } from '../../user/exceptions';
+import { UserRole } from 'src/common/enums';
 
-export type UserPopulatedRequest = Request & { user: { id: Types.ObjectId, role: string } };
+export type UserPopulatedRequest = Request & { user: { id: Types.ObjectId, role: UserRole, email: string } };
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -25,9 +26,9 @@ export class AuthGuard implements CanActivate {
 
     if (!token) throw new BadRequestException('Authorization token missing!');
 
-	const { id, role } = await this.authService.validateUserFromToken(token)
+	const { id, role, email } = await this.authService.validateUserFromToken(token)
 
-    request['user'] = { id: id, role: role };
+    request['user'] = { id: id, role: role, email: email };
 
     return true;
   }

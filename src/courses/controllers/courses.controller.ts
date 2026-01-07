@@ -4,6 +4,7 @@ import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
 import { CourseQueryDto } from '../dto/course-filter.dto';
+import { CourseFullContentResponseDto } from '../dto/course-full-content.dto';
 
 import { ResponseHelper } from '../../common/helpers/api-response.helper';
 import { Types } from 'mongoose';
@@ -136,6 +137,38 @@ export class CoursesController {
   }
   
   @Get(':courseId/content')
+	@ApiBearerAuth()
+	@ApiOperation({
+	summary: 'Get full course content',
+	description: `
+	Returns the full course structure including modules and lessons.
+	Only accessible to:
+	- Enrolled students
+	- Course tutor
+	`,
+	})
+	@ApiParam({
+	name: 'courseId',
+	description: 'MongoDB ObjectId of the course',
+	example: '695bbc7f050dceb9e3202e22',
+	})
+	@ApiResponse({
+	status: 200,
+	description: 'Full course content',
+	type: CourseFullContentResponseDto,
+	})
+	@ApiResponse({
+	status: 401,
+	description: 'Unauthorized',
+	})
+	@ApiResponse({
+	status: 403,
+	description: 'User is not enrolled in this course',
+	})
+	@ApiResponse({
+	status: 404,
+	description: 'Course not found',
+	})
   @UseGuards(AuthGuard, CourseAccessGuard)
   async getCourseContent(@Param('courseId') courseId: Types.ObjectId){
 	const content = await this.coursesService.getFullContent(courseId)

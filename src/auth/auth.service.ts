@@ -38,7 +38,7 @@ export class AuthService {
 	private readonly mailService: MailService,
   ) {}
 
-  async validateUserFromToken(token: string): Promise<{ id: Types.ObjectId, role: UserRole }> {
+  async validateUserFromToken(token: string): Promise<{ id: Types.ObjectId, role: UserRole, email: string }> {
 	try{
 		const payload = await this.jwtService.verifyAsync(token);
 		if (!isValidObjectId(payload.sub) || payload.typ !== 'user') {
@@ -56,6 +56,7 @@ export class AuthService {
 		return {
 			id: user._id,
 			role: user.role,
+			email: user.email.value,
 		}
 	}catch(error){
 		if(error instanceof TokenExpiredError || error?.name === 'TokenExpiredError'){

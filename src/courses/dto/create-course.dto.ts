@@ -1,8 +1,9 @@
-import { IsArray, IsEnum, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CourseCategory, CourseDifficulty } from '../schemas/course.schema';
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
 
 export class CreateLessonDto {
   @ApiProperty({
@@ -70,6 +71,16 @@ export class CreateModuleDto {
   lessons: CreateLessonDto[];
 }
 
+class PriceDto{
+  @IsNotEmpty()
+  @IsString()
+  currency: PaymentCurrency
+
+  @IsNotEmpty()
+  @IsNumber()
+  amount: number
+}
+
 export class CreateCourseDto {
   @ApiProperty({
     description: 'Course title',
@@ -104,10 +115,12 @@ export class CreateCourseDto {
 
   @ApiProperty({
     description: 'Course price',
-    example: 15000,
+    example: {"USD":4000},
   })
-  @IsNumber()
-  price: number;
+  @IsObject()
+  @ValidateNested({each:true})
+  @Type(()=>PriceDto)
+  prices: number;
 
   @ApiProperty({
     description: 'Modules included in the course',

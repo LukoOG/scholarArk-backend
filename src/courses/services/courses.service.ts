@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
 import { Model, Types, FilterQuery, Connection, ClientSession } from 'mongoose';
 import { Course, CourseDocument, CourseListItem } from '../schemas/course.schema';
@@ -17,7 +17,7 @@ import { PaginationDto } from '../../common/dto/pagination.dto';
 import { CourseQueryDto } from '../dto/course-filter.dto';
 import { PaginatedResponse } from '../../common/interfaces';
 import { CourseFullContent } from '../types/course-full-content.type';
-import { clearGlobalAppDefaultCred } from 'firebase-admin/lib/app/credential-factory';
+import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
 
 
 @Injectable()
@@ -44,7 +44,7 @@ export class CoursesService {
 					description: dto.description,
 					category: dto.category,
 					difficulty: dto.difficulty,
-					price: dto.price,
+					prices: dto.prices,
 					isPublished: false,
 				}
 			],
@@ -259,5 +259,19 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 	.lean()
 
 	return !!isTutor
+  }
+
+  async getCoursePrice(courseId: Types.ObjectId, currency: PaymentCurrency): Promise<number>{
+	const course = await this.courseModel.findById(courseId).select('prices isPublished').lean().exec();
+
+	if(!course) throw new NotFoundException("Course not found");
+
+	if(!course.isPublished) throw new BadRequestException("Course is not available for purchase");
+
+	const amount = course.prices?.[currency];
+
+	if (!amount) throw new BadRequestException(`Course is not available to purchase in ${currency}`);
+
+	return amount
   }
 }

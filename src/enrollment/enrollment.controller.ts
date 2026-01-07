@@ -11,6 +11,7 @@ import { ResponseHelper } from '../common/helpers/api-response.helper';
 export class EnrollmentController {
   constructor(private readonly enrollmentService: EnrollmentService) {}
   
+  //not to be exposed
   @UseGuards(AuthGuard)
   @Post('manual/:courseId')
   async enroll(@GetUser('id') userId: Types.ObjectId, @Param('courseId') courseId: Types.ObjectId){
