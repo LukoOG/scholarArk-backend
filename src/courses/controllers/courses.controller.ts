@@ -13,9 +13,11 @@ import { CreateCourseDto } from '../dto/create-course.dto';
 import { UpdateCourseDto } from '../dto/update-course.dto';
 import { Course } from '../schemas/course.schema';
 
-import { GetUser } from '../../common/decorators'
+import { GetUser, Roles } from '../../common/decorators'
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { CourseAccessGuard } from '../guards/course.guard';
+import { RolesGuard } from 'src/common/guards';
+import { UserRole } from 'src/common/enums';
 
 @ApiTags('Courses') 
 @ApiBearerAuth('access-token')
@@ -24,7 +26,8 @@ export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
   @Post()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: 'Create a new course' })
   @ApiBearerAuth()
   @ApiResponse({ status: 201, description: 'Course created successfully', type: Course })

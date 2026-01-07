@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { Identifier, PaymentService } from './payment.service';
 import { PaymentTransactionDto, PaymentInitializationResponseDto } from './dto/payment.transaction.dto';
 import { AuthGuard, UserPopulatedRequest } from 'src/auth/guards/auth.guard';
 import { GetUser } from 'src/common/decorators';
+import { ResponseHelper } from 'src/common/helpers/api-response.helper';
 
 @Controller('payment')
 export class PaymentController {
@@ -43,7 +44,8 @@ export class PaymentController {
     @GetUser('email') email: string,
     @Body() dto: PaymentTransactionDto
   ) {
-    return await this.paymentService.initializeCoursePayment(req.user.id, email, dto)
+    const response = await this.paymentService.initializeCoursePayment(req.user.id, email, dto)
+    return ResponseHelper.success(response, HttpStatus.OK)
   }
 
   // @Get()

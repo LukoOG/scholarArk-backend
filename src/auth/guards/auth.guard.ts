@@ -7,8 +7,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { Request } from 'express';
-import { isValidObjectId, Types } from 'mongoose';
-import { UserNotFoundException } from '../../user/exceptions';
+import { Types } from 'mongoose';
 import { UserRole } from 'src/common/enums';
 
 export type UserPopulatedRequest = Request & { user: { id: Types.ObjectId, role: UserRole, email: string } };

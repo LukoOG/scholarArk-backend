@@ -117,10 +117,10 @@ export class CreateCourseDto {
     description: 'Course price',
     example: {"USD":4000},
   })
-  @IsObject()
+  @IsArray()
   @ValidateNested({each:true})
   @Type(()=>PriceDto)
-  prices: number;
+  prices: PriceDto[];
 
   @ApiProperty({
     description: 'Modules included in the course',

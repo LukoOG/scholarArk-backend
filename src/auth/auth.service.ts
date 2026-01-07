@@ -47,7 +47,7 @@ export class AuthService {
 
 		const user = await this.userModel
 		  .findById(payload.sub)
-		  .select('_id role')
+		  .select('_id role email')
 		  .lean()
 		  .exec();
 

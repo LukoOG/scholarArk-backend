@@ -35,6 +35,9 @@ export class CoursesService {
 	const session: ClientSession = await this.connection.startSession();
 	
 	session.startTransaction();
+
+	const coursePrices = new Map<string, number>();
+	dto.prices.map((price)=>coursePrices.set(price.currency, price.amount))
 	try{
 		const course = await this.courseModel.create(
 			[
@@ -44,7 +47,7 @@ export class CoursesService {
 					description: dto.description,
 					category: dto.category,
 					difficulty: dto.difficulty,
-					prices: dto.prices,
+					prices: coursePrices,
 					isPublished: false,
 				}
 			],
