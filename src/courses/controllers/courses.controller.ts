@@ -132,7 +132,7 @@ Validation checks:
   //public access point
   @Get(':id')
   @ApiOperation({ summary: 'Get a Course by ID' })
-  @ApiParam({ name: 'id', example: '68f17f0f6f0740d2d0bb6be3', description: 'MongoDB ObjectId of the course' })
+  @ApiParam({ name: 'id', example: '695e6f462e8bbe31fdc07411', description: 'MongoDB ObjectId of the course' })
   @ApiResponse({ status: 200, description: 'Returns a specific course', type: Course })
   @ApiResponse({ status: 404, description: 'Course not found' })
   async findOne(@Param('id') id: string) {
@@ -159,9 +159,10 @@ Validation checks:
 	`,
 	})
 	@ApiParam({
-	name: 'id',
+	name: 'courseId',
+	type: 'string',
 	description: 'Course ID',
-	example: '695bbc7f050dceb9e3202e22',
+	example: '695e6f462e8bbe31fdc07411',
 	})
 	@ApiResponse({
 	status: 200,
@@ -211,7 +212,7 @@ Validation checks:
 	@ApiParam({
 	name: 'courseId',
 	description: 'MongoDB ObjectId of the course',
-	example: '695bbc7f050dceb9e3202e22',
+	example: '695e6f462e8bbe31fdc07411',
 	})
 	@ApiResponse({
 	status: 200,

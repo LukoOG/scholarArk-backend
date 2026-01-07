@@ -264,7 +264,7 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 	if (!course) throw new NotFoundException();
 
 	const modules = await this.moduleModel
-		.find({ courseId })
+		.find({ course: courseId })
 		.select('_id title position totalDuration')
 		.sort({ position: 1 })
 		.lean<{
@@ -275,7 +275,10 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 		}[]>()
 		.exec();
 
+	console.log(modules)
+
 	const moduleIds = modules.map(m => m._id);
+	console.log(moduleIds)
 
 	const lessons = await this.lessonModel
 		.find({ moduleId: { $in: moduleIds } })
