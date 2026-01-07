@@ -41,7 +41,16 @@ export class CoursesController {
   @Post(':courseId/publish')
   @UseGuards(AuthGuard, RolesGuard, CourseAccessGuard)
   @Roles(UserRole.TUTOR)
-  @ApiOperation({ summary: "Publish a course to make it available for view and purchase after creation and final edits "})
+  @ApiOperation({ 
+	summary: "Publish a Course",
+	description: `
+Publishes a course and makes it publicly visible and purchasable.
+
+Validation checks:
+- Course has at least one module
+- Course has at least one lesson
+- Course has valid pricing
+`,})
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Course published successfully' })
   async publishCourse(@Param('courseId') courseId: Types.ObjectId, @GetUser('id') tutorId: Types.ObjectId){
