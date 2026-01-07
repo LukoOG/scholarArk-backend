@@ -4,41 +4,40 @@ import { Types } from "mongoose"
 import { PaymentCurrency } from "../schemas/payment.schema";
 
 export class PaymentTransactionDto {
-@ApiProperty({
-    description: 'Course ID user wants to pay for',
+  @ApiProperty({
+    description: 'Course ID the user wants to pay for',
     example: '695bbc7f050dceb9e3202e22',
   })
   @IsMongoId()
-  @IsNotEmpty()
   courseId: Types.ObjectId;
 
   @ApiProperty({
-    enum: ['NGN', 'USD'],
-    example: 'NGN',
+    description: 'Currency to pay with',
+    enum: PaymentCurrency,
+    example: PaymentCurrency.NAIRA,
   })
   @IsEnum(PaymentCurrency)
-  @IsNotEmpty()
   currency: PaymentCurrency;
 }
 
+
 export class PaymentInitializationResponseDto {
   @ApiProperty({
-    example: 'https://checkout.paystack.com/abc123',
+    example: 'https://checkout.paystack.com/aly8g7j4cjngc72',
+    description: 'Paystack authorization URL',
   })
   authorizationUrl: string;
 
   @ApiProperty({
-    example: 'psk_695c9b2e...',
+    example: 'SK_1767796665370_695b897dcc20e8a0c87c70ed',
+    description: 'Unique payment reference',
   })
   reference: string;
 
   @ApiProperty({
-    enum: ['NGN', 'USD'],
+    example: 'aly8g7j4cjngc72',
+    description: 'Access code to proceed payment',
   })
-  currency: string;
-
-  @ApiProperty({
-    example: 15000,
-  })
-  amount: number;
+  access_code: string;
 }
+

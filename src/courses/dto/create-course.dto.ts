@@ -72,10 +72,19 @@ export class CreateModuleDto {
 }
 
 class PriceDto{
+  @ApiProperty({
+    example: PaymentCurrency.NAIRA,
+    enum: PaymentCurrency,
+    description: "Regional Currency Code"
+  })
   @IsNotEmpty()
   @IsString()
   currency: PaymentCurrency
 
+  @ApiProperty({
+    example: 15000,
+    description: "Price amount in major unit of specified currency"
+  })
   @IsNotEmpty()
   @IsNumber()
   amount: number
@@ -114,8 +123,12 @@ export class CreateCourseDto {
   difficulty?: CourseDifficulty;
 
   @ApiProperty({
-    description: 'Course price',
-    example: {"USD":4000},
+    description: 'List of Course Prices in Supported Currencies',
+    type: [PriceDto],
+    example: [
+      { currency: 'NGN', amount: 15000 },
+      { currency: 'USD', amount: 40 },
+    ],
   })
   @IsArray()
   @ValidateNested({each:true})

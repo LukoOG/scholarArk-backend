@@ -21,6 +21,7 @@ export class PaystackWebhookController {
     }
 
     const event = req.body as any;
+    console.log("Webhook handling for", event)
 
     if(event.event === 'charge.success') {
       await this.paymentService.handleSuccessfulPayment(
