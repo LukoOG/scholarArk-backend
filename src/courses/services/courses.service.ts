@@ -275,13 +275,11 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 		}[]>()
 		.exec();
 
-	console.log(modules)
-
 	const moduleIds = modules.map(m => m._id);
 	console.log(moduleIds)
 
 	const lessons = await this.lessonModel
-		.find({ moduleId: { $in: moduleIds } })
+		.find({ module: { $in: moduleIds } })
 		.select('_id title position module duration isPreview')
 		.sort({ position: 1 })
 		.lean<{

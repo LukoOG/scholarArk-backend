@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
 
 export enum LessonType {
   VIDEO = 'video',
@@ -9,10 +9,10 @@ export enum LessonType {
 
 @Schema({ timestamps: true })
 export class Lesson {
-  @Prop({ type: Types.ObjectId, ref: 'Course', required: true, index: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true, index: true })
   course: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'CourseModule', required: true, index: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'CourseModule', required: true, index: true })
   module: Types.ObjectId;
 
   @Prop({ required: true })

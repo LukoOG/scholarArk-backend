@@ -4,7 +4,7 @@ import { Lesson } from './lesson.schema';
 
 @Schema({ timestamps: true })
 export class CourseModule {
-  @Prop({ type: Types.ObjectId, ref: 'Course', required: true, index: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true, index: true })
   course: Types.ObjectId;
 
   @Prop({ required: true })
