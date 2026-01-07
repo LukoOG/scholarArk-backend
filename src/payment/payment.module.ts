@@ -11,7 +11,8 @@ import { HttpModule } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config';
 import { EnrollmentModule } from 'src/enrollment/enrollment.module';
-import { CourseModule } from 'src/courses/schemas/module.schema';
+import { CoursesModule } from 'src/courses/courses.module';
+
 
 @Module({
   imports: [
@@ -41,7 +42,7 @@ import { CourseModule } from 'src/courses/schemas/module.schema';
     ),
     AuthModule,
     EnrollmentModule,
-    CourseModule
+    CoursesModule,
   ],
   controllers: [PaymentController],
   providers: [PaymentService, PaystackService],

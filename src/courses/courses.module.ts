@@ -27,5 +27,6 @@ import { EnrollmentModule } from 'src/enrollment/enrollment.module';
   ],
   controllers: [CoursesController],
   providers: [CoursesService, CourseAccessService, CourseAccessGuard],
+  exports: [CoursesService]
 })
 export class CoursesModule {}
