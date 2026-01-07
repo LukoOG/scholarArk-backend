@@ -18,6 +18,7 @@ import { AuthGuard } from '../../auth/guards/auth.guard';
 import { CourseAccessGuard } from '../guards/course.guard';
 import { RolesGuard } from 'src/common/guards';
 import { UserRole } from 'src/common/enums';
+import { CourseOutlineDto } from '../dto/course-outline.dto';
 
 @ApiTags('Courses') 
 @ApiBearerAuth('access-token')
@@ -128,6 +129,43 @@ export class CoursesController {
   async findOne(@Param('id') id: string) {
     const result = await this.coursesService.findOne(id);
 	return ResponseHelper.success(result)
+  }
+
+  @Get(':courseId/outline')
+	@ApiOperation({
+	summary: 'Get course outline',
+	description: `
+	Returns the public outline of a published course.
+
+	Includes:
+	- Modules
+	- Lesson titles
+	- Durations
+	- Preview flags
+
+	Does NOT include:
+	- Lesson content
+	- Video URLs
+	- Full learning material
+	`,
+	})
+	@ApiParam({
+	name: 'id',
+	description: 'Course ID',
+	example: '695bbc7f050dceb9e3202e22',
+	})
+	@ApiResponse({
+	status: 200,
+	description: 'Course outline retrieved successfully',
+	type: CourseOutlineDto,
+	})
+	@ApiResponse({
+	status: 404,
+	description: 'Course not found or not published',
+	})
+  async getCourseOutline(@Param('courseId') courseId: Types.ObjectId){
+	const response = await this.coursesService.getOutline(courseId)
+	return ResponseHelper.success(response)
   }
 
   @Patch(':id')

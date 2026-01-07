@@ -18,6 +18,7 @@ import { CourseQueryDto } from '../dto/course-filter.dto';
 import { PaginatedResponse } from '../../common/interfaces';
 import { CourseFullContent } from '../types/course-full-content.type';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
+import { CourseOutlineDto } from '../dto/course-outline.dto';
 
 
 @Injectable()
@@ -250,6 +251,53 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 		throw new NotFoundException('Course not found');
 	}
 	return course;
+  }
+
+  async getOutline(courseId: Types.ObjectId): Promise<CourseOutlineDto> {
+	const course = await this.courseModel.findOne({
+		_id: courseId,
+		isPublished: true,
+	})
+	.select('title description totalDuration')
+	.lean<{ title: string; description: string; totalDuration: number }>();
+
+	if (!course) throw new NotFoundException();
+
+	const modules = await this.moduleModel
+		.find({ courseId })
+		.select('_id title position totalDuration')
+		.sort({ position: 1 })
+		.lean<{
+			_id: Types.ObjectId;
+			title: string;
+			position: number;
+			totalDuration: number;
+		}[]>()
+		.exec();
+
+	const moduleIds = modules.map(m => m._id);
+
+	const lessons = await this.lessonModel
+		.find({ moduleId: { $in: moduleIds } })
+		.select('_id title position module duration isPreview')
+		.sort({ position: 1 })
+		.lean<{
+			_id: Types.ObjectId;
+			module: Types.ObjectId;
+			title: string;
+			position: number;
+			duration: number;
+			isPreview: boolean;
+		}[]>()
+		.exec();
+
+	return {
+		...course,
+		modules: modules.map(m => ({
+		...m,
+		lessons: lessons.filter(l => l.module.equals(m._id)),
+		})),
+	};
   }
 
   async findOne(id: string): Promise<Course> {
