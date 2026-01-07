@@ -58,7 +58,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
       //   console.error('Error:', exception);
       // }
     //}
-    if (isServerError || isDev) {
+    //if (isServerError || isDev) {
       console.error('🚨 API ERROR');
       console.error('Status:', status);
       console.error('Request:', safeRequestLog);
@@ -67,7 +67,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
       if (exception instanceof Error) {
         console.error('Stack:', exception.stack);
       }
-    }
+    //}
 
     response.status(status).json(
       ResponseHelper.error(
