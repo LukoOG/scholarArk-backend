@@ -37,6 +37,17 @@ export class CoursesController {
 	return ResponseHelper.success({"message":"Course created successfully"})
   }
 
+  @Post(':courseId/publish')
+  @UseGuards(AuthGuard, RolesGuard, CourseAccessGuard)
+  @Roles(UserRole.TUTOR)
+  @ApiOperation({ summary: "Publish a course to make it available for view and purchase after creation and final edits "})
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Course published successfully' })
+  async publishCourse(@Param('courseId') courseId: Types.ObjectId, @GetUser('id') tutorId: Types.ObjectId){
+	const response = await this.coursesService.publishCourse(courseId, tutorId)
+	return ResponseHelper.success(response, HttpStatus.OK)
+  }
+
   @Get()
   @ApiOperation({
 	  summary: 'Get all courses',
@@ -110,7 +121,7 @@ export class CoursesController {
 
   //public access point
   @Get(':id')
-  @ApiOperation({ summary: 'Get a course by ID' })
+  @ApiOperation({ summary: 'Get a Course by ID' })
   @ApiParam({ name: 'id', example: '68f17f0f6f0740d2d0bb6be3', description: 'MongoDB ObjectId of the course' })
   @ApiResponse({ status: 200, description: 'Returns a specific course', type: Course })
   @ApiResponse({ status: 404, description: 'Course not found' })
@@ -181,7 +192,7 @@ export class CoursesController {
 
   //learning
   /**
-GET /courses/:courseId/content
+GET /courses/:courseId/content - done
 GET /courses/:courseId/modules
 GET /courses/:courseId/modules/:moduleId/lessons
 GET /lessons/:lessonId

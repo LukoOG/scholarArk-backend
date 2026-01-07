@@ -17,6 +17,7 @@ export class CourseAccessGuard implements CanActivate {
 
 		return this.courseAccessService.canAccessCourse(
 			user.id,
+			user.role,
 			courseId
 		)
 	}

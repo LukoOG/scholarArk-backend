@@ -31,6 +31,25 @@ export class CoursesService {
 	private readonly cloudinaryService: CloudinaryService,
   ) {}
 
+  private async validatePublishable(course: Course):Promise<void> {
+	if(!course.title || !course.description) throw new BadRequestException("Course must contain basic details")
+
+	if(course.modules.length === 0) throw new BadRequestException("Course must contain at least 1 module");
+
+	if(course.prices.keys.length === 0) throw new BadRequestException("Course must have at least one price");
+
+	const moduleIds = course.modules.map((id) => id)
+
+	const totalLessons = await this.lessonModel.find({
+		module: { $in: { moduleIds } }
+	})
+	.select('title')
+	.lean()
+	.exec();
+
+	if(totalLessons.length === 0) throw new BadRequestException("Course must contain at least 1 lesson")
+  }
+
   async create(dto: CreateCourseDto, tutorId:Types.ObjectId): Promise<{ courseId: Types.ObjectId }>{
 	const session: ClientSession = await this.connection.startSession();
 	
@@ -252,6 +271,27 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
   async remove(id: string): Promise<void> {
     const result = await this.courseModel.findByIdAndDelete(id).exec();
     if (!result) throw new NotFoundException(`Course #${id} not found`);
+  }
+
+  async publishCourse(courseId: Types.ObjectId, tutorId: Types.ObjectId) {
+	const course = await this.courseModel.findOne({
+		_id: courseId,
+		tutor: tutorId
+	})
+	.exec();
+
+	if (!course) throw new NotFoundException("Course not found");
+
+	if(course.isPublished) throw new BadRequestException("Course is already published");
+
+	await this.validatePublishable(course)
+
+	course.isPublished = true;
+	course.publishedAt = new Date();
+
+	await course.save()
+
+	return {"message":"Course published successfully"}
   }
 
   //

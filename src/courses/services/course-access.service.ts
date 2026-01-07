@@ -13,7 +13,7 @@ export class CourseAccessService {
     private readonly enrollmentService: EnrollmentService,
   ) {}
 
-  async canAccessCourse(userId: Types.ObjectId, courseId: Types.ObjectId) {
+  async canAccessCourse(userId: Types.ObjectId, role: string, courseId: Types.ObjectId) {
     const course = await this.courseModel
       .findById(courseId)
       .select('tutor isPublished')
@@ -21,13 +21,15 @@ export class CourseAccessService {
 
     if (!course) return false;
 
-    // Tutor always has access
-    if (course.tutor.toString() === userId.toString()) {
+    // Tutor owner always has access
+    if (role === "tutor" && course.tutor.toString() === userId.toString()) {
       return true;
+    } else if(role === "tutor" && course.tutor.toString() !== userId.toString()){
+      return false
     }
 
     // Must be published
-    //if (!course.isPublished) return false;
+    if (!course.isPublished) return false;
 
     // Must be enrolled
     return this.enrollmentService.isEnrolled(userId, courseId);

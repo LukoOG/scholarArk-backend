@@ -129,7 +129,9 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<{ user: Omit<User, 'password'>, accessToken: string, refreshToken: string }>{
 	const { email, password: plainPassword } = loginDto;
 	
-	const user = await this.userModel.findOne({ 'email.value': email }).exec();
+	const user = await this.userModel.findOne({ 'email.value': email })
+	.select('-refresh_token -unreadNotifications -nonce -wallet -authProviders -googleId -onboardingStatus')
+	.exec();
 	
 	if(!user) throw new UnauthorizedException('Invalid credentials');
 	

@@ -17,7 +17,14 @@ export class PaymentController {
     summary: 'Initialize course payment',
     description: `
   Initializes a Paystack payment transaction for a course.
-  Returns a payment authorization URL for the user to complete payment.
+
+  The backend:
+  - Fetches course price securely
+  - Creates a payment record
+  - Returns a Paystack authorization URL
+
+  The frontend:
+  - Redirects the user to the authorizationUrl
   `,
   })
   @ApiBody({ type: PaymentTransactionDto })
@@ -26,18 +33,9 @@ export class PaymentController {
     description: 'Payment initialized successfully',
     type: PaymentInitializationResponseDto,
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid course or payment data',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'User already enrolled in course',
-  })
+  @ApiResponse({ status: 400, description: 'Invalid course or currency' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 409, description: 'User already enrolled in course' })
   @UseGuards(AuthGuard)
   async initializeTransaction(
     @Req() req: UserPopulatedRequest,
