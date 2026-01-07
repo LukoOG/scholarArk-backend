@@ -59,15 +59,16 @@ export class UserService {
 		profile_pic: profilePicUrl
 	  };
 
-	  if (goalIds) updatePayload.goals = goalIds.map(id => new Types.ObjectId(id));
-	  if (topicIds) updatePayload.topics = topicIds.map(id => new Types.ObjectId(id));
-	  if (preferenceIds) updatePayload.preferences = preferenceIds.map(id => new Types.ObjectId(id));
+	  if (goalIds) updatePayload.goalsIds = goalIds.map(id => new Types.ObjectId(id));
+	  if (topicIds) updatePayload.topicsIds = topicIds.map(id => new Types.ObjectId(id));
+	  if (preferenceIds) updatePayload.preferencesIds = preferenceIds.map(id => new Types.ObjectId(id));
 
 	  // Set completion flags
 	  if (Object.keys(profileData).length > 0) updatePayload.isProfileComplete = true;
 	  if (goalIds || topicIds || preferenceIds) updatePayload.isPreferencesComplete = true;
 
 	  // Perform atomic update
+	  console.log(updatePayload)
 	  const updatedUser = await this.userModel.findByIdAndUpdate(
 		id,
 		{ $set: updatePayload },

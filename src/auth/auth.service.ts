@@ -130,7 +130,7 @@ export class AuthService {
 	const { email, password: plainPassword } = loginDto;
 	
 	const user = await this.userModel.findOne({ 'email.value': email })
-	.select('-refresh_token -unreadNotifications -nonce -wallet -authProviders -googleId -onboardingStatus')
+	.select('-unreadNotifications -nonce -wallet -googleId -onboardingStatus')
 	.exec();
 	
 	if(!user) throw new UnauthorizedException('Invalid credentials');
