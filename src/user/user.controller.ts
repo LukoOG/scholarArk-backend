@@ -1,114 +1,146 @@
-/*
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Patch,
-  Post,
-  Query,
-  Req,
-  UploadedFiles,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
-import { SignupDto } from './dto/signup.dto';
+import { Controller, Get, Post, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from '../common/multer/multer.config';
+import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiCreatedResponse, ApiBadRequestResponse, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { UserService } from './user.service';
-import { LoginDto } from './dto/login.dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { ThrottlerGuard } from '@nestjs/throttler';
-import { UserGuard, UserPopulatedRequest } from './user.guard';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { SaveFcmTokenDto } from './dto/save-fcm-token.dto';
+import { ResponseHelper } from '../common/helpers/api-response.helper';
+import { GetUser } from '../common/decorators'
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Types } from 'mongoose';
-import { ObjectId } from 'src/common/decorators';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { GetUsersDto } from './dto/get-users.dto';
-import { VerifyEmailDto } from './dto/verify-email.dto';
 
-@Controller('/user')
-export class UserController {
-  constructor(private readonly userService: UserService) {}
-
-  @Get()
-  getUsers(@Query() query: GetUsersDto) {
-    return this.userService.getUsers(query);
-  }
-
-  @UseGuards(ThrottlerGuard)
-  @Post('/signup')
-  signup(@Body() body: SignupDto) {
-    return this.userService.signup(body);
-  }
-
-  @UseGuards(ThrottlerGuard)
-  @HttpCode(HttpStatus.OK)
-  @Post('/login')
-  login(@Body() body: LoginDto) {
-    return this.userService.login(body);
-  }
-
-  @UseGuards(UserGuard)
-  @Get('/me')
-  getUserProfile(@Req() req: UserPopulatedRequest) {
-    return this.userService.getUserProfile(req.user.id);
-  }
-
-  @UseGuards(UserGuard)
-  @Patch('/me')
-  updateUser(@Req() req: UserPopulatedRequest, @Body() body: UpdateUserDto) {
-    return this.userService.updateUser(req.user.id, body);
-  }
-
-  @UseGuards(ThrottlerGuard)
-  @Get('/verify-email')
-  verifyEmail(@Query() query: VerifyEmailDto) {
-    return this.userService.verifyEmail(query);
-  }
-
-  @UseInterceptors(FilesInterceptor('files'))
-  @UseGuards(UserGuard, ThrottlerGuard)
-  @Post('/upload')
-  upload(
-    @Req() req: UserPopulatedRequest,
-    @UploadedFiles() files: Express.Multer.File[],
-  ) {
-    return this.userService.upload(req.user.id, files);
-  }
-}
-*/
-
-import { Controller, Get, Post, Body, Param, Delete, Patch, Query } from '@nestjs/common';
-import { UserService } from './user.service';
-import { SignupDto } from './dto/signup.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-
+@ApiTags('Users')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() signupDto: SignupDto) {
-    return this.userService.create(signupDto);
-  }
-
   @Get()
-  findAll(@Query('role') role?: 'student' | 'tutor') {
-    return this.userService.findAll(role);
+  async findAll(@Query('role') role?: 'student' | 'tutor') {
+    const response = await this.userService.findAll(role);
+	return ResponseHelper.success(response)	
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  async findOne(@Param('id') id: string) {
+   const response = await this.userService.findOne(id);
+	return ResponseHelper.success(response)   
   }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  
+  @UseGuards(AuthGuard)
+  @Get('me')
+  async findOneMe(@GetUser('id') id: string) {
+   const response = await this.userService.findOne(id);
+	return ResponseHelper.success(response)   
   }
+  
+  @UseGuards(AuthGuard)
+  @Patch('me')
+  @UseInterceptors(FileInterceptor('profile_pic', multerConfig))
+  @ApiBearerAuth()
+  @ApiOperation({
+	  summary: 'Complete user registration or update user profile',
+	  description: `
+	This endpoint is used for **two purposes**:
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(id);
+	1. **Complete Registration Flow**  
+	   After registering or signing in with Google, users must finish onboarding by supplying preferences, topics, goals, etc.
+
+	2. **Regular Profile Update**  
+	   Allows an authenticated user to edit their profile information.
+
+	📌 **Mobile Developers:**  
+	You MUST pass the access token in the request header:  
+	\`Authorization: Bearer <access_token>\`
+	  `,
+	})
+  @ApiBody({
+    type: UpdateUserDto,
+    description: 'Fields required to complete user profile',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile completed successfully',
+    schema: {
+      example: {
+        data: {
+          user: {
+            _id: '6730b2cfb8c2a12b4e9b25cd',
+            username: 'emmanuel',
+            email: { value: 'emma@test.com', verified: true },
+            role: 'STUDENT',
+            preferences: [],
+            goals: ['master backend engineering'],
+          topics: ['nestjs', 'mongodb'],
+          },
+        },
+      },
+    },
+  })
+  async updateMe(@GetUser('id') id: Types.ObjectId, @Body() updateUserDto: UpdateUserDto, @UploadedFile() file?: Express.Multer.File) {
+    const response = await this.userService.update(id, updateUserDto, file);
+	return ResponseHelper.success(response)	
+  }
+  
+  @UseGuards(AuthGuard)
+  @Patch('me/fcm-token')
+  @ApiBearerAuth()
+  @ApiOperation({ description: "save fcm token for user (per device)" })
+  async saveToken(@GetUser('id') id: Types.ObjectId, @Body() dto: SaveFcmTokenDto){
+	  await this.userService.saveFcmToken(id, dto)
+	  return ResponseHelper.success({ message: "Token saved!" })
+	}
+  
+  @UseGuards(AuthGuard)
+  @Delete('me')
+  @ApiBearerAuth()
+  @ApiOperation({
+	  summary: 'Delete current user account',
+	  description:
+		'Deletes the authenticated user account. Requires a valid access token in the Authorization header.',
+	})
+	@ApiResponse({
+	  status: 200,
+	  description: 'User account successfully deleted',
+	  schema: {
+		example: {
+		  data: {
+			message: 'User deleted',
+		  },
+		  statusCode: 200,
+		  error: null,
+		},
+	  },
+	})
+	@ApiResponse({
+	  status: 401,
+	  description: 'Unauthorized – invalid or missing access token',
+	  schema: {
+		example: {
+		  data: null,
+		  statusCode: 401,
+		  error: {
+			message: 'Invalid token',
+		  },
+		},
+	  },
+	})
+	@ApiResponse({
+	  status: 404,
+	  description: 'User not found',
+	  schema: {
+		example: {
+		  data: null,
+		  statusCode: 404,
+		  error: {
+			message: 'User not found',
+		  },
+		},
+	  },
+	})
+  async removeMe(@GetUser('id') id: Types.ObjectId) {
+    const response = await this.userService.delete(id);
+	return ResponseHelper.success({ message :"User deleted" }, HttpStatus.OK)
   }
 }

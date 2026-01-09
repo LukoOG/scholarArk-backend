@@ -1,40 +1,71 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { CacheModule } from '@nestjs/cache-manager';
+import { ScheduleModule } from '@nestjs/schedule';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import Keyv from 'keyv';
+import { createKeyv } from '@keyv/redis';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Config, configuration, validateEnv } from './config';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AdminModule } from './admin/admin.module';
 import { CoursesModule } from './courses/courses.module';
 import { AssessmentsModule } from './assessments/assessments.module';
+import { PaymentModule } from './payment/payment.module';
+import { GoalsModule } from './goals/goals.module';
+import { TopicsModule } from './topics/topics.module';
+import { PreferencesModule } from './preferences/preferences.module';
+import { MailModule } from './mail/mail.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { MetaModule } from './meta/meta.module';
+import { EnrollmentModule } from './enrollment/enrollment.module';
 
 @Module({
   imports: [
+	CacheModule.registerAsync({
+		isGlobal: true,
+    inject: [ConfigService],
+    useFactory: async (configService: ConfigService<Config, true>) => {
+      let redisConfig = configService.get('redis', { infer: true });
+      const redisUrl = `redis://default:${redisConfig.password}@${redisConfig.host}:${redisConfig.port}`;
+
+      const keyv = createKeyv(redisUrl, { namespace:"scholarark" });
+
+      keyv.on('error', (err)=>console.error("Redis connection error: ", err))
+
+      return {
+       stores: [keyv],
+       ttl: 45 * 1000
+      }
+
+    }
+	
+}),
     EventEmitterModule.forRoot({
-      wildcard: true,
-      delimiter: ':',
-      verboseMemoryLeak: true,
+      wildcard: false,
+      verboseMemoryLeak: false,
     }),
     ThrottlerModule.forRoot({
       throttlers: [
         { name: 'l0', limit: 4, ttl: 60 * 1_000 },
-        { name: 'l1', limit: 10, ttl: 10 * 60 * 1_000 },
-        { name: 'l2', limit: 20, ttl: 60 * 60 * 1_000 },
       ],
     }),
-    MongooseModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory(configService: ConfigService<Config, true>) {
-        const mongoConfig = configService.get('mongo', { infer: true });
-        return { uri: mongoConfig.uri };
-      },
-    }),
+	MongooseModule.forRootAsync({
+		inject: [ConfigService],
+		useFactory(configService: ConfigService<Config, true>){
+			const mongoConfig = configService.get('mongo', { infer: true });
+			return { uri: mongoConfig.uri }
+		}
+	}),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory(configService: ConfigService<Config, true>) {
@@ -63,13 +94,33 @@ import { AssessmentsModule } from './assessments/assessments.module';
       isGlobal: true,
       cache: true,
     }),
+	ScheduleModule.forRoot(),
     UserModule,
     AdminModule,
     CoursesModule,
     AssessmentsModule,
+    PaymentModule,
+    GoalsModule,
+    TopicsModule,
+    PreferencesModule,
+    AuthModule,
+    MailModule,
+    NotificationsModule,
+    MetaModule,
+    EnrollmentModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+		AppService,
+		{
+			provide: APP_GUARD,
+			useClass: ThrottlerGuard,
+		},
+		{
+			provide: APP_INTERCEPTOR,
+			useClass: CacheInterceptor,
+		}
+	],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

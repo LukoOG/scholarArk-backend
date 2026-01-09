@@ -1,3 +1,5 @@
 export * from './email.decorator';
 export * from './title.decorator';
-export * from './object-id.decorator';
+export * from './get-user.decorator';
+export * from './roles.decorator';
+export * from './api-wrapped-response.decorator';

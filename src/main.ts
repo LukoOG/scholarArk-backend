@@ -3,6 +3,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 
+import { ApiExceptionFilter } from './common/filters/api-exception.filter';
+
 import helmet from 'helmet';
 
 import { AppModule } from './app.module';
@@ -26,16 +28,23 @@ async function bootstrap() {
     }),
   );
   
+  app.useGlobalFilters(new ApiExceptionFilter());
+  
+  console.log("Swagger started...")
   const config = new DocumentBuilder()
     .setTitle('ScholarArk API')
     .setDescription('API documentation for ScholarArk — Courses & Users services')
     .setVersion('1.0')
     .addTag('users')
     .addTag('courses')
+	.addBearerAuth()
     .build();
-
+	
+	//console.log("Swagger config created...")
   const document = SwaggerModule.createDocument(app, config);
+  	//console.log("Swagger document created...")
   SwaggerModule.setup('api/docs', app, document);
+  	//console.log("Swagger mounted...")
   
   app.enableCors({ origin: cors.origin });
 

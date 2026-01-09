@@ -9,7 +9,7 @@ export class Attempt {
   assessment_id: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  user_id: Types.ObjectId;
+  student_id: Types.ObjectId;
 
   @Prop({ type: Date, required: true })
   startedAt: Date;
@@ -20,10 +20,19 @@ export class Attempt {
   @Prop({ type: Array, required: true })
   // snapshot of questions asked (so grading is deterministic)
   questionsSnapshot: any[];
-
-  @Prop({ type: Array, required: true })
-  // user's answers (align with snapshot order)
-  answers: any[];
+  
+  @Prop({
+	  type: [
+		{
+		  questionId: String,
+		  answer: String//Schema.Types.Mixed,
+		},
+	  ],
+	})
+	answers: {
+	  questionId: string;
+	  answer: string;
+	}[];
 
   @Prop({ default: 0 })
   score: number;

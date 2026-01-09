@@ -1,180 +1,34 @@
-/*
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { FilterQuery, Model, Types } from 'mongoose';
-import * as crypto from 'node:crypto';
-
-import { User } from './schemas/user.schema';
-import { UserMethods } from './schemas/methods';
-import { SignupDto } from './dto/signup.dto';
-import { LoginDto } from './dto/login.dto';
-import { GetUsersDto } from './dto/get-users.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { SaveFcmTokenDto } from './dto/save-fcm-token.dto';
+import { GoogleClientService } from '../common/services/google.service';
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
+import { InjectModel } from '@nestjs/mongoose';
+import { ConfigService } from '@nestjs/config';
+import { Config } from '../config'
+import { Model, HydratedDocument, Types } from 'mongoose';
+import { User, UserDocument } from './schemas/user.schema';
+import { UserFcmToken, UserFcmTokenDocument } from './schemas/user-fcm-token.schema';
+import { UserRole } from '../common/enums';
 import {
   UserAlreadyExistsException,
   UserNotFoundException,
 } from './exceptions';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { VerifyEmailDto } from './dto/verify-email.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  private readonly logger: Logger = new Logger(UserService.name);
-
   constructor(
-    @InjectModel(User.name)
-    readonly userModel: Model<User, object, UserMethods, { fullName: string }>,
-    private readonly jwtService: JwtService,
-  ) { }
-
-  // note: write admin module first
-  async getAllUsers() { }
-
-  async getUsers(dto: GetUsersDto) {
-    const { q } = dto;
-
-    const filter: FilterQuery<User> = {};
-
-    if (q) {
-      filter.$or = [
-        { username: { $regex: q, $options: 'i' } },
-        { 'name.first': { $regex: q, $options: 'i' } },
-        { 'name.last': { $regex: q, $options: 'i' } },
-      ];
-    }
-
-    const users = await this.userModel
-      .find(filter)
-      .sort({ createdAt: 1 })
-      .lean()
-      .exec();
-
-    return { message: 'Users fetched.', data: { users } };
-  }
-
-  async signup(dto: SignupDto) {
-    let user = await this.userModel
-      .findOne({
-        $or: [
-          { username: dto.username },
-          { 'email.value': dto['email.value'] },
-        ],
-      })
-      .exec();
-
-    if (user) throw new UserAlreadyExistsException();
-
-    user = await this.userModel.create(dto);
-
-    const token = await this.jwtService.signAsync({
-      sub: user.id,
-      typ: 'user',
-    });
-
-    return { message: 'User signup successful!', data: { user, token } };
-  }
-
-  async login(dto: LoginDto) {
-    const user = await this.userModel
-      .findOne({ 'email.value': dto.email })
-      .exec();
-
-    if (!user || !(await user.verifyHash('password', dto.password)))
-      throw new BadRequestException({ message: 'Invalid credentials!' });
-
-    const token = await this.jwtService.signAsync({
-      sub: user.id,
-      typ: 'user',
-    });
-
-    return { message: 'User login successful!', data: { user, token } };
-  }
-
-  async verifyEmail(dto: VerifyEmailDto) {
-    const { email, otp } = dto;
-
-    const user = await this.userModel.findOne({ 'email.value': email }).exec();
-
-    if (!user) throw new UserNotFoundException();
-
-    if (user.get('email.verified'))
-      throw new BadRequestException({ message: 'Email already verified.' });
-
-    const isValid = await user.verifyNonce(otp);
-
-    if (isValid === 'expired')
-      throw new BadRequestException({ message: 'OTP has expired.' });
-
-    if (!isValid) throw new BadRequestException({ message: 'OTP is invalid' });
-
-    user.set('email.verified', true);
-    await user.save();
-
-    return { message: 'Email verified!' };
-  }
-
-  async getUserProfile(userId: Types.ObjectId) {
-    const user = await this.userModel
-      .findById(userId)
-      .select('-password')
-      .lean()
-      .exec();
-
-    return { message: 'User profile fetched!', data: { user } };
-  }
-
-  async updateUser(userId: Types.ObjectId, dto: UpdateUserDto) {
-    if (
-      dto['username'] &&
-      (await this.userModel.findOne({ username: dto['username'] }).exec())
-    )
-      throw new UserAlreadyExistsException();
-
-    const result = await this.userModel
-      .updateOne({ _id: userId }, { $set: dto })
-      .exec();
-
-    if (result.matchedCount < 1) throw new UserNotFoundException();
-
-    return { message: 'User updated!' };
-  }
-
-  async upload(userId: Types.ObjectId, files: Express.Multer.File[]) {
-    if (files.length === 0)
-      throw new BadRequestException('No files were sent.');
-
-    const urls: string[] = [];
-
-    for (const file of files) {
-      const key = crypto.randomUUID().toString();
-
-    }
-
-    return { message: 'Files Uploaded Successful!', data: { urls } };
-  }
-
-  async deleteProfile(userId: Types.ObjectId, dto) { }
-}
-*/
-
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { User } from './schemas/user.schema';
-import { SignupDto } from './dto/signup.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-
-@Injectable()
-export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
-
-  async create(signupDto: SignupDto): Promise<User> {
-    const createdUser = new this.userModel(signupDto);
-    return createdUser.save();
-  }
+	  @InjectModel(User.name) public userModel: Model<UserDocument>, 
+	  private readonly jwtService: JwtService,
+	  private readonly configService: ConfigService<Config>,
+	  private readonly cloudinaryService: CloudinaryService,
+	  @InjectModel(UserFcmToken.name) private fcmTokenModel: Model<UserFcmTokenDocument>
+	) {}
 
   async findAll(role?: 'student' | 'tutor'): Promise<User[]> {
-    if (role) return this.userModel.find({ isTutor: role === 'tutor' }).exec();
+    if (role) return this.userModel.find({ role }).exec();
     return this.userModel.find().exec();
   }
 
@@ -184,13 +38,83 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const updated = await this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).exec();
-    if (!updated) throw new NotFoundException('User not found');
-    return updated;
-  }
+	async update(id: Types.ObjectId, updateUserDto: UpdateUserDto, file): Promise<User> {
+		let profilePicUrl: string | undefined
+		
+		if(file){
+			profilePicUrl = await this.cloudinaryService.uploadImage(file, 'users/profile-pics');
+		};
+		
+		//console.log(id)
+	  const {
+		goalIds,
+		topicIds,
+		preferenceIds,
+		...profileData
+	  } = updateUserDto;
 
-  async remove(id: string): Promise<void> {
+	  // Build the update object
+	  const updatePayload: any = {
+		...profileData,
+		profile_pic: profilePicUrl
+	  };
+
+	  if (goalIds) updatePayload.goalsIds = goalIds.map(id => new Types.ObjectId(id));
+	  if (topicIds) updatePayload.topicsIds = topicIds.map(id => new Types.ObjectId(id));
+	  if (preferenceIds) updatePayload.preferencesIds = preferenceIds.map(id => new Types.ObjectId(id));
+
+	  // Set completion flags
+	  if (Object.keys(profileData).length > 0) updatePayload.isProfileComplete = true;
+	  if (goalIds || topicIds || preferenceIds) updatePayload.isPreferencesComplete = true;
+
+	  // Perform atomic update
+	  console.log(updatePayload)
+	  const updatedUser = await this.userModel.findByIdAndUpdate(
+		id,
+		{ $set: updatePayload },
+		{ new: true, runValidators: true },
+	  ).exec();
+
+	  if (!updatedUser) throw new UserNotFoundException();
+	  
+	  const { password, refresh_token, ...userWithoutSecrets } = updatedUser.toObject();
+
+	  return updatedUser;
+	}
+	
+	async saveFcmToken(
+	  userId: Types.ObjectId,
+	  dto: SaveFcmTokenDto,
+	) {
+	  const { fcmToken, device, remindersEnabled } = dto;
+
+	  // 1. Upsert device token
+	  await this.fcmTokenModel.findOneAndUpdate(
+		{ token: fcmToken },
+		{
+		  userId,
+		  token: fcmToken,
+		  device,
+		  isActive: true,
+		  lastSeenAt: new Date(),
+		},
+		{
+		  upsert: true,
+		  new: true,
+		  setDefaultsOnInsert: true,
+		},
+	  );
+
+	  // 2. Optionally update user preferences
+	  if (typeof remindersEnabled === 'boolean') {
+		await this.userModel.findByIdAndUpdate(userId, {
+		  remindersEnabled,
+		});
+	  }
+	}
+
+
+  async delete(id: Types.ObjectId): Promise<void> {
     const res = await this.userModel.findByIdAndDelete(id).exec();
     if (!res) throw new NotFoundException('User not found');
   }

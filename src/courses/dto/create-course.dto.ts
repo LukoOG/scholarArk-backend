@@ -1,47 +1,146 @@
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CourseCategory, CourseDifficulty } from '../schemas/course.schema';
+
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, IsBoolean } from 'class-validator';
+import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
+
+export class CreateLessonDto {
+  @ApiProperty({
+    description: 'Lesson title',
+    example: 'Introduction to JavaScript',
+  })
+  @IsString()
+  title: string;
+
+  @ApiProperty({
+    description: 'Lesson content type',
+    enum: ['video', 'article', 'quiz'],
+    example: 'video',
+  })
+  @IsEnum(['video', 'article', 'quiz'])
+  type: 'video' | 'article' | 'quiz';
+
+  @ApiPropertyOptional({
+    description: 'Text content for article or quiz lessons',
+    example: 'JavaScript is a programming language...',
+  })
+  @IsOptional()
+  @IsString()
+  content?: string;
+
+  @ApiProperty({
+    description: 'Lesson duration in seconds',
+    example: 420,
+  })
+  @IsNumber()
+  duration: number;
+
+  @ApiPropertyOptional({
+    description: 'Whether this lesson can be previewed before enrollment',
+    example: true,
+  })
+  @IsOptional()
+  isPreview?: boolean;
+}
+
+
+export class CreateModuleDto {
+  @ApiProperty({
+    description: 'Module title',
+    example: 'JavaScript Basics',
+  })
+  @IsString()
+  title: string;
+
+  @ApiPropertyOptional({
+    description: 'Optional module description',
+    example: 'Covers the fundamentals of JavaScript',
+  })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({
+    description: 'Lessons under this module',
+    type: [CreateLessonDto],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateLessonDto)
+  lessons: CreateLessonDto[];
+}
+
+class PriceDto{
+  @ApiProperty({
+    example: PaymentCurrency.NAIRA,
+    enum: PaymentCurrency,
+    description: "Regional Currency Code"
+  })
+  @IsNotEmpty()
+  @IsString()
+  currency: PaymentCurrency
+
+  @ApiProperty({
+    example: 15000,
+    description: "Price amount in major unit of specified currency"
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  amount: number
+}
 
 export class CreateCourseDto {
-	@ApiProperty({ example: 'Mathematics 101' })
-	@IsString()
-	@IsNotEmpty()
-	title: string;
-	
-	@ApiPropertyOptional({ example: 'A complete course to master the fundamentals of mathematics for junior secondary students' })
-	@IsString()
-	@IsOptional()
-	description?: string;
-	
-	@ApiPropertyOptional({ example: 'Beginner' })
-	@IsEnum(['Beginner', 'Intermediate', 'Advanced']) //till we properly define our enums
-	@IsOptional()
-	difficulty?: string;
+  @ApiProperty({
+    description: 'Course title',
+    example: 'Complete JavaScript Mastery',
+  })
+  @IsString()
+  title: string;
 
-	@ApiPropertyOptional({ example: 10000.00 })
-	@IsNumber()
-	@IsOptional()
-	price?: number;
-	
-	@ApiPropertyOptional({ example: 20 })
-	@IsNumber()
-	@IsOptional()
-	students_enrolled?: number;
-	
-	@ApiPropertyOptional({ example: 'https://www.bing.com/images/search?view=detailV2&ccid=0T0cC7t4&id=B91455B44ACD53474402DF9B13CA6CF4E73E7640&thid=OIP.0T0cC7t4zN9F2snpTs4R0wHaE8&mediaurl=https%3a%2f%2fwww.umc.org%2f-%2fmedia%2fumc-media%2f2024%2f02%2f21%2f22%2f52%2fstack-of-books-recommended-reading.jpeg%3fmw%3d1200%26hash%3d6E209BCE991F928F9D5F81B2F357A281&cdnurl=https%3a%2f%2fth.bing.com%2fth%2fid%2fR.d13d1c0bbb78ccdf45dac9e94ece11d3%3frik%3dQHY%252b5%252fRsyhOb3w%26pid%3dImgRaw%26r%3d0&exph=800&expw=1200&q=books&FORM=IRPRST&ck=8B005F9DAC21BAAD357713B44B62DAE7&selectedIndex=0&itb=0' })
-	@IsString()
-	@IsOptional()
-	thumbnail_url?: string;
-	
-	@ApiPropertyOptional({ example: 0 })
-	@IsNumber()
-	@IsOptional()
-	rating?: number;
+  @ApiProperty({
+    description: 'Course description',
+    example: 'Learn JavaScript from beginner to advanced',
+  })
+  @IsString()
+  description: string;
 
-	@IsBoolean()
-	@IsOptional()
-	isPublished?: boolean;
+  @ApiProperty({
+    description: 'Course category',
+    enum: CourseCategory,
+    example: CourseCategory.PROGRAMMING,
+  })
+  @IsEnum(CourseCategory)
+  category: CourseCategory;
 
-	@IsString()
-	@IsNotEmpty()
-	user_id: string; // ObjectId string
+  @ApiPropertyOptional({
+    description: 'Course difficulty level',
+    enum: CourseDifficulty,
+    example: CourseDifficulty.BEGINNER,
+  })
+  @IsOptional()
+  @IsEnum(CourseDifficulty)
+  difficulty?: CourseDifficulty;
+
+  @ApiProperty({
+    description: 'List of Course Prices in Supported Currencies',
+    type: [PriceDto],
+    example: [
+      { currency: 'NGN', amount: 15000 },
+      { currency: 'USD', amount: 40 },
+    ],
+  })
+  @IsArray()
+  @ValidateNested({each:true})
+  @Type(()=>PriceDto)
+  prices: PriceDto[];
+
+  @ApiProperty({
+    description: 'Modules included in the course',
+    type: [CreateModuleDto],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateModuleDto)
+  modules: CreateModuleDto[];
 }

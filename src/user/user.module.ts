@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
+import { AuthModule } from '../auth/auth.module';
+import { GoogleClientService } from '../common/services/google.service';
+import { CloudinaryModule } from '../common/cloudinary/cloudinary.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
+import { UserFcmToken, UserFcmTokenSchema } from './schemas/user-fcm-token.schema';
 import { preSave, preValidate } from './schemas/middleware';
 import { userMethods } from './schemas/methods';
 import { UserController } from './user.controller';
@@ -19,22 +23,31 @@ import { TMP_DIR } from 'src/config';
         name: User.name,
         useFactory() {
           const schema = UserSchema;
+		  
+		  schema.set('toObject', { virtuals: true });
+		  schema.set('toJSON', { virtuals: true });
 
           for (const method of userMethods) schema.method(method.name, method);
 
           schema.virtual('fullName').get(function () {
             return `${this.first_name ?? ''} ${this.last_name ?? ''}`.trim();
           });
-
-          schema.pre('save', preSave);
           schema.pre('validate', preValidate);
 
           return schema;
         },
       },
+	  {
+		  name: UserFcmToken.name,
+		  useFactory(){
+			  return UserFcmTokenSchema
+		  }
+	  },
     ]),
+	CloudinaryModule,
+	AuthModule
   ],
-  providers: [UserService],
+  providers: [UserService, GoogleClientService],
   exports: [UserService],
   controllers: [UserController],
 })
