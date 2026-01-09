@@ -1,7 +1,9 @@
 import { Controller, Post, Req, Headers, ForbiddenException } from "@nestjs/common";
 import { PaymentService } from "../payment.service";
 import * as crypto from "crypto";
+import { ApiTags } from "@nestjs/swagger";
 
+@ApiTags("Payment")
 @Controller('webhooks/paystack')
 export class PaystackWebhookController {
   constructor(private readonly paymentService: PaymentService) {}
