@@ -24,8 +24,6 @@ export class CourseAccessService {
     // Tutor owner always has access
     if (role === "tutor" && course.tutor.toString() === userId.toString()) {
       return true;
-    } else if(role === "tutor" && course.tutor.toString() !== userId.toString()){
-      return false
     }
 
     // Must be published

@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
+import { LessonMedia } from './lesson-media.schema';
 
 export enum LessonType {
   VIDEO = 'video',
@@ -24,14 +25,11 @@ export class Lesson {
   @Prop({ type: String, enum: LessonType, required: true })
   type: LessonType;
 
-  @Prop()
-  videoUrl?: string;
+  @Prop({ type: LessonMedia })
+  media?: LessonMedia;
 
   @Prop()
-  content?: string; // articles / markdown
-
-  @Prop({ default: 0 })
-  duration: number; // seconds
+  content?: string;
 
   @Prop({ required: true })
   position: number;

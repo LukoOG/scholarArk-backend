@@ -33,7 +33,7 @@ export enum CourseDifficulty {
 
 @Schema({ timestamps: true })
 export class Course {
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true })
   tutor: Types.ObjectId;
 
   @Prop({

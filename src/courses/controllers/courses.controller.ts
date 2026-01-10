@@ -236,6 +236,29 @@ Validation checks:
 	const content = await this.coursesService.getFullContent(courseId)
 	return ResponseHelper.success(content, HttpStatus.OK)
   }
+
+	@Get(':lessonId/play')
+	@UseGuards(AuthGuard, CourseAccessGuard)
+	@ApiBearerAuth()
+	@ApiOperation({
+	summary: 'Get secure playback URL for lesson video',
+	})
+	@ApiParam({
+	name: 'lessonId',
+	example: '695c4a483443b575a0086ce5',
+	})
+	@ApiResponse({
+	status: 200,
+	description: 'Signed playback URL',
+	})
+	async playLesson(
+	@Param('lessonId') lessonId: Types.ObjectId,
+	) {
+	const result = await this.coursesService.getPlaybackUrl(lessonId);
+
+	return ResponseHelper.success(result, HttpStatus.OK);
+	}
+
 }
 
   //learning

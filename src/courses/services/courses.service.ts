@@ -1,13 +1,13 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
 import { Model, Types, FilterQuery, Connection, ClientSession } from 'mongoose';
 import { Course, CourseDocument, CourseListItem } from '../schemas/course.schema';
 import { CourseModule, CourseModuleDocument } from '../schemas/module.schema';
-import { Lesson, LessonDocument } from '../schemas/lesson.schema';
+import { Lesson, LessonDocument, LessonType } from '../schemas/lesson.schema';
+import { LessonMediaStatus } from '../schemas/lesson-media.schema';
 import { User, UserDocument } from '../../user/schemas/user.schema';
 import { CreateCourseDto } from '../dto/create-course.dto';
 import { UpdateCourseDto } from '../dto/update-course.dto';
-import { CloudinaryService } from '../../common/cloudinary/cloudinary.service';
 import {
   UserAlreadyExistsException,
   UserNotFoundException,
@@ -19,18 +19,29 @@ import { PaginatedResponse } from '../../common/interfaces';
 import { CourseFullContent } from '../types/course-full-content.type';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
 import { CourseOutlineDto } from '../dto/course-outline.dto';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { ConfigService } from '@nestjs/config';
+import { Config } from 'src/config';
+import { InjectAws } from 'aws-sdk-v3-nest';
+import { LessonMedia, LessonMediaDocument } from '../schemas/lesson-media.schema';
 
 
 @Injectable()
 export class CoursesService {
+	private env;
   constructor(
     @InjectModel(Course.name) private courseModel: Model<CourseDocument>,
     @InjectModel(CourseModule.name) private moduleModel: Model<CourseModuleDocument>,
     @InjectModel(Lesson.name) private lessonModel: Model<LessonDocument>,
+	@InjectModel(LessonMedia.name) private lessonMediaModel: Model<LessonMediaDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
 	@InjectConnection() private readonly connection: Connection,
-	private readonly cloudinaryService: CloudinaryService,
-  ) {}
+	@InjectAws(S3Client) private readonly s3: S3Client,
+	private readonly configService: ConfigService<Config, true>,
+  ) {
+	this.env = configService.get("redis", {infer: true})
+  }
 
   private async validatePublishable(course: Course):Promise<void> {
 	if(!course.title || !course.description) throw new BadRequestException("Course must contain basic details")
@@ -366,4 +377,97 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 
 	return amount
   }
+
+  async getUploadUrl (lessonId: Types.ObjectId, courseId: Types.ObjectId){
+	const lesson = await this.lessonModel.findOne({ _id: lessonId, course: courseId }).lean().exec();
+
+	if (!lesson) throw new NotFoundException("Lesson not found")
+
+	const key = `courses/${courseId}/lessons/${lessonId}/video-${Date.now()}.mp4`;
+
+	const command = new PutObjectCommand({
+		Bucket: this.env.bucket,
+		Key: key,
+		ContentType: "video/mp4",
+		Metadata: {
+			lessonId: lessonId.toString(),
+			courseId: courseId.toString(),
+		}
+	})
+
+	const media = await this.lessonMediaModel.create({
+		type: 'video',
+		s3key: key,	
+	})
+
+	lesson.media = media;
+	await lesson.save();
+
+	const signedUrl = await getSignedUrl(this.s3, command, { expiresIn: 60 * 5 })
+
+	return { url: signedUrl, key, exppiresIn: 300, method: 'PUT' }
+	}
+
+	async completeMediaUpload(
+		lessonId: Types.ObjectId,
+		tutorId: Types.ObjectId,
+	) {
+	const lesson = await this.lessonModel
+		.findById(lessonId)
+		.populate<{ course: { tutor: Types.ObjectId }}>({
+			path: 'course',
+			select: 'tutor',
+		}).exec();
+
+	if (!lesson) {
+		throw new NotFoundException('Lesson not found');
+	}
+
+	if (lesson.course.tutor.toString() !== tutorId.toString()) {
+		throw new ForbiddenException('You do not own this course');
+	}
+
+	if (lesson.type !== LessonType.VIDEO) {
+		throw new BadRequestException('Lesson is not a video');
+	}
+
+	if (!lesson.media) {
+		throw new BadRequestException('No media found for lesson');
+	}
+
+	if (lesson.media.status !== LessonMediaStatus.PENDING) {
+		throw new BadRequestException('Media already completed');
+	}
+
+	lesson.media.status = LessonMediaStatus.UPLOADED;
+	await lesson.save();
+	}
+
+	async getPlaybackUrl(lessonId: Types.ObjectId){
+		const lesson = await this.lessonModel.findById(lessonId);
+
+		if(!lesson) throw new NotFoundException("Lesson not found");
+
+		if(lesson.type != LessonType.VIDEO) throw new BadRequestException("Lesson is not a video");
+
+		if(!lesson.media) throw new BadRequestException("Lesson media is not upload");
+
+		if(![LessonMediaStatus.READY, LessonMediaStatus.UPLOADED].includes(lesson.media.status)) throw new BadRequestException("Video not ready for playback");
+
+		const command = new GetObjectCommand({
+			Bucket: this.env.bucket,
+			Key: lesson.media.s3key
+		})
+
+		const url = await getSignedUrl(this.s3, command, {
+			expiresIn: 60 * 5, 
+		});
+
+		return {
+			url,
+			expiresIn: 300,
+		};
+	}
+
 }
+
