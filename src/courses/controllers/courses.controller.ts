@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query, UseGuards, UploadedFile, UseInterceptors, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
@@ -19,6 +19,7 @@ import { CourseAccessGuard } from '../guards/course.guard';
 import { RolesGuard } from 'src/common/guards';
 import { UserRole } from 'src/common/enums';
 import { CourseOutlineDto } from '../dto/course-outline.dto';
+import { UploadLessonDto, UploadLessonResponseDto } from '../dto/upload-course.dto';
 
 @ApiTags('Courses') 
 @ApiBearerAuth('access-token')
@@ -237,6 +238,43 @@ Validation checks:
 	return ResponseHelper.success(content, HttpStatus.OK)
   }
 
+  @UseGuards(AuthGuard)
+  @Post('/courses/:courseId/lessons/:lessonId/upload-url')
+	@ApiBearerAuth()
+	@ApiOperation({
+	summary: 'Get signed upload URL for lesson media',
+	description: `
+	Generates a temporary S3 upload URL for a lesson video.
+
+	- Upload happens directly to S3
+	- Backend does NOT receive the file
+	- Must call completion endpoint after upload
+	`,
+	})
+	@ApiParam({
+	name: 'courseId',
+	description: 'Course ID',
+	example: '695bbc7f050dceb9e3202e22',
+	})
+	@ApiParam({
+	name: 'lessonId',
+	description: 'Lesson ID',
+	example: '695c4a483443b575a0086ce5',
+	})
+	@ApiBody({ type: UploadLessonDto })
+	@ApiResponse({
+	status: 200,
+	description: 'Signed upload URL generated',
+	type: UploadLessonResponseDto,
+	})
+	@ApiResponse({ status: 401, description: 'Unauthorized' })
+	@ApiResponse({ status: 403, description: 'Not course owner' })
+	@ApiResponse({ status: 404, description: 'Lesson not found' })
+  async uploadLesson(@Param('lessonId') lessonId: Types.ObjectId, @Param('couseId') courseId: Types.ObjectId, @Body() dto: UploadLessonDto){
+	const result = await this.coursesService.getUploadUrl(lessonId, courseId, dto)
+	return ResponseHelper.success(result)
+  }
+
 	@Get(':lessonId/play')
 	@UseGuards(AuthGuard, CourseAccessGuard)
 	@ApiBearerAuth()
@@ -254,9 +292,9 @@ Validation checks:
 	async playLesson(
 	@Param('lessonId') lessonId: Types.ObjectId,
 	) {
-	const result = await this.coursesService.getPlaybackUrl(lessonId);
+		const result = await this.coursesService.getPlaybackUrl(lessonId);
 
-	return ResponseHelper.success(result, HttpStatus.OK);
+		return ResponseHelper.success(result, HttpStatus.OK);
 	}
 
 }

@@ -25,6 +25,7 @@ import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config';
 import { InjectAws } from 'aws-sdk-v3-nest';
 import { LessonMedia, LessonMediaDocument } from '../schemas/lesson-media.schema';
+import { UploadLessonDto } from '../dto/upload-course.dto';
 
 
 @Injectable()
@@ -378,10 +379,14 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 	return amount
   }
 
-  async getUploadUrl (lessonId: Types.ObjectId, courseId: Types.ObjectId){
-	const lesson = await this.lessonModel.findOne({ _id: lessonId, course: courseId }).lean().exec();
+  async getUploadUrl (lessonId: Types.ObjectId, courseId: Types.ObjectId, tutorId: Types.ObjectId, dto: UploadLessonDto){
+	const lesson = await this.lessonModel.findOne({ _id: lessonId, course: courseId })
+	.populate<{course: { tutor:  Types.ObjectId }}>({ path: "course", select:"tutor"}).exec();
 
-	if (!lesson) throw new NotFoundException("Lesson not found")
+
+	if (!lesson) throw new NotFoundException("Lesson not found");
+
+	if(lesson.course.tutor.toString() !== tutorId.toString()) throw new BadRequestException("You do not own this course");
 
 	const key = `courses/${courseId}/lessons/${lessonId}/video-${Date.now()}.mp4`;
 
@@ -405,42 +410,42 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 
 	const signedUrl = await getSignedUrl(this.s3, command, { expiresIn: 60 * 5 })
 
-	return { url: signedUrl, key, exppiresIn: 300, method: 'PUT' }
+	return { url: signedUrl, key, expiresIn: 300 }
 	}
 
 	async completeMediaUpload(
 		lessonId: Types.ObjectId,
 		tutorId: Types.ObjectId,
 	) {
-	const lesson = await this.lessonModel
-		.findById(lessonId)
-		.populate<{ course: { tutor: Types.ObjectId }}>({
-			path: 'course',
-			select: 'tutor',
-		}).exec();
+		const lesson = await this.lessonModel
+			.findById(lessonId)
+			.populate<{ course: { tutor: Types.ObjectId }}>({
+				path: 'course',
+				select: 'tutor',
+			}).exec();
 
-	if (!lesson) {
-		throw new NotFoundException('Lesson not found');
-	}
+		if (!lesson) {
+			throw new NotFoundException('Lesson not found');
+		}
 
-	if (lesson.course.tutor.toString() !== tutorId.toString()) {
-		throw new ForbiddenException('You do not own this course');
-	}
+		if (lesson.course.tutor.toString() !== tutorId.toString()) {
+			throw new ForbiddenException('You do not own this course');
+		}
 
-	if (lesson.type !== LessonType.VIDEO) {
-		throw new BadRequestException('Lesson is not a video');
-	}
+		if (lesson.type !== LessonType.VIDEO) {
+			throw new BadRequestException('Lesson is not a video');
+		}
 
-	if (!lesson.media) {
-		throw new BadRequestException('No media found for lesson');
-	}
+		if (!lesson.media) {
+			throw new BadRequestException('No media found for lesson');
+		}
 
-	if (lesson.media.status !== LessonMediaStatus.PENDING) {
-		throw new BadRequestException('Media already completed');
-	}
+		if (lesson.media.status !== LessonMediaStatus.PENDING) {
+			throw new BadRequestException('Media already completed');
+		}
 
-	lesson.media.status = LessonMediaStatus.UPLOADED;
-	await lesson.save();
+		lesson.media.status = LessonMediaStatus.UPLOADED;
+		await lesson.save();
 	}
 
 	async getPlaybackUrl(lessonId: Types.ObjectId){
