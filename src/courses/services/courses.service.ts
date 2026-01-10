@@ -71,6 +71,15 @@ export class CoursesService {
 	}
   }
 
+  async isTutor(courseId: Types.ObjectId, userId: Types.ObjectId){
+	const isTutor = await this.courseModel
+	.findOne({ _id: courseId, tutor: userId })
+	.select('_id')
+	.lean()
+
+	return !!isTutor
+  }
+
   async create(dto: CreateCourseDto, tutorId:Types.ObjectId): Promise<{ courseId: Types.ObjectId }>{
 	const session: ClientSession = await this.connection.startSession();
 	
@@ -363,15 +372,26 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 	return {"message":"Course published successfully"}
   }
 
-  //
-  async isTutor(courseId: Types.ObjectId, userId: Types.ObjectId){
-	const isTutor = await this.courseModel
-	.findOne({ _id: courseId, tutor: userId })
-	.select('_id')
-	.lean()
+	async publishLesson(lessonId: Types.ObjectId, tutorId: Types.ObjectId) {
+		const lesson = await this.lessonModel
+			.findById(lessonId)
+			.populate<{ course: { tutor: Types.ObjectId } }>({ path: 'course', select: 'tutor' })
+			.exec();
 
-	return !!isTutor
-  }
+		if (!lesson) throw new NotFoundException();
+		if (lesson.course.tutor.toString() !== tutorId.toString()) {
+			throw new ForbiddenException();
+		}
+
+		if (lesson.type === LessonType.VIDEO) {
+			if (!lesson.media || lesson.media.status !== LessonMediaStatus.READY) {
+			throw new BadRequestException('Video not ready');
+			}
+		}
+
+		lesson.isPublished = true;
+		await lesson.save();
+	}
 
   async getCoursePrice(courseId: Types.ObjectId, currency: PaymentCurrency): Promise<number>{
 	const course = await this.courseModel.findById(courseId).select('prices isPublished').lean().exec();
@@ -461,8 +481,7 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 			throw new BadRequestException('Media already completed');
 		}
 
-		lesson.media.status = LessonMediaStatus.UPLOADED;
-		lesson.isPublished = true;
+		lesson.media.status = LessonMediaStatus.READY;
 		await lesson.save();
 	}
 
