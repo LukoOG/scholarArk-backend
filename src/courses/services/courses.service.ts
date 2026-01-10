@@ -25,7 +25,7 @@ import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config';
 import { InjectAws } from 'aws-sdk-v3-nest';
 import { LessonMedia, LessonMediaDocument } from '../schemas/lesson-media.schema';
-import { UploadLessonDto } from '../dto/upload-course.dto';
+import { FILE_FORMAT_CONFIG, UploadLessonDto } from '../dto/upload-course.dto';
 
 
 @Injectable()
@@ -53,14 +53,22 @@ export class CoursesService {
 
 	const moduleIds = course.modules.map((id) => id)
 
-	const totalLessons = await this.lessonModel.find({
+	const lessons = await this.lessonModel.find({
 		module: { $in: { moduleIds } }
 	})
-	.select('title')
 	.lean()
 	.exec();
 
-	if(totalLessons.length === 0) throw new BadRequestException("Course must contain at least 1 lesson")
+	if(lessons.length === 0) throw new BadRequestException("Course must contain at least 1 lesson");
+
+	for (const lesson of lessons){
+		if(!lesson.isPublished) throw new BadRequestException(`Lesson ${lesson.title} is not published`);
+
+		if (lesson.type === LessonType.VIDEO) {
+			if (!lesson.media) throw new BadRequestException(`Video missing for lesson "${lesson.title}"`);
+			if (lesson.media.status !== 'ready') throw new BadRequestException(`Video upload not completed for "${lesson.title}"`)
+		}
+	}
   }
 
   async create(dto: CreateCourseDto, tutorId:Types.ObjectId): Promise<{ courseId: Types.ObjectId }>{
@@ -388,6 +396,17 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 
 	if(lesson.course.tutor.toString() !== tutorId.toString()) throw new BadRequestException("You do not own this course");
 
+	const format = FILE_FORMAT_CONFIG[dto.type];
+	if(!format) throw new BadRequestException("Unsupported File Format");
+
+	if (lesson.type === LessonType.VIDEO && format.kind !== 'video') {
+		throw new BadRequestException('Lesson expects a video upload');
+	}
+
+	if (lesson.type === LessonType.ARTICLE && format.kind !== 'article') {
+		throw new BadRequestException('Lesson expects an article upload');
+	}
+
 	const key = `courses/${courseId}/lessons/${lessonId}/video-${Date.now()}.mp4`;
 
 	const command = new PutObjectCommand({
@@ -397,12 +416,13 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 		Metadata: {
 			lessonId: lessonId.toString(),
 			courseId: courseId.toString(),
+			type: format.kind,
 		}
 	})
 
 	const media = await this.lessonMediaModel.create({
-		type: 'video',
-		s3key: key,	
+		s3key: key,
+		mimeType: format.contentType,
 	})
 
 	lesson.media = media;
@@ -413,10 +433,7 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 	return { url: signedUrl, key, expiresIn: 300 }
 	}
 
-	async completeMediaUpload(
-		lessonId: Types.ObjectId,
-		tutorId: Types.ObjectId,
-	) {
+	async completeMediaUpload(lessonId: Types.ObjectId, tutorId: Types.ObjectId) {
 		const lesson = await this.lessonModel
 			.findById(lessonId)
 			.populate<{ course: { tutor: Types.ObjectId }}>({
@@ -445,17 +462,16 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 		}
 
 		lesson.media.status = LessonMediaStatus.UPLOADED;
+		lesson.isPublished = true;
 		await lesson.save();
 	}
 
-	async getPlaybackUrl(lessonId: Types.ObjectId){
+	async getLessonUrl(lessonId: Types.ObjectId){
 		const lesson = await this.lessonModel.findById(lessonId);
 
 		if(!lesson) throw new NotFoundException("Lesson not found");
 
-		if(lesson.type != LessonType.VIDEO) throw new BadRequestException("Lesson is not a video");
-
-		if(!lesson.media) throw new BadRequestException("Lesson media is not upload");
+		if(!lesson.media) throw new BadRequestException("Lesson media is not uploaded");
 
 		if(![LessonMediaStatus.READY, LessonMediaStatus.UPLOADED].includes(lesson.media.status)) throw new BadRequestException("Video not ready for playback");
 
@@ -465,12 +481,13 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 		})
 
 		const url = await getSignedUrl(this.s3, command, {
-			expiresIn: 60 * 5, 
+			expiresIn: 600 * 5, 
 		});
 
 		return {
+			type: lesson.type,
 			url,
-			expiresIn: 300,
+			expiresIn: 600 * 5,
 		};
 	}
 

@@ -238,7 +238,8 @@ Validation checks:
 	return ResponseHelper.success(content, HttpStatus.OK)
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.TUTOR)
   @Post('/courses/:courseId/lessons/:lessonId/upload-url')
 	@ApiBearerAuth()
 	@ApiOperation({
@@ -270,12 +271,17 @@ Validation checks:
 	@ApiResponse({ status: 401, description: 'Unauthorized' })
 	@ApiResponse({ status: 403, description: 'Not course owner' })
 	@ApiResponse({ status: 404, description: 'Lesson not found' })
-  async uploadLesson(@Param('lessonId') lessonId: Types.ObjectId, @Param('couseId') courseId: Types.ObjectId, @Body() dto: UploadLessonDto){
-	const result = await this.coursesService.getUploadUrl(lessonId, courseId, dto)
+  async uploadLesson(
+	@Param('lessonId') lessonId: Types.ObjectId, 
+	@Param('couseId') courseId: Types.ObjectId, 
+	@Body() dto: UploadLessonDto,
+	@GetUser('id') tutorId: Types.ObjectId,
+){
+	const result = await this.coursesService.getUploadUrl(lessonId, courseId, tutorId, dto)
 	return ResponseHelper.success(result)
   }
 
-	@Get(':lessonId/play')
+	@Get(':courseId/lessons/:lessonId/play')
 	@UseGuards(AuthGuard, CourseAccessGuard)
 	@ApiBearerAuth()
 	@ApiOperation({
@@ -288,12 +294,13 @@ Validation checks:
 	@ApiResponse({
 	status: 200,
 	description: 'Signed playback URL',
+	example: { url: "signed get url for lesson"}
 	})
 	async playLesson(
-	@Param('lessonId') lessonId: Types.ObjectId,
+		@Param('courseId') courseId: Types.ObjectId,
+		@Param('lessonId') lessonId: Types.ObjectId,
 	) {
-		const result = await this.coursesService.getPlaybackUrl(lessonId);
-
+		const result = await this.coursesService.getLessonUrl(lessonId);
 		return ResponseHelper.success(result, HttpStatus.OK);
 	}
 

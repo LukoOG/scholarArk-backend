@@ -9,9 +9,6 @@ export enum LessonMediaStatus {
 
 @Schema({ _id: false })
 export class LessonMedia {
-    @Prop({ enum: ['video'], required:true })
-    type: 'video';
-
     @Prop({ required: true })
     s3key: string;
 
