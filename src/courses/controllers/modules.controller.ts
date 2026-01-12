@@ -1,7 +1,7 @@
 import { Controller, Body, Param, Post, Patch, Delete, UseGuards, HttpStatus } from "@nestjs/common";
 import { ApiTags, ApiBody, ApiParam, ApiBearerAuth, ApiResponse, ApiOperation } from "@nestjs/swagger";
 import { CourseOwnerGuard } from "../guards/course.guard";
-import { AuthGuard } from "@nestjs/passport";
+import { AuthGuard } from "src/auth/guards/auth.guard";
 import { ModulesService } from "../services";
 import { Types } from "mongoose";
 import { ResponseHelper } from "src/common/helpers/api-response.helper";
