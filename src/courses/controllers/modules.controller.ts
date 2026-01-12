@@ -1,16 +1,19 @@
-import { Controller, Post, Param, Patch, Delete, UseGuards, HttpStatus } from "@nestjs/common";
+import { Controller, Body, Param, Post, Patch, Delete, UseGuards, HttpStatus } from "@nestjs/common";
 import { ApiTags, ApiBody, ApiParam, ApiBearerAuth, ApiResponse, ApiOperation } from "@nestjs/swagger";
 import { CourseOwnerGuard } from "../guards/course.guard";
 import { AuthGuard } from "@nestjs/passport";
 import { ModulesService } from "../services";
 import { Types } from "mongoose";
 import { ResponseHelper } from "src/common/helpers/api-response.helper";
-import { GetUser } from "src/common/decorators";
+import { GetUser, Roles } from "src/common/decorators";
 import { CreateModuleDto } from "../dto/courses/create-course.dto";
+import { RolesGuard } from "src/common/guards";
+import { UserRole } from "src/common/enums";
 
 @ApiTags('Modules')
 @Controller()
-@UseGuards(AuthGuard, CourseOwnerGuard)
+@UseGuards(AuthGuard, CourseOwnerGuard, RolesGuard)
+@Roles(UserRole.TUTOR)
 export class ModulesController {
     constructor(
         private readonly modulesService: ModulesService
@@ -30,23 +33,23 @@ export class ModulesController {
         status: 201,
         description: 'Module created successfully',
     })
-    createModule(@Param('courseId') courseId: Types.ObjectId, @GetUser('id') userId: Types.ObjectId, @Body() dto: CreateModuleDto) {
-        const result = await this.modulesService
+    async createModule(@Param('courseId') courseId: Types.ObjectId, @GetUser('id') tutorId: Types.ObjectId, @Body() dto: CreateModuleDto) {
+        const result = await this.modulesService.createModule(courseId, tutorId, dto)
         return ResponseHelper.success(result, HttpStatus.CREATED)
     }
 
     @Patch('modules/:moduleId')
-    updateModule() {
+    async updateModule() {
 
     }
 
     @Delete('modules/:moduleId')
-    deleteModule() {
+    async deleteModule() {
 
     }
 
     @Post('courses/:courseId/modules/reorder')
-    reorderModules() {
+    async reorderModules() {
 
     }
 }
