@@ -29,7 +29,7 @@ export class AssessmentsController {
   @ApiResponse({ status: 201, description: 'Assessment created successfully' })
   async create(@Body() createAssessmentDto: CreateAssessmentDto, @GetUser('id') userId: Types.ObjectId) {
     const result = await this.assessmentsService.createAssessment(createAssessmentDto, userId);
-    return ResponseHelper.success(result, 201);
+    return ResponseHelper.success(result, HttpStatus.CREATED);
   }
 
   @UseGuards(AssessmentOwnerGuard)

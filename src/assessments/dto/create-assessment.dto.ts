@@ -14,15 +14,7 @@ export class CreateAssessmentDto {
   @ApiPropertyOptional({ description: 'amount of duration in seconds' })
   @IsOptional() 
   @IsNumber() 
-  duration_seconds: number;
-
-  @ApiPropertyOptional() 
-  @IsDateString() 
-  startAt: Date;
-
-  @ApiPropertyOptional() 
-  @IsDateString() 
-  endAt: Date;
+  duration: number;
 
   @ApiProperty() 
   @IsMongoId() 

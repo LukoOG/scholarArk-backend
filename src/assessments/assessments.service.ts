@@ -35,10 +35,12 @@ export class AssessmentsService {
 	  return score;
 	}
   
-  async createAssessment(createAssessmentDto: CreateAssessmentDto, id: Types.ObjectId) {
+  async createAssessment(createAssessmentDto: CreateAssessmentDto, tutorId: Types.ObjectId) {
 	  const newAssessment = new this.assessmentModel({
 		  ...createAssessmentDto,
-		  createdBy: id,
+		  createdBy: tutorId,
+		  startAt: Date.now(),
+		  endAt: Date.now(),
 		  isPublished: false,
 		  questions: []
 	  })
@@ -65,7 +67,7 @@ export class AssessmentsService {
     assessment.isPublished = true;
 	await assessment.save();
 	
-    return { message: 'Assessment published successfully', assessment };
+    return { message: 'Assessment published successfully' };
   }
 
   async getAssessmentById(assessmentId: string) {
@@ -75,7 +77,7 @@ export class AssessmentsService {
   }
   
   async updateAssessmentById(assessmentId: string, updateAssessmentDto: UpdateAssessmentDto){
-	const assessment = await this.assessmentModel.findByIdAndUpdate(assessmentId,  updateAssessmentDto, { new: true }).exec();
+	const assessment = await this.assessmentModel.findByIdAndUpdate(assessmentId,  updateAssessmentDto, { upsert: true }).exec();
     if (!assessment) throw new NotFoundException('Assessment not found');
     return assessment;
   }
@@ -210,12 +212,8 @@ export class AssessmentsService {
 	  attempt.answers = dto.answers;
 	  attempt.submittedAt = new Date();
 	  
-	  const score = this.calculateScore(attempt.questionsSnapshot, dto.answers)
-	  
-	  attempt.score = score;
-	  
 	  await attempt.save();
 	  
-	  return { score }
+	  return { message: "Answers submitted successfully" }
   };
 }
