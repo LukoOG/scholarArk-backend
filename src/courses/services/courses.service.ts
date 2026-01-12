@@ -372,13 +372,14 @@ async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
 	return {"message":"Course published successfully"}
   }
 
-	async publishLesson(lessonId: Types.ObjectId, tutorId: Types.ObjectId) {
+	async publishLesson(courseId: Types.ObjectId, lessonId: Types.ObjectId, tutorId: Types.ObjectId) {
 		const lesson = await this.lessonModel
 			.findById(lessonId)
-			.populate<{ course: { tutor: Types.ObjectId } }>({ path: 'course', select: 'tutor' })
+			.populate<{ course: { _id: Types.ObjectId, tutor: Types.ObjectId } }>({ path: 'course', select: '_id tutor' })
 			.exec();
 
 		if (!lesson) throw new NotFoundException();
+		if(lesson.course._id !== courseId) throw new BadRequestException("Wrong course for lesson")
 		if (lesson.course.tutor.toString() !== tutorId.toString()) {
 			throw new ForbiddenException();
 		}

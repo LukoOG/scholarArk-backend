@@ -15,7 +15,7 @@ import { Course } from '../schemas/course.schema';
 
 import { GetUser, Roles } from '../../common/decorators'
 import { AuthGuard } from '../../auth/guards/auth.guard';
-import { CourseAccessGuard } from '../guards/course.guard';
+import { CourseAccessGuard, CourseOwnerGuard } from '../guards/course.guard';
 import { RolesGuard } from 'src/common/guards';
 import { UserRole } from 'src/common/enums';
 import { CourseOutlineDto } from '../dto/course-outline.dto';
@@ -40,7 +40,7 @@ export class CoursesController {
   }
 
   @Post(':courseId/publish')
-  @UseGuards(AuthGuard, RolesGuard, CourseAccessGuard)
+  @UseGuards(AuthGuard, RolesGuard, CourseOwnerGuard)
   @Roles(UserRole.TUTOR)
   @ApiOperation({ 
 	summary: "Publish a Course",
@@ -56,6 +56,18 @@ Validation checks:
   @ApiResponse({ status: 200, description: 'Course published successfully' })
   async publishCourse(@Param('courseId') courseId: Types.ObjectId, @GetUser('id') tutorId: Types.ObjectId){
 	const response = await this.coursesService.publishCourse(courseId, tutorId)
+	return ResponseHelper.success(response, HttpStatus.OK)
+  }
+
+  @Post(':courseId/:lessonId/publish')
+  @UseGuards(AuthGuard, RolesGuard, CourseOwnerGuard)
+  @Roles(UserRole.TUTOR)
+  async publishLesson(
+	@Param('courseId') courseId: Types.ObjectId, 
+	@GetUser('id') tutorId: Types.ObjectId,
+	@Param('lessonId') lessonId: Types.ObjectId
+){
+	const response = await this.coursesService.publishLesson(courseId, lessonId, tutorId)
 	return ResponseHelper.success(response, HttpStatus.OK)
   }
 
