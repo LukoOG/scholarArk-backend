@@ -3,14 +3,14 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth, A
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
-import { CourseQueryDto } from '../dto/course-filter.dto';
-import { CourseFullContentResponseDto } from '../dto/course-full-content.dto';
+import { CourseQueryDto } from '../dto/courses/course-filter.dto';
+import { CourseFullContentResponseDto } from '../dto/courses/course-full-content.dto';
 
 import { ResponseHelper } from '../../common/helpers/api-response.helper';
 import { Types } from 'mongoose';
 import { CoursesService } from '../services/courses.service';
-import { CreateCourseDto } from '../dto/create-course.dto';
-import { UpdateCourseDto } from '../dto/update-course.dto';
+import { CreateCourseDto } from '../dto/courses/create-course.dto';
+import { UpdateCourseDto } from '../dto/courses/update-course.dto';
 import { Course } from '../schemas/course.schema';
 
 import { GetUser, Roles } from '../../common/decorators'
@@ -18,8 +18,8 @@ import { AuthGuard } from '../../auth/guards/auth.guard';
 import { CourseAccessGuard, CourseOwnerGuard } from '../guards/course.guard';
 import { RolesGuard } from 'src/common/guards';
 import { UserRole } from 'src/common/enums';
-import { CourseOutlineDto } from '../dto/course-outline.dto';
-import { UploadLessonDto, UploadLessonResponseDto } from '../dto/upload-course.dto';
+import { CourseOutlineDto } from '../dto/courses/course-outline.dto';
+import { UploadLessonDto, UploadLessonResponseDto } from '../dto/courses/upload-course.dto';
 
 @ApiTags('Courses') 
 @ApiBearerAuth('access-token')

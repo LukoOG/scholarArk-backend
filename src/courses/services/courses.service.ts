@@ -6,26 +6,26 @@ import { CourseModule, CourseModuleDocument } from '../schemas/module.schema';
 import { Lesson, LessonDocument, LessonType } from '../schemas/lesson.schema';
 import { LessonMediaStatus } from '../schemas/lesson-media.schema';
 import { User, UserDocument } from '../../user/schemas/user.schema';
-import { CreateCourseDto } from '../dto/create-course.dto';
-import { UpdateCourseDto } from '../dto/update-course.dto';
+import { CreateCourseDto } from '../dto/courses/create-course.dto';
+import { UpdateCourseDto } from '../dto/courses/update-course.dto';
 import {
 	UserAlreadyExistsException,
 	UserNotFoundException,
 } from '../../user/exceptions';
 
 import { PaginationDto } from '../../common/dto/pagination.dto';
-import { CourseQueryDto } from '../dto/course-filter.dto';
+import { CourseQueryDto } from '../dto/courses/course-filter.dto';
 import { PaginatedResponse } from '../../common/interfaces';
 import { CourseFullContent } from '../types/course-full-content.type';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
-import { CourseOutlineDto } from '../dto/course-outline.dto';
+import { CourseOutlineDto } from '../dto/courses/course-outline.dto';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config';
 import { InjectAws } from 'aws-sdk-v3-nest';
 import { LessonMedia, LessonMediaDocument } from '../schemas/lesson-media.schema';
-import { FILE_FORMAT_CONFIG, UploadLessonDto } from '../dto/upload-course.dto';
+import { FILE_FORMAT_CONFIG, UploadLessonDto } from '../dto/courses/upload-course.dto';
 
 
 @Injectable()

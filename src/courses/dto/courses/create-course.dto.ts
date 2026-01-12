@@ -1,6 +1,6 @@
 import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CourseCategory, CourseDifficulty } from '../schemas/course.schema';
+import { CourseCategory, CourseDifficulty } from '../../schemas/course.schema';
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
