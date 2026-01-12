@@ -4,8 +4,8 @@ import { AuthModule } from '../auth/auth.module';
 import { CloudinaryModule } from '../common/cloudinary/cloudinary.module';
 import { AwsSdkModule } from 'aws-sdk-v3-nest';
 import { S3Client } from '@aws-sdk/client-s3';
-import { CoursesService } from './services/courses.service';
-import { CoursesController } from './controllers/courses.controller';
+import { CoursesService, ModulesService, LessonsService } from './services/';
+import { CoursesController, ModulesController, LessonsController } from './controllers/';
 import { Course, CourseSchema } from './schemas/course.schema';
 import { CourseModule, CourseModuleSchema } from './schemas/module.schema';
 import { Lesson, LessonSchema } from './schemas/lesson.schema';
@@ -35,8 +35,8 @@ import { LessonMedia, LessonMediaSchema } from './schemas/lesson-media.schema';
 	EnrollmentModule,
 	ConfigModule
   ],
-  controllers: [CoursesController],
-  providers: [CoursesService, CourseAccessService, CourseAccessGuard],
+  controllers: [CoursesController, ModulesController, LessonsController],
+  providers: [CoursesService, ModulesService, LessonsService, CourseAccessService, CourseAccessGuard],
   exports: [CoursesService]
 })
 export class CoursesModule {}
