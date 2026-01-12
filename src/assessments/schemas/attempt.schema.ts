@@ -1,15 +1,22 @@
+import { AttachedEnhancerDefinition } from '@nestjs/core/inspector/interfaces/extras.interface';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
 
 export type AttemptDocument = HydratedDocument<Attempt>;
 
+export enum AttemptStatus {
+  SUBMITTED = 'submitted',
+  GRADED = 'graded',
+  IN_PROGRESS = 'in_progress'
+}
+
 @Schema({ timestamps: true })
 export class Attempt {
-  @Prop({ type: Types.ObjectId, ref: 'Assessment', required: true })
-  assessment_id: Types.ObjectId;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Assessment', required: true })
+  assessment: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  student_id: Types.ObjectId;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
+  student: Types.ObjectId;
 
   @Prop({ type: Date, required: true })
   startedAt: Date;
@@ -17,27 +24,16 @@ export class Attempt {
   @Prop()
   submittedAt?: Date;
 
-  @Prop({ type: Array, required: true })
-  // snapshot of questions asked (so grading is deterministic)
-  questionsSnapshot: any[];
-  
-  @Prop({
-	  type: [
-		{
-		  questionId: String,
-		  answer: String//Schema.Types.Mixed,
-		},
-	  ],
-	})
-	answers: {
-	  questionId: string;
-	  answer: string;
-	}[];
+  @Prop({ default: 0})
+  attemptNumber: number;
 
-  @Prop({ default: 0 })
-  score: number;
+  @Prop({ enum: AttemptStatus, default: AttemptStatus.IN_PROGRESS })
+  status: AttemptStatus
 
-  @Prop({ default: false })
-  graded: boolean;
+  @Prop()
+  score?: number;
+
+  @Prop({ type: Map, of: mongoose.Schema.Types.Mixed })
+  answers: Record<string, any>;
 }
 export const AttemptSchema = SchemaFactory.createForClass(Attempt);

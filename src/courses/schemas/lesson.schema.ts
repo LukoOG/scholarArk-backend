@@ -25,6 +25,10 @@ export class Lesson {
   @Prop({ type: String, enum: LessonType, required: true })
   type: LessonType;
 
+  //For Quiz Type Lessons
+  @Prop({ type: mongoose.Schema.Types.ObjectId })
+  assessment?: Types.ObjectId;
+
   @Prop({ type: LessonMedia })
   media?: LessonMedia;
 

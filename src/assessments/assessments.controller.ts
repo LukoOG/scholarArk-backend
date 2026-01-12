@@ -21,7 +21,7 @@ import { ResponseHelper } from '../common/helpers/api-response.helper';
 @Controller('assessments')
 @UseGuards(AuthGuard, RolesGuard)
 export class AssessmentsController {
-  constructor(private readonly assessmentsService: AssessmentsService) {}
+  constructor(private readonly assessmentsService: AssessmentsService) { }
 
   @Post()
   @Roles(UserRole.TUTOR)
@@ -29,74 +29,74 @@ export class AssessmentsController {
   @ApiResponse({ status: 201, description: 'Assessment created successfully' })
   async create(@Body() createAssessmentDto: CreateAssessmentDto, @GetUser('id') userId: Types.ObjectId) {
     const result = await this.assessmentsService.createAssessment(createAssessmentDto, userId);
-	return ResponseHelper.success(result, 201);
-  }
-  
-  @UseGuards(AssessmentOwnerGuard)
-  @Patch(':id')
-  @Roles(UserRole.TUTOR)
-  @ApiOperation({ summary: "Edit assessment (tutor)" })
-  async updateAssessment(@Param('id') id: string, @Body() updateAssessmentDto: UpdateAssessmentDto){
-	const result = await this.assessmentsService.updateAssessmentById(id, updateAssessmentDto);  
-	return ResponseHelper.success(result, 200);
+    return ResponseHelper.success(result, 201);
   }
 
   @UseGuards(AssessmentOwnerGuard)
-  @Post(':id/questions')
+  @Patch(':assessmentId')
+  @Roles(UserRole.TUTOR)
+  @ApiOperation({ summary: "Edit assessment (tutor)" })
+  async updateAssessment(@Param('id') id: string, @Body() updateAssessmentDto: UpdateAssessmentDto) {
+    const result = await this.assessmentsService.updateAssessmentById(id, updateAssessmentDto);
+    return ResponseHelper.success(result, 200);
+  }
+
+  @UseGuards(AssessmentOwnerGuard)
+  @Post(':assessmentId/questions')
   @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: 'Add questions to an assessment (tutor)' })
   async addQuestions(
-    @Param('id') id: string,
+    @Param('assessmentId') id: string,
     @Body() addQuestionsDto: AddQuestionsDto,
   ) {
     const result = await this.assessmentsService.addQuestions(id, addQuestionsDto);
-	return ResponseHelper.success(result, 200);
+    return ResponseHelper.success(result, 200);
   }
 
   @UseGuards(AssessmentOwnerGuard)
-  @Patch(':id/questions')
+  @Patch(':assessmentId/questions')
   @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: "Update assessment's questions (tutor)" })
-  async updateAssessmentQuestions(@Param('id') id: string, @Body() updateQuestionsDto: UpdateQuestionsDto){
-	const result = await this.assessmentsService.updateQuestions(id, updateQuestionsDto);  
-	return ResponseHelper.success(result, 200);
+  async updateAssessmentQuestions(@Param('assessmentId') id: string, @Body() updateQuestionsDto: UpdateQuestionsDto) {
+    const result = await this.assessmentsService.updateQuestions(id, updateQuestionsDto);
+    return ResponseHelper.success(result, 200);
   }
-  
+
   @UseGuards(AssessmentOwnerGuard)
-  @Post(':id/generate-questions')
+  @Post(':assessmentId/generate-questions')
   @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: "Generate questions using AI" })
-  async generateQuestions(@Param('id') id: string, @Body() dto: GenerateQuestionsDto){
-	const result = await this.assessmentsService.generateQuestions(id, dto)
-	return ResponseHelper.success(result, 200);
+  async generateQuestions(@Param('assessmentId') id: string, @Body() dto: GenerateQuestionsDto) {
+    const result = await this.assessmentsService.generateQuestions(id, dto)
+    return ResponseHelper.success(result, 200);
   }
-  
-  
+
+
   @UseGuards(AssessmentOwnerGuard)
-  @Post(':id/publish')
+  @Post(':assessmentId/publish')
   @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: 'Publish assessment (tutor)' })
-  async publish(@Param('id') id: string) {
+  async publish(@Param('assessmentId') id: string) {
     return this.assessmentsService.publishAssessment(id);
   }
 
-  @Get(':id')
+  @Get(':assessmentId')
   @Roles(UserRole.TUTOR, UserRole.STUDENT)
   @ApiOperation({ summary: 'Get assessment by ID (students/tutors)' })
-  async getAssessment(@Param('id') id: string) {
+  async getAssessment(@Param('assessmentId') id: string) {
     const result = await this.assessmentsService.getAssessmentById(id);
-	return ResponseHelper.success(result, 200);
+    return ResponseHelper.success(result, 200);
   }
 
-  @Delete(':id')
+  @Delete(':assessmentId')
   @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: 'Delete a batch of questions (tutors)' })
-  async deleteAssessmentQuestions(@Param('id') id: string, @Body() ids: string[]) {
+  async deleteAssessmentQuestions(@Param('assessmentId') id: string, @Body() ids: string[]) {
     const result = await this.assessmentsService.softDeleteQuestions(id, ids);
-	return ResponseHelper.success(result, HttpStatus.OK);
-  }  
+    return ResponseHelper.success(result, HttpStatus.OK);
+  }
   ///Student related endpoints
-  @Post(':id/start')
+  @Post(':idassessmentId/start')
   @Roles(UserRole.STUDENT)
   @ApiOperation({ summary: "Start an attempt (students)" })
   @ApiResponse({
@@ -114,12 +114,12 @@ export class AssessmentsController {
       },
     },
   })
-  async startAttempt(@Param('id') assessmentId: string, @GetUser('id') studentId: string){
-	const result = await this.assessmentsService.startAttempt(assessmentId, studentId)
-	return ResponseHelper.success(result, 201)
+  async startAttempt(@Param('assessmentId') assessmentId: string, @GetUser('id') studentId: string) {
+    const result = await this.assessmentsService.startAttempt(assessmentId, studentId)
+    return ResponseHelper.success(result, 201)
   }
-  
-  @Patch(":id")
+
+  @Patch(":assessmentId")
   @Roles(UserRole.STUDENT)
   @ApiOperation({
     summary: "Patch an attempt (autosave answers from local state)",
@@ -135,12 +135,12 @@ export class AssessmentsController {
       },
     },
   })
-  async editAttempt(@Param('id') attemptId: string, @GetUser('id') studentId: string, @Body() submitAttemptDto: SubmitAttemptDto){
-	const result =await this.assessmentsService.editAttempt(attemptId, studentId, submitAttemptDto);
-	return ResponseHelper.success(result, 200)
+  async editAttempt(@Param('assessmentId') attemptId: string, @GetUser('id') studentId: string, @Body() submitAttemptDto: SubmitAttemptDto) {
+    const result = await this.assessmentsService.editAttempt(attemptId, studentId, submitAttemptDto);
+    return ResponseHelper.success(result, 200)
   }
-  
-  @Post(':id/submit')
+
+  @Post(':assessmentId/submit')
   @Roles()
   @ApiOperation({ summary: "Submit answers for an attempt (student)" })
   @ApiResponse({
@@ -154,9 +154,9 @@ export class AssessmentsController {
       },
     },
   })
-  async submitAttempt(@Param('id') assessmentId: string, @GetUser('id') studentId: string, @Body() submitAttemptDto: SubmitAttemptDto){
-	const result = await this.assessmentsService.submitAttempt(assessmentId, studentId, submitAttemptDto)
-	return ResponseHelper.success(result, 200)
+  async submitAttempt(@Param('assessmentId') assessmentId: string, @GetUser('id') studentId: string, @Body() submitAttemptDto: SubmitAttemptDto) {
+    const result = await this.assessmentsService.submitAttempt(assessmentId, studentId, submitAttemptDto)
+    return ResponseHelper.success(result, 200)
   };
   //Add get attempt state endpoint to restore state on FE/mobile in cases of disconnection
 }
