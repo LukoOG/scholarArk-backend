@@ -1,11 +1,12 @@
 import { Body, Controller, Get, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Identifier, PaymentService } from './payment.service';
 import { PaymentTransactionDto, PaymentInitializationResponseDto } from './dto/payment.transaction.dto';
 import { AuthGuard, UserPopulatedRequest } from 'src/auth/guards/auth.guard';
 import { GetUser } from 'src/common/decorators';
 import { ResponseHelper } from 'src/common/helpers/api-response.helper';
 
+@ApiTags("Payment")
 @Controller('payment')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) { }

@@ -14,7 +14,7 @@ export class AssessmentOwnerGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
     const user = req.user;               
-    const assessmentId = req.params.id;   
+    const assessmentId = req.params.assessmentId;   
 
     const assessment = await this.assessmentModel.findById(assessmentId);
     if (!assessment) throw new NotFoundException('Assessment not found');

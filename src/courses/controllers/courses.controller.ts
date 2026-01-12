@@ -1,24 +1,25 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query, UseGuards, UploadedFile, UseInterceptors, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
-import { CourseQueryDto } from '../dto/course-filter.dto';
-import { CourseFullContentResponseDto } from '../dto/course-full-content.dto';
+import { CourseQueryDto } from '../dto/courses/course-filter.dto';
+import { CourseFullContentResponseDto } from '../dto/courses/course-full-content.dto';
 
 import { ResponseHelper } from '../../common/helpers/api-response.helper';
 import { Types } from 'mongoose';
 import { CoursesService } from '../services/courses.service';
-import { CreateCourseDto } from '../dto/create-course.dto';
-import { UpdateCourseDto } from '../dto/update-course.dto';
+import { CreateCourseDto } from '../dto/courses/create-course.dto';
+import { UpdateCourseDto } from '../dto/courses/update-course.dto';
 import { Course } from '../schemas/course.schema';
 
 import { GetUser, Roles } from '../../common/decorators'
 import { AuthGuard } from '../../auth/guards/auth.guard';
-import { CourseAccessGuard } from '../guards/course.guard';
+import { CourseAccessGuard, CourseOwnerGuard } from '../guards/course.guard';
 import { RolesGuard } from 'src/common/guards';
 import { UserRole } from 'src/common/enums';
-import { CourseOutlineDto } from '../dto/course-outline.dto';
+import { CourseOutlineDto } from '../dto/courses/course-outline.dto';
+import { UploadLessonDto, UploadLessonResponseDto } from '../dto/courses/upload-course.dto';
 
 @ApiTags('Courses') 
 @ApiBearerAuth('access-token')
@@ -39,7 +40,7 @@ export class CoursesController {
   }
 
   @Post(':courseId/publish')
-  @UseGuards(AuthGuard, RolesGuard, CourseAccessGuard)
+  @UseGuards(AuthGuard, RolesGuard, CourseOwnerGuard)
   @Roles(UserRole.TUTOR)
   @ApiOperation({ 
 	summary: "Publish a Course",
@@ -55,6 +56,18 @@ Validation checks:
   @ApiResponse({ status: 200, description: 'Course published successfully' })
   async publishCourse(@Param('courseId') courseId: Types.ObjectId, @GetUser('id') tutorId: Types.ObjectId){
 	const response = await this.coursesService.publishCourse(courseId, tutorId)
+	return ResponseHelper.success(response, HttpStatus.OK)
+  }
+
+  @Post(':courseId/:lessonId/publish')
+  @UseGuards(AuthGuard, RolesGuard, CourseOwnerGuard)
+  @Roles(UserRole.TUTOR)
+  async publishLesson(
+	@Param('courseId') courseId: Types.ObjectId, 
+	@GetUser('id') tutorId: Types.ObjectId,
+	@Param('lessonId') lessonId: Types.ObjectId
+){
+	const response = await this.coursesService.publishLesson(courseId, lessonId, tutorId)
 	return ResponseHelper.success(response, HttpStatus.OK)
   }
 
@@ -130,12 +143,12 @@ Validation checks:
   }
 
   //public access point
-  @Get(':id')
+  @Get(':courseId')
   @ApiOperation({ summary: 'Get a Course by ID' })
-  @ApiParam({ name: 'id', example: '695e6f462e8bbe31fdc07411', description: 'MongoDB ObjectId of the course' })
+  @ApiParam({ name: 'courseId', example: '695e6f462e8bbe31fdc07411', description: 'MongoDB ObjectId of the course' })
   @ApiResponse({ status: 200, description: 'Returns a specific course', type: Course })
   @ApiResponse({ status: 404, description: 'Course not found' })
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('courseId') id: string) {
     const result = await this.coursesService.findOne(id);
 	return ResponseHelper.success(result)
   }
@@ -178,22 +191,22 @@ Validation checks:
 	return ResponseHelper.success(response)
   }
 
-  @Patch(':id')
+  @Patch(':courseId')
   @ApiOperation({ summary: 'Update a course by ID' })
-  @ApiParam({ name: 'id', example: '68f17f0f6f0740d2d0bb6be3' })
+  @ApiParam({ name: 'courseId', example: '68f17f0f6f0740d2d0bb6be3' })
   @ApiResponse({ status: 200, description: 'Course updated successfully', type: Course })
   @ApiResponse({ status: 404, description: 'Course not found' })
-  async update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDto) {
+  async update(@Param('courseId') id: string, @Body() updateCourseDto: UpdateCourseDto) {
     const result = await this.coursesService.update(id, updateCourseDto);
 	return ResponseHelper.success(result)
   }
 
-  @Delete(':id')
+  @Delete(':courseId')
   @ApiOperation({ summary: 'Delete a course by ID' })
-  @ApiParam({ name: 'id', example: '68f17f0f6f0740d2d0bb6be3' })
+  @ApiParam({ name: 'courseId', example: '68f17f0f6f0740d2d0bb6be3' })
   @ApiResponse({ status: 200, description: 'Course deleted successfully' })
   @ApiResponse({ status: 404, description: 'Course not found' })
-  async remove(@Param('id') id: string) {
+  async remove(@Param('courseId') id: string) {
     await this.coursesService.remove(id);
 	return ResponseHelper.success({ message: "Course deleted" })
   }
@@ -236,6 +249,73 @@ Validation checks:
 	const content = await this.coursesService.getFullContent(courseId)
 	return ResponseHelper.success(content, HttpStatus.OK)
   }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.TUTOR)
+  @Post('/courses/:courseId/lessons/:lessonId/upload-url')
+	@ApiBearerAuth()
+	@ApiOperation({
+	summary: 'Get signed upload URL for lesson media',
+	description: `
+	Generates a temporary S3 upload URL for a lesson video.
+
+	- Upload happens directly to S3
+	- Backend does NOT receive the file
+	- Must call completion endpoint after upload
+	`,
+	})
+	@ApiParam({
+	name: 'courseId',
+	description: 'Course ID',
+	example: '695bbc7f050dceb9e3202e22',
+	})
+	@ApiParam({
+	name: 'lessonId',
+	description: 'Lesson ID',
+	example: '695c4a483443b575a0086ce5',
+	})
+	@ApiBody({ type: UploadLessonDto })
+	@ApiResponse({
+	status: 200,
+	description: 'Signed upload URL generated',
+	type: UploadLessonResponseDto,
+	})
+	@ApiResponse({ status: 401, description: 'Unauthorized' })
+	@ApiResponse({ status: 403, description: 'Not course owner' })
+	@ApiResponse({ status: 404, description: 'Lesson not found' })
+  async uploadLesson(
+	@Param('lessonId') lessonId: Types.ObjectId, 
+	@Param('couseId') courseId: Types.ObjectId, 
+	@Body() dto: UploadLessonDto,
+	@GetUser('id') tutorId: Types.ObjectId,
+){
+	const result = await this.coursesService.getUploadUrl(lessonId, courseId, tutorId, dto)
+	return ResponseHelper.success(result)
+  }
+
+	@Get(':courseId/lessons/:lessonId/play')
+	@UseGuards(AuthGuard, CourseAccessGuard)
+	@ApiBearerAuth()
+	@ApiOperation({
+	summary: 'Get secure playback URL for lesson video',
+	})
+	@ApiParam({
+	name: 'lessonId',
+	example: '695c4a483443b575a0086ce5',
+	})
+	@ApiResponse({
+	status: 200,
+	description: 'Signed playback URL',
+	example: { url: "signed get url for lesson"}
+	})
+	async playLesson(
+		@Param('courseId') courseId: Types.ObjectId,
+		@Param('lessonId') lessonId: Types.ObjectId,
+	) {
+		const result = await this.coursesService.getLessonUrl(lessonId);
+		return ResponseHelper.success(result, HttpStatus.OK);
+	}
+
 }
 
   //learning

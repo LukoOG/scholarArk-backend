@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { Question, QuestionSchema } from "./question.schema";
 
 export type AssessmentDocument = HydratedDocument<Assessment>;
@@ -12,8 +12,8 @@ export enum QuestionType {
 
 @Schema({ timestamps: true })
 export class Assessment {
-  @Prop({ type: Types.ObjectId, ref: 'Course', required: true })
-  course_id: Types.ObjectId;
+  @Prop({ type: mongoose.Types.ObjectId, ref: 'Course', required: true })
+  course: Types.ObjectId;
 
   @Prop({ required: true })
   title: string;
@@ -22,7 +22,7 @@ export class Assessment {
   description?: string;
 
   @Prop() 
-  duration_seconds?: number;
+  duration?: number;
 
   @Prop() 
   startAt?: Date;
@@ -30,17 +30,16 @@ export class Assessment {
   @Prop() 
   endAt?: Date;
 
-  @Prop({ default: false })
+  @Prop({ type: Boolean, default: false })
   isPublished: boolean;
 
-  
   @Prop({ type: [QuestionSchema] })
   questions: Question[]; 
 
   @Prop({ default: 0 })
   maxScore: number;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
   createdBy: Types.ObjectId;
 }
 export const AssessmentSchema = SchemaFactory.createForClass(Assessment);
