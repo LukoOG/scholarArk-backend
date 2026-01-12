@@ -165,9 +165,9 @@ export class AssessmentsService {
 	  })
 	  
 	  return this.attemptModel.create({
-		student_id: studentId,
-		assessment_id: assessment._id.toString(),
-		startedAt: new Date(),
+		student: studentId,
+		assessment: assessment._id.toString(),
+		startedAt: Date.now(),
 		questionsSnapshot: sanitizedQuestions,
 		answers: []
 	  }) 
