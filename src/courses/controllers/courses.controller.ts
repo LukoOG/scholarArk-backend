@@ -143,12 +143,12 @@ Validation checks:
   }
 
   //public access point
-  @Get(':id')
+  @Get(':courseId')
   @ApiOperation({ summary: 'Get a Course by ID' })
-  @ApiParam({ name: 'id', example: '695e6f462e8bbe31fdc07411', description: 'MongoDB ObjectId of the course' })
+  @ApiParam({ name: 'courseId', example: '695e6f462e8bbe31fdc07411', description: 'MongoDB ObjectId of the course' })
   @ApiResponse({ status: 200, description: 'Returns a specific course', type: Course })
   @ApiResponse({ status: 404, description: 'Course not found' })
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('courseId') id: string) {
     const result = await this.coursesService.findOne(id);
 	return ResponseHelper.success(result)
   }
@@ -191,22 +191,22 @@ Validation checks:
 	return ResponseHelper.success(response)
   }
 
-  @Patch(':id')
+  @Patch(':courseId')
   @ApiOperation({ summary: 'Update a course by ID' })
-  @ApiParam({ name: 'id', example: '68f17f0f6f0740d2d0bb6be3' })
+  @ApiParam({ name: 'courseId', example: '68f17f0f6f0740d2d0bb6be3' })
   @ApiResponse({ status: 200, description: 'Course updated successfully', type: Course })
   @ApiResponse({ status: 404, description: 'Course not found' })
-  async update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDto) {
+  async update(@Param('courseId') id: string, @Body() updateCourseDto: UpdateCourseDto) {
     const result = await this.coursesService.update(id, updateCourseDto);
 	return ResponseHelper.success(result)
   }
 
-  @Delete(':id')
+  @Delete(':courseId')
   @ApiOperation({ summary: 'Delete a course by ID' })
-  @ApiParam({ name: 'id', example: '68f17f0f6f0740d2d0bb6be3' })
+  @ApiParam({ name: 'courseId', example: '68f17f0f6f0740d2d0bb6be3' })
   @ApiResponse({ status: 200, description: 'Course deleted successfully' })
   @ApiResponse({ status: 404, description: 'Course not found' })
-  async remove(@Param('id') id: string) {
+  async remove(@Param('courseId') id: string) {
     await this.coursesService.remove(id);
 	return ResponseHelper.success({ message: "Course deleted" })
   }
