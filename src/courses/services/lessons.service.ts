@@ -12,7 +12,7 @@ export class LessonsService {
     async getLessonForAssessment(lessonId: Types.ObjectId) {
         const lesson = await this.lessonModel
             .findById(lessonId)
-            .populate({
+            .populate<{ course: { tutor: Types.ObjectId } }>({
                 path: 'course',
                 select: 'tutor',
             })
