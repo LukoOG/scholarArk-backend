@@ -3,33 +3,47 @@ import {
   Text,
   Heading,
 } from '@react-email/components';
-import * as React from 'react';
+
 import { EmailLayout } from '../components/EmailLayout';
 
-interface WelcomeEmailProps {
-  name?: string;
+interface VerificationEmailProps {
+  token: string;
 }
 
-export const WelcomeEmail = ({ name }: WelcomeEmailProps) => {
+export const VerificationEmail = ({ token }: VerificationEmailProps) => {
+  const verifyUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+
   return (
     <EmailLayout>
       <Section>
-        <Heading as="h2">
-          Welcome{ name ? `, ${name}` : '' }!
-        </Heading>
-
         <Text>
-          We’re excited to have you on ScholarArk.
+          Verify your email address
         </Text>
 
         <Text>
-          You can now explore courses, assessments, and reminders.
+          Welcome to <strong>ScholarArk</strong> 🎉
         </Text>
 
         <Text>
-          🚀 The ScholarArk Team
+          Please confirm your email address by clicking the button below.
+          This helps us keep your account secure.
+        </Text>
+
+        <Section>
+          <Button href={verifyUrl}>
+            Verify Email
+          </Button>
+        </Section>
+
+        <Text>
+          This link will expire in 24 hours.
+        </Text>
+
+        <Text>
+          If you did not create an account, you can safely ignore this email.
         </Text>
       </Section>
     </EmailLayout>
   );
 };
+
