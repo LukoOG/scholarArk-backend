@@ -27,14 +27,21 @@ export class Assessment {
   @Prop({ default: 20})
   totalQuestions: number;
 
-  @Prop() 
+  @Prop({ default: 30 }) 
   duration?: number;
 
-  @Prop() 
-  startAt?: Date;
+  @Prop({
+    type: Map,
+    of: Number,
+    default: { easy: 3, medium: 5, hard: 2 },
+  })
+  distribution: Record<'easy' | 'medium' | 'hard', number>;
 
-  @Prop() 
-  endAt?: Date;
+  // @Prop() 
+  // startAt?: Date;
+
+  // @Prop() 
+  // endAt?: Date;
 
   @Prop({ type: Boolean, default: false })
   isPublished: boolean;

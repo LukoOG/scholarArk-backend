@@ -12,28 +12,30 @@ export enum AttemptStatus {
 
 @Schema({ timestamps: true })
 export class Attempt {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Assessment', required: true })
+  @Prop({ type: mongoose.Types.ObjectId, ref: 'Assessment', required: true })
   assessment: Types.ObjectId;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
   student: Types.ObjectId;
 
-  @Prop({ type: Date, required: true })
+  @Prop({
+    type: [{ question: { type: Types.ObjectId, ref: 'Question' }, options: [String], }],
+  })
+  questions: {
+    question: Types.ObjectId;
+    options: string[];
+  }[];
+
+  @Prop({ default: Date.now })
   startedAt: Date;
 
   @Prop()
   submittedAt?: Date;
 
-  @Prop({ default: 0})
-  attemptNumber: number;
-
-  @Prop({ enum: AttemptStatus, default: AttemptStatus.IN_PROGRESS })
-  status: AttemptStatus
+  @Prop({ default: false })
+  isCompleted: boolean;
 
   @Prop()
   score?: number;
-
-  @Prop({ type: Map, of: mongoose.Schema.Types.Mixed })
-  answers: Record<string, any>;
 }
 export const AttemptSchema = SchemaFactory.createForClass(Attempt);
