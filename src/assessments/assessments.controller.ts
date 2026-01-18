@@ -27,8 +27,8 @@ export class AssessmentsController {
   @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: 'Create a new assessment (tutor)' })
   @ApiResponse({ status: 201, description: 'Assessment created successfully' })
-  async create(@Body() createAssessmentDto: CreateAssessmentDto, @GetUser('id') userId: Types.ObjectId) {
-    const result = await this.assessmentsService.createAssessment(createAssessmentDto, userId);
+  async create(@Body() createAssessmentDto: CreateAssessmentDto, @GetUser('id') tutorId: Types.ObjectId) {
+    const result = await this.assessmentsService.createAssessment(createAssessmentDto, tutorId);
     return ResponseHelper.success(result, HttpStatus.CREATED);
   }
 
@@ -116,7 +116,7 @@ export class AssessmentsController {
   })
   async startAttempt(@Param('assessmentId') assessmentId: string, @GetUser('id') studentId: string) {
     const result = await this.assessmentsService.startAttempt(assessmentId, studentId)
-    return ResponseHelper.success(result, 201)
+    return ResponseHelper.success(result, HttpStatus.CREATED)
   }
 
   @Patch(":assessmentId")

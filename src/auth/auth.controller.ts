@@ -1,4 +1,4 @@
-import { Controller, UploadedFile, UseInterceptors, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, UploadedFile, UseInterceptors, Post, Get, Body, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiCreatedResponse, ApiBadRequestResponse, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '../common/multer/multer.config';
@@ -168,6 +168,12 @@ export class AuthController {
 	return ResponseHelper.success(result)
   }
   
+  @Get('verify-email')
+  async verifyEmail(@Query('token') token: string){
+	await this.authService.verifyEmail(token);
+	return ResponseHelper.success({ message: "Email verified successfully" })
+  }
+ 
   @Post('forgot-password')
   @ApiOperation({
 	  summary: "Request password reset link",

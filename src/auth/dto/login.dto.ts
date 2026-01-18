@@ -10,4 +10,8 @@ export class LoginDto {
   @ApiProperty()
   @IsString()
   password: string;
+
+  @ApiProperty()
+  @IsString()
+  role: string;
 }
