@@ -2,6 +2,7 @@ import {
   Section,
   Text,
   Heading,
+  Button
 } from '@react-email/components';
 
 import { EmailLayout } from '../components/EmailLayout';
