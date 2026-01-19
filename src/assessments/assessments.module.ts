@@ -7,6 +7,7 @@ import { AiService } from '../common/services/AI.service';
 import { Assessment, AssessmentSchema } from './schemas/assessments.schema';
 import { Attempt, AttemptSchema} from './schemas/attempt.schema';
 import { UserModule } from '../user/user.module';
+import { CoursesModule } from 'src/courses/courses.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { UserModule } from '../user/user.module';
       { name: Attempt.name, schema: AttemptSchema },
     ]),
 	UserModule,
-	AuthModule
+	AuthModule,
+  CoursesModule
   ],
   controllers: [AssessmentsController],
   providers: [AssessmentsService, AiService],

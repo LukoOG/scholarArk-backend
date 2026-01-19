@@ -12,8 +12,11 @@ export enum QuestionType {
 
 @Schema({ timestamps: true })
 export class Assessment {
-  @Prop({ type: mongoose.Types.ObjectId, ref: 'Course', required: true })
-  course: Types.ObjectId;
+  @Prop({ type: mongoose.Types.ObjectId, ref: 'Lesson', required: true })
+  lesson: Types.ObjectId;
+  
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
+  createdBy: Types.ObjectId;
 
   @Prop({ required: true })
   title: string;
@@ -21,25 +24,27 @@ export class Assessment {
   @Prop()
   description?: string;
 
-  @Prop() 
+  @Prop({ default: 20})
+  totalQuestions: number;
+
+  @Prop({ default: 30 }) 
   duration?: number;
 
-  @Prop() 
-  startAt?: Date;
+  @Prop({
+    type: Map,
+    of: Number,
+    default: { easy: 3, medium: 5, hard: 2 },
+  })
+  distribution: Record<'easy' | 'medium' | 'hard', number>;
 
-  @Prop() 
-  endAt?: Date;
+  // @Prop() 
+  // startAt?: Date;
+
+  // @Prop() 
+  // endAt?: Date;
 
   @Prop({ type: Boolean, default: false })
   isPublished: boolean;
-
-  @Prop({ type: [QuestionSchema] })
-  questions: Question[]; 
-
-  @Prop({ default: 0 })
-  maxScore: number;
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-  createdBy: Types.ObjectId;
 }
+
 export const AssessmentSchema = SchemaFactory.createForClass(Assessment);

@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config'
 import { WelcomeEmail } from './templates/emails/welcome-email';
+import { VerificationEmail } from './templates/emails/verification-email';
 
 @Injectable()
 export class MailService {
@@ -32,6 +33,20 @@ export class MailService {
 	}catch(error){
 		this.logger.error(`Failed to send email to ${email}`, error?.stack ?? error?.message ?? JSON.stringify(error),)  
 	};
+  }
+
+  async sendVerificationEmail(email: string, token: string) {
+	try{
+		await this.resend.emails.send({
+			from: "ScholarArk <noreply@scholarark.com>",
+			to: [email],
+			subject: "Verify your email",
+			react: VerificationEmail({token}),
+		})
+	}catch(error){
+		this.logger.error(`Failed to send email to ${email}`, error?.stack ?? error?.message ?? JSON.stringify(error),)  
+		console.error(`Failed to send email to ${email}`, error)  
+	}
   }
 
   async sendWelcomeEmail(email: string, name?: string) {

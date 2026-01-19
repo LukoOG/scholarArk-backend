@@ -252,7 +252,7 @@ Validation checks:
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UserRole.TUTOR)
-  @Post('/courses/:courseId/lessons/:lessonId/upload-url')
+  @Post(':courseId/lessons/:lessonId/upload-url')
 	@ApiBearerAuth()
 	@ApiOperation({
 	summary: 'Get signed upload URL for lesson media',

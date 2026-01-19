@@ -37,6 +37,6 @@ import { LessonMedia, LessonMediaSchema } from './schemas/lesson-media.schema';
   ],
   controllers: [CoursesController, ModulesController, LessonsController],
   providers: [CoursesService, ModulesService, LessonsService, CourseAccessService, CourseAccessGuard],
-  exports: [CoursesService]
+  exports: [CoursesService, LessonsService]
 })
 export class CoursesModule {}

@@ -15,4 +15,16 @@ export class Email {
 
   @Prop({ type: Boolean, required: true, default: false })
   verified: boolean;
+
+  @Prop({ type: Date })
+  verifiedAt?: Date;
+}
+
+@Schema({ _id: false })
+export class EmailVerification {
+  @Prop({ type: String })
+  token: string;
+
+  @Prop({ type: Date })
+  expiresAt: Date;
 }

@@ -1,7 +1,9 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { ValidateNested, IsArray, IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsEmail, IsStrongPassword, IsMongoId } from 'class-validator';
 import { Gender, UserRole } from 'src/common/enums';
+import { ParseArray } from 'src/common/transforms/parse-array-transform';
 
 export class UpdateUserDto {
   // Profile fields
@@ -52,6 +54,7 @@ export class UpdateUserDto {
     example: ['64f0d2c5e92f3b0012345678', '64f0d2c5e92f3b0012345679'],
   })
   @IsOptional()
+  @Transform(ParseArray())
   @IsArray()
   @IsMongoId({ each: true })
   goalIds?: string[];
@@ -62,6 +65,7 @@ export class UpdateUserDto {
     example: ['64f0d2c5e92f3b0012345680', '64f0d2c5e92f3b0012345681'],
   })
   @IsOptional()
+  @Transform(ParseArray())
   @IsArray()
   @IsMongoId({ each: true })
   topicIds?: string[];
@@ -72,6 +76,7 @@ export class UpdateUserDto {
     example: ['64f0d2c5e92f3b0012345682', '64f0d2c5e92f3b0012345683'],
   })
   @IsOptional()
+  @Transform(ParseArray())
   @IsArray()
   @IsMongoId({ each: true })
   preferenceIds?: string[];

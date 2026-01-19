@@ -4,9 +4,6 @@ import { QuestionType } from './assessments.schema';
 
 @Schema({ _id: true }) 
 export class Question {
-   @Prop()
-   _id?: Types.ObjectId;
-  
   @Prop({ required: true, enum: QuestionType })
   type: QuestionType;
 
@@ -17,13 +14,13 @@ export class Question {
   options?: { id: string; text: string }[];
 
   @Prop({ required: true })
-  correctAnswer: string;
+  correctOptionIndex: number;
 
-  @Prop({ default: 1 })
-  points?: number;
-  
-  @Prop({ required: true, default: false })
-  isDeleted: boolean
+  @Prop({ type: [String], index: true })
+  tags: string[];
+
+  @Prop({ enum: ['easy' ,'medium' , 'hard'], index: true })
+  difficulty: 'easy' | 'medium' | 'hard'
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(Question);

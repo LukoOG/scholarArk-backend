@@ -28,7 +28,7 @@ export class LessonsController {
 
     }
 
-    @Post(':/reorder')
+    @Post(':lessonId/reorder')
     reorderLessons(){
 
     }
