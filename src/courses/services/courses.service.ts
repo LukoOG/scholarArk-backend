@@ -215,6 +215,10 @@ export class CoursesService {
 				.select(
 					'title thumbnail_url price rating category difficulty students_enrolled'
 				)
+				.populate({
+					path: "tutor",
+					select: "first_name last_name email profile_pic"
+				})
 				.sort({ createdAt: -1 })
 				.skip(skip)
 				.limit(limit)
