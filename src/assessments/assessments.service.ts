@@ -155,7 +155,7 @@ export class AssessmentsService {
 
 		if (lesson.course.tutor.toString() !== tutorId.toString())
 			throw new ForbiddenException('You do not own this course');
-		
+
 		const assessment = await this.assessmentModel
 			.findOne({ lesson: lessonId })
 			.exec();
@@ -165,4 +165,53 @@ export class AssessmentsService {
 
 		return assessment;
 	}
+
+	async setPublishState(
+		assessmentId: Types.ObjectId,
+		tutorId: Types.ObjectId,
+		publish: boolean,
+	) {
+		const assessment = await this.assessmentModel
+			.findById(assessmentId)
+			.populate({
+				path: 'lesson',
+				populate: {
+					path: 'course',
+					select: 'tutor',
+				},
+			})
+			.exec();
+
+		if (!assessment) throw new NotFoundException('Assessment not found');
+
+		if (assessment.createdBy.toString() !== tutorId.toString())
+			throw new ForbiddenException('You do not own this assessment');
+
+		if (publish) {
+			if (assessment.isPublished)
+				throw new BadRequestException('Assessment already published');
+
+			// Minimal v1 validation
+			if (assessment.totalQuestions <= 0)
+				throw new BadRequestException('Invalid assessment configuration');
+
+			assessment.isPublished = true;
+			assessment.createdAt = new Date();
+		} else {
+			if (!assessment.isPublished)
+				throw new BadRequestException('Assessment is not published');
+
+			assessment.isPublished = false;
+			assessment.createdAt = null;
+		}
+
+		await assessment.save();
+
+		return {
+			message: publish
+				? 'Assessment published successfully'
+				: 'Assessment unpublished successfully',
+		};
+	}
+
 }

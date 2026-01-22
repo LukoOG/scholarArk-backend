@@ -52,5 +52,7 @@ export class AssessmentsController {
   @Get('lessons/:lessonId')
   async getAssessmentByLesson(@Param('lessonId') lessonId: Types.ObjectId, @GetUser('id') tutorId: Types.ObjectId){
     const assessment = await this.assessmentsService.getByLesson(lessonId, tutorId)
+
+    return ResponseHelper.success(assessment)
   }
 }

@@ -45,6 +45,9 @@ export class Assessment {
 
   @Prop({ type: Boolean, default: false })
   isPublished: boolean;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export const AssessmentSchema = SchemaFactory.createForClass(Assessment);
