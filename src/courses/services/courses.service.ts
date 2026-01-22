@@ -243,10 +243,11 @@ export class CoursesService {
 	async getRecommended(userId: Types.ObjectId) {
 		const user = await this.userModel
 			.findById(userId)
-			.select('goals topics')
+			.select('goalsIds topicsIds preferencesIds')
 			.exec();
 
 		if (!user) throw new UserNotFoundException();
+		console.log(user.goalsIds, user.topicsIds)
 
 		return this.courseModel
 			.find({

@@ -136,6 +136,7 @@ Validation checks:
 
   @Get('recommended')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'List of all courses', type: [Course] })
   async recommended(@GetUser('id') userId: Types.ObjectId) {
     const result = await this.coursesService.getRecommended(userId);
