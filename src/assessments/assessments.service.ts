@@ -13,6 +13,7 @@ import { GenerateQuestionsDto } from './dto/generate-questions.dto';
 import { SubmitAttemptDto } from './dto/attempt.dto';
 import { LessonsService } from 'src/courses/services/lessons.service';
 import { LessonType } from 'src/courses/schemas/lesson.schema';
+import { PublishAssessmentDto } from './dto/publish-assessment.dto';
 
 @Injectable()
 export class AssessmentsService {
@@ -125,18 +126,6 @@ export class AssessmentsService {
 		await assessment.save();
 
 		return assessment;
-	}
-
-	async publishAssessment(assessmentId: string) {
-		const assessment = await this.assessmentModel.findById(assessmentId).exec();
-		if (!assessment) throw new NotFoundException('Assessment not found');
-
-		await this.validatePublishable(assessment);
-
-		assessment.isPublished = true;
-		await assessment.save();
-
-		return { message: 'Assessment published successfully' };
 	}
 
 	async getAssessmentById(assessmentId: string) {

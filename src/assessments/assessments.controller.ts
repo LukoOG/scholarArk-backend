@@ -16,6 +16,7 @@ import { AssessmentOwnerGuard } from './assessments.guard';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { UserRole } from '../common/enums';
 import { ResponseHelper } from '../common/helpers/api-response.helper';
+import { PublishAssessmentDto } from './dto/publish-assessment.dto';
 
 @ApiTags('assessments')
 @Controller('assessments')
@@ -42,11 +43,12 @@ export class AssessmentsController {
   }
 
   @UseGuards(AssessmentOwnerGuard)
-  @Post(':assessmentId/publish')
+  @Patch(':assessmentId/publish')
   @Roles(UserRole.TUTOR)
   @ApiOperation({ summary: 'Publish assessment (tutor)' })
-  async publish(@Param('assessmentId') id: string) {
-    return this.assessmentsService.publishAssessment(id);
+  async publish(@Param('assessmentId') assessmentId: Types.ObjectId, @GetUser('id') tutorId: Types.ObjectId, @Body() dto: PublishAssessmentDto) {
+    const result = await this.assessmentsService.setPublishState(assessmentId, tutorId, dto.publish);
+    return ResponseHelper.success(result)
   }
 
   @Get('lessons/:lessonId')
