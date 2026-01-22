@@ -1,5 +1,5 @@
 import { IsString, IsEnum, IsOptional, IsInt, Min, Max } from 'class-validator';
-import { QuestionType, QuestionDifficulty } from '../schemas/question.schema';
+import { QuestionType, QuestionDifficulty } from  'src/assessments/schemas/question.schema'
 
 export class GenerateQuestionsDto {
   @IsString()
