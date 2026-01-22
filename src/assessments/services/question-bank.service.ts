@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose"
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { Assessment } from "../schemas/assessments.schema";
 import { Question } from "../schemas/question.schema";
 import { AiService } from "src/common/services/AI.service";
@@ -19,8 +19,8 @@ export class QuestionsService {
   ) {}
 
   async create(
-    assessmentId: string,
-    tutorId: string,
+    assessmentId: Types.ObjectId,
+    tutorId: Types.ObjectId,
     dto: CreateQuestionDto,
   ) {
     const assessment = await this.assessmentModel.findById(assessmentId);
