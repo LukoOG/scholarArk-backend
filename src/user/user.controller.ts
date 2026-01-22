@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Req, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '../common/multer/multer.config';
 import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiCreatedResponse, ApiBadRequestResponse, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
@@ -78,8 +78,9 @@ export class UserController {
       },
     },
   })
-  async updateMe(@GetUser('id') id: Types.ObjectId, @Body() updateUserDto: UpdateUserDto, @UploadedFile() file?: Express.Multer.File) {
-    const response = await this.userService.update(id, updateUserDto, file);
+  async updateMe(@Req() req, @GetUser('id') id: Types.ObjectId, @Body() updateUserDto: UpdateUserDto, @UploadedFile() file?: Express.Multer.File) {
+    console.log(req)
+	const response = await this.userService.update(id, updateUserDto, file);
 	return ResponseHelper.success(response)	
   }
   

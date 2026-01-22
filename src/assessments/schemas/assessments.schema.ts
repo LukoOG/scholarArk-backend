@@ -4,12 +4,6 @@ import { Question, QuestionSchema } from "./question.schema";
 
 export type AssessmentDocument = HydratedDocument<Assessment>;
 
-export enum QuestionType {
-  MCQ = 'mcq',
-  TF = 'true_false',
-  NUMERIC = 'numeric',
-}
-
 @Schema({ timestamps: true })
 export class Assessment {
   @Prop({ type: mongoose.Types.ObjectId, ref: 'Lesson', required: true })
@@ -45,6 +39,9 @@ export class Assessment {
 
   @Prop({ type: Boolean, default: false })
   isPublished: boolean;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export const AssessmentSchema = SchemaFactory.createForClass(Assessment);

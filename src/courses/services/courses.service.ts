@@ -215,6 +215,10 @@ export class CoursesService {
 				.select(
 					'title thumbnail_url price rating category difficulty students_enrolled'
 				)
+				.populate({
+					path: "tutor",
+					select: "first_name last_name email profile_pic"
+				})
 				.sort({ createdAt: -1 })
 				.skip(skip)
 				.limit(limit)
@@ -239,10 +243,11 @@ export class CoursesService {
 	async getRecommended(userId: Types.ObjectId) {
 		const user = await this.userModel
 			.findById(userId)
-			.select('goals topics')
+			.select('goalsIds topicsIds preferencesIds')
 			.exec();
 
 		if (!user) throw new UserNotFoundException();
+		console.log(user.goalsIds, user.topicsIds)
 
 		return this.courseModel
 			.find({

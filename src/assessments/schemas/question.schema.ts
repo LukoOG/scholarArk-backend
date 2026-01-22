@@ -1,6 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
-import { QuestionType } from './assessments.schema';
+import { HydratedDocument, Types } from 'mongoose';
+
+export type QuestionDocument = HydratedDocument<Question>
+
+export enum QuestionType {
+  MCQ = 'mcq',
+  TF = 'true_false',
+  NUMERIC = 'numeric',
+}
+
+export enum QuestionDifficulty {
+  EASY = "easy",
+  MEDIUM = "medium",
+  HARD = "hard",
+}
 
 @Schema({ _id: true }) 
 export class Question {
@@ -19,8 +32,8 @@ export class Question {
   @Prop({ type: [String], index: true })
   tags: string[];
 
-  @Prop({ enum: ['easy' ,'medium' , 'hard'], index: true })
-  difficulty: 'easy' | 'medium' | 'hard'
+  @Prop({ enum: QuestionDifficulty, index: true })
+  difficulty: QuestionDifficulty;
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(Question);
