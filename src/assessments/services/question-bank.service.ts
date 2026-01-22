@@ -38,8 +38,8 @@ export class QuestionsService {
   }
 
   async generateFromAI(
-    assessmentId: string,
-    tutorId: string,
+    assessmentId: Types.ObjectId,
+    tutorId: Types.ObjectId,
     dto: GenerateQuestionsDto,
   ) {
     const assessment = await this.assessmentModel.findById(assessmentId);

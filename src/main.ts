@@ -48,7 +48,7 @@ async function bootstrap() {
   
   app.enableCors({ origin: cors.origin });
 
-  await app.listen(8080, () => {
+  await app.listen(port, () => {
     console.log(`Api is listening on port ${port}.`);
   });
 }

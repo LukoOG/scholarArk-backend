@@ -15,7 +15,7 @@ import { UpdateAssessmentDto } from '../dto/assessments/update-assessment.dto';
 import { AssessmentsService } from '../services/assessments.service';
 
 
-@ApiTags('assessments')
+@ApiTags('Assessments')
 @Controller('assessments')
 @UseGuards(AuthGuard, RolesGuard)
 export class AssessmentsController {
