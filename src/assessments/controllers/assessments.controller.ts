@@ -1,13 +1,6 @@
 import { Controller, Post, Get, Patch, Body, Delete, Param, UseGuards, Req, HttpStatus } from '@nestjs/common';
 import { Types } from "mongoose";
 import { Request } from "express";
-import { AssessmentsService } from '../services/assessments.service';
-import { CreateAssessmentDto } from '../dto/create-assessment.dto';
-import { UpdateAssessmentDto } from '../dto/update-assessment.dto';
-import { GenerateQuestionsDto } from '../dto/generate-questions.dto';
-import { UpdateQuestionsDto } from '../dto/update-questions.dto';
-import { AddQuestionsDto } from '../dto/add-questions.dto';
-import { SubmitAttemptDto } from '../dto/attempt.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { Roles, GetUser } from '../../common/decorators';
@@ -16,7 +9,11 @@ import { AssessmentOwnerGuard } from '../assessments.guard';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { UserRole } from '../../common/enums';
 import { ResponseHelper } from '../../common/helpers/api-response.helper';
-import { PublishAssessmentDto } from '../dto/publish-assessment.dto';
+import { CreateAssessmentDto } from '../dto/assessments/create-assessment.dto';
+import { PublishAssessmentDto } from '../dto/assessments/publish-assessment.dto';
+import { UpdateAssessmentDto } from '../dto/assessments/update-assessment.dto';
+import { AssessmentsService } from '../services/assessments.service';
+
 
 @ApiTags('assessments')
 @Controller('assessments')
