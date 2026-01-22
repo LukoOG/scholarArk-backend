@@ -1,19 +1,19 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AiService } from '../common/services/AI.service';
+import { AiService } from '../../common/services/AI.service';
 import { Model, Types } from 'mongoose';
-import { Assessment, AssessmentDocument } from './schemas/assessments.schema';
-import { Attempt, AttemptDocument } from './schemas/attempt.schema';
-import { Question } from './schemas/question.schema';
-import { CreateAssessmentDto } from './dto/create-assessment.dto';
-import { UpdateAssessmentDto } from './dto/update-assessment.dto';
-import { AddQuestionsDto } from './dto/add-questions.dto';
-import { UpdateQuestionsDto } from './dto/update-questions.dto';
-import { GenerateQuestionsDto } from './dto/generate-questions.dto';
-import { SubmitAttemptDto } from './dto/attempt.dto';
+import { Assessment, AssessmentDocument } from '../schemas/assessments.schema';
+import { Attempt, AttemptDocument } from '../schemas/attempt.schema';
+import { Question } from '../schemas/question.schema';
+import { CreateAssessmentDto } from '../dto/create-assessment.dto';
+import { UpdateAssessmentDto } from '../dto/update-assessment.dto';
+import { AddQuestionsDto } from '../dto/add-questions.dto';
+import { UpdateQuestionsDto } from '../dto/update-questions.dto';
+import { GenerateQuestionsDto } from '../dto/generate-questions.dto';
+import { SubmitAttemptDto } from '../dto/attempt.dto';
 import { LessonsService } from 'src/courses/services/lessons.service';
 import { LessonType } from 'src/courses/schemas/lesson.schema';
-import { PublishAssessmentDto } from './dto/publish-assessment.dto';
+import { PublishAssessmentDto } from '../dto/publish-assessment.dto';
 
 @Injectable()
 export class AssessmentsService {

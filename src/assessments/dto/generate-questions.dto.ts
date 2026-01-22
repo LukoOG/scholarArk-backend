@@ -1,9 +1,21 @@
-import { IsString, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsEnum, IsOptional, IsInt, Min, Max } from 'class-validator';
+import { QuestionType, QuestionDifficulty } from '../schemas/question.schema';
 
 export class GenerateQuestionsDto {
   @IsString()
-  prompt: string; // prompt for AI
-  @IsOptional() @IsNumber() count?: number; // number of Questions
-  @IsOptional() @IsString() difficulty?: string;
-  @IsOptional() @IsString() questionType?: 'mcq' | 'true_false' | 'numeric' | 'mixed';
+  prompt: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(50)
+  count?: number;
+
+  @IsOptional()
+  @IsEnum(QuestionDifficulty)
+  difficulty?: QuestionDifficulty;
+
+  @IsOptional()
+  @IsEnum(QuestionType)
+  questionType?: QuestionType;
 }

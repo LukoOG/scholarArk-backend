@@ -1,7 +1,7 @@
 import { IsString, IsArray, IsOptional, ValidateNested, IsEnum, IsNumber, IsMongoId } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
-import { QuestionType } from '../schemas/assessments.schema';
+import { QuestionType } from '../schemas/question.schema';
 import { ApiProperty } from '@nestjs/swagger';
 
 class OptionDto {
