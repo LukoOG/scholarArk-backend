@@ -10,7 +10,7 @@ import { UpdateAssessmentDto } from '../dto/assessments/update-assessment.dto'
 import { AddQuestionsDto } from '../dto/question-bank/add-questions.dto';
 import { UpdateQuestionsDto } from '../dto/question-bank/update-questions.dto';
 import { GenerateQuestionsDto } from '../dto/question-bank/generate-questions.dto';
-import { SubmitAttemptDto } from '../dto/attempt.dto';
+import { SubmitAttemptDto } from '../dto/attempts/attempt.dto';
 import { LessonsService } from 'src/courses/services/lessons.service';
 import { LessonType } from 'src/courses/schemas/lesson.schema';
 import { PublishAssessmentDto } from '../dto/assessments/publish-assessment.dto';

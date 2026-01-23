@@ -37,3 +37,11 @@ export class Question {
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(Question);
+
+export class QuestionSnapshot {
+  questionId: Types.ObjectId;
+  text: string;
+  options: string[];
+  correctAnswer: string;
+  points: number;
+}
