@@ -28,7 +28,7 @@ export class Attempt {
   @Prop({
     type: [QuestionSnapshot],
   })
-  questions: QuestionSnapshot[];
+  questionsSnapshot: QuestionSnapshot[];
 
   //student answers to the questions
   @Prop({ type: [Answer]})
@@ -43,7 +43,10 @@ export class Attempt {
   @Prop({ default: false })
   isGraded: boolean;
 
-  @Prop()
-  score?: number;
+  @Prop({ default: 0 })
+  score: number;
+
+  @Prop({ default: 0 })
+  maxScore: number;
 }
 export const AttemptSchema = SchemaFactory.createForClass(Attempt);

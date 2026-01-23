@@ -13,9 +13,9 @@ import { Types } from 'mongoose';
 export class AttemptsController {
   constructor(private readonly attemptsService: AttemptsService) {}
 
-  @Post('assessments/:id/attempts/start')
+  @Post('assessments/:assessmentId/attempts/start')
   start(
-    @Param('id') assessmentId: string,
+    @Param('assessmentId') assessmentId: Types.ObjectId,
     @GetUser('id') studentId: Types.ObjectId,
   ) {
     return this.attemptsService.startAttempt(
@@ -24,9 +24,9 @@ export class AttemptsController {
     );
   }
 
-  @Post('assessments/:id/attempts/submit')
+  @Post('assessments/:assessmentId/attempts/submit')
   submit(
-    @Param('id') assessmentId: string,
+    @Param('assessmentId') assessmentId: Types.ObjectId,
     @GetUser('id') studentId: Types.ObjectId,
     @Body() dto: SubmitAttemptDto,
   ) {
@@ -37,8 +37,8 @@ export class AttemptsController {
     );
   }
 
-  @Get('attempts/:id/result')
-  getResult(@Param('id') id: string, @GetUser('id') studentId: Types.ObjectId,) {
+  @Get('attempts/:attemptId/result')
+  getResult(@Param('attemptId') id: Types.ObjectId, @GetUser('id') studentId: Types.ObjectId,) {
     return this.attemptsService.getResult(id, studentId);
   }
 }

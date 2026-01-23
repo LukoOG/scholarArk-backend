@@ -1,5 +1,6 @@
 import { IsArray, IsMongoId, IsString, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
+import { Types } from "mongoose";
 
 export class SubmitAttemptDto {
   @IsArray()
@@ -10,7 +11,7 @@ export class SubmitAttemptDto {
 
 export class AnswerDto {
   @IsMongoId()
-  questionId: string;
+  questionId: Types.ObjectId;
 
   @IsString()
   answer: string;
