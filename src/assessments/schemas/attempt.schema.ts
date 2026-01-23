@@ -1,6 +1,7 @@
 import { AttachedEnhancerDefinition } from '@nestjs/core/inspector/interfaces/extras.interface';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
+import { QuestionSnapshot } from './question.schema';
 
 export type AttemptDocument = HydratedDocument<Attempt>;
 
@@ -8,6 +9,11 @@ export enum AttemptStatus {
   SUBMITTED = 'submitted',
   GRADED = 'graded',
   IN_PROGRESS = 'in_progress'
+}
+
+export class Answer {
+  questionId: Types.ObjectId;
+  answer: string;
 }
 
 @Schema({ timestamps: true })
@@ -18,13 +24,15 @@ export class Attempt {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
   student: Types.ObjectId;
 
+  //Randomly selected questions the student sees
   @Prop({
-    type: [{ question: { type: Types.ObjectId, ref: 'Question' }, options: [String], }],
+    type: [QuestionSnapshot],
   })
-  questions: {
-    question: Types.ObjectId;
-    options: string[];
-  }[];
+  questions: QuestionSnapshot[];
+
+  //student answers to the questions
+  @Prop({ type: [Answer]})
+  answers: Answer[];
 
   @Prop({ default: Date.now })
   startedAt: Date;
@@ -33,7 +41,7 @@ export class Attempt {
   submittedAt?: Date;
 
   @Prop({ default: false })
-  isCompleted: boolean;
+  isGraded: boolean;
 
   @Prop()
   score?: number;
