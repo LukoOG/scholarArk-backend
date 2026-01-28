@@ -12,6 +12,7 @@ import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config';
 import { EnrollmentModule } from 'src/enrollment/enrollment.module';
 import { CoursesModule } from 'src/courses/courses.module';
+import { PaystackWebhookController } from './webhooks/paystack.webhook.controller';
 
 
 @Module({
@@ -44,7 +45,7 @@ import { CoursesModule } from 'src/courses/courses.module';
     EnrollmentModule,
     CoursesModule,
   ],
-  controllers: [PaymentController],
+  controllers: [PaymentController, PaystackWebhookController],
   providers: [PaymentService, PaystackService],
 })
 export class PaymentModule { }
