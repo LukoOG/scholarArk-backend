@@ -155,7 +155,7 @@ Validation checks:
 	@UseGuards(AuthGuard, RolesGuard)
 	@Roles(UserRole.TUTOR)
 	async tutor(@GetUser('id') userId: Types.ObjectId) {
-		const result = await this.coursesService.getEnrolledCourses(userId)
+		const result = await this.coursesService.getTutorOwnedCourses(userId)
 		return ResponseHelper.success(result)
 	}
 

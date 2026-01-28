@@ -275,7 +275,8 @@ export class CoursesService {
 		.exec();
 
 		return {
-			items
+			items,
+			meta: {}
 		}
 	}
 
