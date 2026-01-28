@@ -26,6 +26,7 @@ import { Config } from 'src/config';
 import { InjectAws } from 'aws-sdk-v3-nest';
 import { LessonMedia, LessonMediaDocument } from '../schemas/lesson-media.schema';
 import { FILE_FORMAT_CONFIG, UploadLessonDto } from '../dto/courses/upload-course.dto';
+import { EnrollmentService } from 'src/enrollment/enrollment.service';
 
 
 @Injectable()
@@ -40,6 +41,7 @@ export class CoursesService {
 		@InjectConnection() private readonly connection: Connection,
 		@InjectAws(S3Client) private readonly s3: S3Client,
 		private readonly configService: ConfigService<Config, true>,
+		private readonly enrollmentService: EnrollmentService,
 	) {
 		this.env = configService.get("redis", { infer: true })
 	}
@@ -239,6 +241,36 @@ export class CoursesService {
 		};
 	}
 
+	async getEnrolledCourses(userId: Types.ObjectId) {
+		const courseIds = await this.enrollmentService.userEnrolledCourses(userId);
+		console.log(courseIds)
+		const [items, total] = await Promise.all([
+			this.courseModel
+				.find({
+					_id: { $in: courseIds }
+				})
+				.select(
+					'title thumbnail_url price rating category difficulty students_enrolled'
+				)
+				.populate({
+					path: "tutor",
+					select: "first_name last_name email profile_pic"
+				})
+				.lean<CourseListItem[]>(),
+
+			courseIds.length,
+		]);
+				return {
+			items,
+			meta: {
+				total,
+				// page,
+				// limit,
+				// totalPages: Math.ceil(total / limit),
+				// hasNextPage: page * limit < total,
+			},
+		};
+	}
 
 	async getRecommended(userId: Types.ObjectId) {
 		const user = await this.userModel
@@ -357,7 +389,7 @@ export class CoursesService {
 					[],
 					{ session }
 				)
-		}
+			}
 		}
 		const course = await this.courseModel.findByIdAndUpdate(id, dto).exec();
 		if (!course) throw new NotFoundException(`Course #${id} not found`);

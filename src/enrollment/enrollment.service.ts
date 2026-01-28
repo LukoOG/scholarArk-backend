@@ -15,10 +15,10 @@ export class EnrollmentService {
 
 		if(exists) return exists;
 
-		return this.enrollmentModel.create({
+		return await this.enrollmentModel.create({
 			user: userId,
 			course: courseId,
-			status: 'pending',
+			status: 'active',
 			isPaid: true
 		})
 	}
@@ -46,5 +46,15 @@ export class EnrollmentService {
 		})
 		.exec();
 		return !!enrollment
+	}
+
+	async userEnrolledCourses(userId: Types.ObjectId): Promise<Types.ObjectId[]> {
+		const enrollments = await this.enrollmentModel.find({
+			user: userId
+		}).lean().exec();
+
+		const courseIds = enrollments.map((c)=> c._id);
+
+		return courseIds
 	}
 }

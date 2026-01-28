@@ -48,8 +48,8 @@ export class Course {
   @Prop({ required: true })
   description: string;
 
-  @Prop({ unique: true, index: true })
-  slug: string;
+  // @Prop({ unique: true, index: true })
+  // slug: string;
 
   @Prop({ type: String, enum: CourseCategory, required: true })
   category: CourseCategory;

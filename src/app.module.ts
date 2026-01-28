@@ -5,7 +5,6 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import Keyv from 'keyv';
 import { createKeyv } from '@keyv/redis';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 

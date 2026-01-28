@@ -11,6 +11,7 @@ import { CourseModule, CourseModuleSchema } from './schemas/module.schema';
 import { Lesson, LessonSchema } from './schemas/lesson.schema';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { CourseAccessService } from './services/course-access.service';
+import { EnrollmentService } from 'src/enrollment/enrollment.service';
 import { CourseAccessGuard } from './guards/course.guard';
 import { EnrollmentModule } from 'src/enrollment/enrollment.module';
 import { ConfigModule } from '@nestjs/config';
