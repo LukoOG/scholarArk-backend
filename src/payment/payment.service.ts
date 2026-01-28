@@ -47,14 +47,14 @@ export class PaymentService {
         })
     }
 
-    async handleSuccessfulPayment(reference: string, payload: any){
+    async handleSuccessfulPayment(reference: string, payload: any) {
         const payment = await this.paymentModel.findOne({ reference }).exec();
 
         if (!payment || payment.status === PaymentStatus.SUCCESS) return;
 
         const verification = await this.paystackService.verifyTransaction(reference);
 
-        if(verification.status){
+        if (verification.status) {
             payment.status = PaymentStatus.SUCCESS;
             payment.providerPayload = payload;
             await payment.save();
@@ -63,9 +63,10 @@ export class PaymentService {
                 payment.user,
                 payment.course
             )
+        } else {
+            throw new BadRequestException('Transaction failed')
         }
 
-        throw new BadRequestException('Transaction failed')
     }
 
     // async getTransactions(userId: Identifier) {

@@ -32,7 +32,7 @@ export class UserService {
     return this.userModel.find().exec();
   }
 
-  async findOne(id: string): Promise<User> {
+  async findOne(id: Types.ObjectId): Promise<User> {
     const user = await this.userModel.findById(id).exec();
     if (!user) throw new NotFoundException('User not found');
     return user;

@@ -451,7 +451,7 @@ export class CoursesService {
 		const command = new PutObjectCommand({
 			Bucket: this.env.bucket,
 			Key: key,
-			ContentType: "video/mp4",
+			ContentType: format.contentType,
 			Metadata: {
 				lessonId: lessonId.toString(),
 				courseId: courseId.toString(),

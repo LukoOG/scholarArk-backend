@@ -21,16 +21,10 @@ export class UserController {
     const response = await this.userService.findAll(role);
 	return ResponseHelper.success(response)	
   }
-
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-   const response = await this.userService.findOne(id);
-	return ResponseHelper.success(response)   
-  }
   
   @UseGuards(AuthGuard)
   @Get('me')
-  async findOneMe(@GetUser('id') id: string) {
+  async findOneMe(@GetUser('id') id: Types.ObjectId) {
    const response = await this.userService.findOne(id);
 	return ResponseHelper.success(response)   
   }
