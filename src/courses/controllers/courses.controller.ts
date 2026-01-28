@@ -151,6 +151,14 @@ Validation checks:
 		return ResponseHelper.success(result)
 	}
 
+	@Get('me/tutor')
+	@UseGuards(AuthGuard, RolesGuard)
+	@Roles(UserRole.TUTOR)
+	async tutor(@GetUser('id') userId: Types.ObjectId) {
+		const result = await this.coursesService.getEnrolledCourses(userId)
+		return ResponseHelper.success(result)
+	}
+
 	//public access point
 	@Get(':courseId')
 	@ApiOperation({ summary: 'Get a Course by ID' })

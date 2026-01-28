@@ -267,6 +267,18 @@ export class CoursesService {
 		};
 	}
 
+	async getTutorOwnedCourses(tutorId: Types.ObjectId){
+		const items = await this.courseModel.find({
+			tutor: tutorId
+		})
+		.lean<CourseListItem>()
+		.exec();
+
+		return {
+			items
+		}
+	}
+
 	async getRecommended(userId: Types.ObjectId) {
 		const user = await this.userModel
 			.findById(userId)
