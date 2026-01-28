@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query, UseGuards, UploadedFile, UseInterceptors, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth, ApiQuery, ApiUnauthorizedResponse, ApiForbiddenResponse, ApiOkResponse } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
@@ -138,7 +138,15 @@ Validation checks:
 	@Get('recommended')
 	@UseGuards(AuthGuard)
 	@ApiBearerAuth()
-	@ApiResponse({ status: 200, description: 'List of all courses', type: [Course] })
+	@ApiOperation({
+		summary: 'Get recommended courses',
+		description: 'Returns a list of recommended courses for the authenticated user',
+	})
+	@ApiOkResponse({
+		description: 'Recommended courses retrieved successfully',
+		type: [Course],
+	})
+	@ApiUnauthorizedResponse({ description: 'Unauthorized' })
 	async recommended(@GetUser('id') userId: Types.ObjectId) {
 		const result = await this.coursesService.getRecommended(userId);
 		return ResponseHelper.success(result)
@@ -146,6 +154,15 @@ Validation checks:
 
 	@Get('me/enrolled')
 	@UseGuards(AuthGuard)
+	@ApiOperation({
+		summary: 'Get enrolled courses',
+		description: 'Returns all courses the authenticated user is enrolled in',
+	})
+	@ApiOkResponse({
+		description: 'Enrolled courses retrieved successfully',
+		type: [Course],
+	})
+	@ApiUnauthorizedResponse({ description: 'Unauthorized' })
 	async enrolled(@GetUser('id') userId: Types.ObjectId) {
 		const result = await this.coursesService.getEnrolledCourses(userId)
 		return ResponseHelper.success(result)
@@ -154,6 +171,16 @@ Validation checks:
 	@Get('me/tutor')
 	@UseGuards(AuthGuard, RolesGuard)
 	@Roles(UserRole.TUTOR)
+	@ApiOperation({
+		summary: 'Get tutor-owned courses',
+		description: 'Returns all courses created by the authenticated tutor',
+	})
+	@ApiOkResponse({
+		description: 'Tutor-owned courses retrieved successfully',
+		type: [Course],
+	})
+	@ApiUnauthorizedResponse({ description: 'Unauthorized' })
+	@ApiForbiddenResponse({ description: 'User is not a tutor' })
 	async tutor(@GetUser('id') userId: Types.ObjectId) {
 		const result = await this.coursesService.getTutorOwnedCourses(userId)
 		return ResponseHelper.success(result)

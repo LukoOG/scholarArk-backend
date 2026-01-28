@@ -42,7 +42,7 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
         keyv.on('error', (err) => console.error("Redis connection error: ", err))
 
         return {
-          stores: [],
+          stores: [keyv],
           ttl: 45 * 1000
         }
 
