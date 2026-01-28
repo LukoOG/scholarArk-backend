@@ -53,7 +53,7 @@ export class EnrollmentService {
 			user: userId
 		}).lean().exec();
 
-		const courseIds = enrollments.map((c)=> c._id);
+		const courseIds = enrollments.map((c)=>new Types.ObjectId(c.course));
 
 		return courseIds
 	}

@@ -30,25 +30,25 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
 
 @Module({
   imports: [
-	CacheModule.registerAsync({
-		isGlobal: true,
-    inject: [ConfigService],
-    useFactory: async (configService: ConfigService<Config, true>) => {
-      let redisConfig = configService.get('redis', { infer: true });
-      const redisUrl = `redis://default:${redisConfig.password}@${redisConfig.host}:${redisConfig.port}`;
+    CacheModule.registerAsync({
+      isGlobal: true,
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService<Config, true>) => {
+        let redisConfig = configService.get('redis', { infer: true });
+        const redisUrl = `redis://default:${redisConfig.password}@${redisConfig.host}:${redisConfig.port}`;
 
-      const keyv = createKeyv(redisUrl, { namespace:"scholarark" });
+        const keyv = createKeyv(redisUrl, { namespace: "scholarark" });
 
-      keyv.on('error', (err)=>console.error("Redis connection error: ", err))
+        keyv.on('error', (err) => console.error("Redis connection error: ", err))
 
-      return {
-       stores: [keyv],
-       ttl: 45 * 1000
+        return {
+          stores: [],
+          ttl: 45 * 1000
+        }
+
       }
 
-    }
-	
-}),
+    }),
     EventEmitterModule.forRoot({
       wildcard: false,
       verboseMemoryLeak: false,
@@ -58,13 +58,13 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
         { name: 'l0', limit: 4, ttl: 60 * 1_000 },
       ],
     }),
-	MongooseModule.forRootAsync({
-		inject: [ConfigService],
-		useFactory(configService: ConfigService<Config, true>){
-			const mongoConfig = configService.get('mongo', { infer: true });
-			return { uri: mongoConfig.uri }
-		}
-	}),
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory(configService: ConfigService<Config, true>) {
+        const mongoConfig = configService.get('mongo', { infer: true });
+        return { uri: mongoConfig.uri }
+      }
+    }),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory(configService: ConfigService<Config, true>) {
@@ -93,7 +93,7 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
       isGlobal: true,
       cache: true,
     }),
-	ScheduleModule.forRoot(),
+    ScheduleModule.forRoot(),
     UserModule,
     AdminModule,
     CoursesModule,
@@ -110,16 +110,16 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
   ],
   controllers: [AppController],
   providers: [
-		AppService,
-		{
-			provide: APP_GUARD,
-			useClass: ThrottlerGuard,
-		},
-		{
-			provide: APP_INTERCEPTOR,
-			useClass: CacheInterceptor,
-		}
-	],
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor,
+    }
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

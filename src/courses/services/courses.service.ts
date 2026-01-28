@@ -243,27 +243,22 @@ export class CoursesService {
 
 	async getEnrolledCourses(userId: Types.ObjectId) {
 		const courseIds = await this.enrollmentService.userEnrolledCourses(userId);
-		console.log(courseIds)
-		const [items, total] = await Promise.all([
-			this.courseModel
-				.find({
-					_id: { $in: courseIds }
-				})
-				.select(
-					'title thumbnail_url price rating category difficulty students_enrolled'
-				)
-				.populate({
-					path: "tutor",
-					select: "first_name last_name email profile_pic"
-				})
-				.lean<CourseListItem[]>(),
-
-			courseIds.length,
-		]);
-				return {
+		const items = await this.courseModel
+			.find({
+				_id: { $in: courseIds }
+			})
+			.select(
+				'title thumbnail_url price rating category difficulty students_enrolled'
+			)
+			.populate({
+				path: "tutor",
+				select: "first_name last_name email profile_pic"
+			})
+			.lean<CourseListItem[]>();
+		return {
 			items,
 			meta: {
-				total,
+				total: items.length,
 				// page,
 				// limit,
 				// totalPages: Math.ceil(total / limit),
