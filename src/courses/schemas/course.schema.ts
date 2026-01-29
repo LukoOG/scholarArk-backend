@@ -14,6 +14,7 @@ export interface CourseListItem {
 	category: CourseCategory;
 	difficulty: string;
 	students_enrolled: number;
+  prices: Map<PaymentCurrency, number>
 }
 
 export enum CourseCategory {
