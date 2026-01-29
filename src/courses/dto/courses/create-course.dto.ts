@@ -43,9 +43,9 @@ export class CreateLessonDto {
   @IsOptional()
   isPreview?: boolean;
 
-  @ApiPropertyOptional({
-    description: 'The s3key used to store the media file on the S3 bucket'
-  })
+  // @ApiPropertyOptional({
+  //   description: 'The s3key used to store the media file on the S3 bucket'
+  // })
 }
 
 
