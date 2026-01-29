@@ -5,6 +5,39 @@ import { CourseCategory, CourseDifficulty } from '../../schemas/course.schema';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
 
+export class LessonMediaDto {
+  @ApiProperty({
+    description: 'S3 object key where the media is stored',
+    example: 'courses/123/lessons/456/video.mp4',
+  })
+  @IsString()
+  s3key: string;
+
+  @ApiPropertyOptional({
+    description: 'Duration of the video in seconds',
+    example: 420,
+  })
+  @IsOptional()
+  @IsNumber()
+  duration?: number;
+
+  @ApiPropertyOptional({
+    description: 'File size in bytes',
+    example: 104857600,
+  })
+  @IsOptional()
+  @IsNumber()
+  size?: number;
+
+  @ApiProperty({
+    description: 'Mime type of the uploaded file',
+    example: 'video/mp4',
+  })
+  @IsString()
+  mimeType: string;
+}
+
+
 export class CreateLessonDto {
   @ApiProperty({
     description: 'Lesson title',
@@ -42,10 +75,6 @@ export class CreateLessonDto {
   })
   @IsOptional()
   isPreview?: boolean;
-
-  // @ApiPropertyOptional({
-  //   description: 'The s3key used to store the media file on the S3 bucket'
-  // })
 }
 
 
@@ -126,15 +155,6 @@ export class CreateCourseDto {
   @IsEnum(CourseDifficulty)
   difficulty?: CourseDifficulty;
 
-  @ApiProperty({
-    description: 'List of Course Prices in Supported Currencies',
-    type: [PriceDto],
-    example: [
-      { currency: 'NGN', amount: 15000 },
-      { currency: 'USD', amount: 40 },
-    ],
-  })
-
   @ApiPropertyOptional({
     description: 'Thumbnail url returned from S3 bucket upload',
     type: String,
@@ -144,6 +164,14 @@ export class CreateCourseDto {
   @IsOptional()
   thumbnailUrl?: string;
 
+  @ApiProperty({
+    description: 'List of Course Prices in Supported Currencies',
+    type: [PriceDto],
+    example: [
+      { currency: 'NGN', amount: 15000 },
+      { currency: 'USD', amount: 40 },
+    ],
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => PriceDto)
