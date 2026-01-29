@@ -99,6 +99,7 @@ export class CoursesService {
 						category: dto.category,
 						difficulty: dto.difficulty,
 						prices: coursePrices,
+						thumbnailUrl: dto.thumbnailUrl,
 						isPublished: false,
 					}
 				],
@@ -144,6 +145,7 @@ export class CoursesService {
 								duration: modLesson.duration,
 								position: j + 1,
 								isPreview: modLesson.isPreview ?? false,
+								media: modLesson.media
 							}
 						],
 						{ session },

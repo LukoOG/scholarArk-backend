@@ -11,10 +11,11 @@ export class LessonMediaDto {
     example: 'courses/123/lessons/456/video.mp4',
   })
   @IsString()
+  @IsNotEmpty()
   s3key: string;
 
   @ApiPropertyOptional({
-    description: 'Duration of the video in seconds',
+    description: 'If video, duration of the video in seconds',
     example: 420,
   })
   @IsOptional()
@@ -75,8 +76,16 @@ export class CreateLessonDto {
   })
   @IsOptional()
   isPreview?: boolean;
-}
 
+  @ApiPropertyOptional({
+    description: 'Media information for video lessons',
+    type: LessonMediaDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => LessonMediaDto)
+  media?: LessonMediaDto;
+}
 
 export class CreateModuleDto {
   @ApiProperty({
