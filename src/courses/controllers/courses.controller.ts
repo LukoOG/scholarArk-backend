@@ -181,8 +181,30 @@ Validation checks:
 	})
 	@ApiUnauthorizedResponse({ description: 'Unauthorized' })
 	@ApiForbiddenResponse({ description: 'User is not a tutor' })
-	async tutor(@GetUser('id') userId: Types.ObjectId) {
-		const result = await this.coursesService.getTutorOwnedCourses(userId)
+	async tutor(@GetUser('id') tutorId: Types.ObjectId) {
+		const result = await this.coursesService.getTutorOwnedCourses(tutorId)
+		return ResponseHelper.success(result)
+	}
+
+	@Get(':tutorId/tutor')
+	@UseGuards(AuthGuard)
+	@ApiOperation({
+		summary: 'Get tutor-owned courses',
+		description: 'Returns all courses created by the authenticated tutor',
+	})
+	@ApiParam({
+		name: 'tutorId',
+		example: "695b897dcc20e8a0c87c70ed",
+		description:"Id of tutor whose courses are needed"
+	})
+	@ApiOkResponse({
+		description: 'Tutor-owned courses retrieved successfully',
+		type: [Course],
+	})
+	@ApiUnauthorizedResponse({ description: 'Unauthorized' })
+	@ApiForbiddenResponse({ description: 'User is not a tutor' })
+	async tutorById(@Param('tutorId') tutorId: Types.ObjectId) {
+		const result = await this.coursesService.getTutorOwnedCoursesById(tutorId)
 		return ResponseHelper.success(result)
 	}
 
