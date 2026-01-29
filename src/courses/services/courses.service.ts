@@ -215,7 +215,7 @@ export class CoursesService {
 			this.courseModel
 				.find(query)
 				.select(
-					'title thumbnail_url price rating category difficulty students_enrolled'
+					'title thumbnail_url price rating category difficulty students_enrolled prices'
 				)
 				.populate({
 					path: "tutor",
@@ -248,7 +248,7 @@ export class CoursesService {
 				_id: { $in: courseIds }
 			})
 			.select(
-				'title thumbnail_url price rating category difficulty students_enrolled'
+				'title thumbnail_url price rating category difficulty students_enrolled prices'
 			)
 			.populate({
 				path: "tutor",
@@ -332,7 +332,7 @@ export class CoursesService {
 			_id: courseId,
 			isPublished: true,
 		})
-			.select('title description totalDuration')
+			.select('title description totalDuration prices')
 			.lean<{ title: string; description: string; totalDuration: number }>();
 
 		if (!course) throw new NotFoundException();

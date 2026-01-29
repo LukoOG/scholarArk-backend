@@ -66,7 +66,7 @@ export class Course {
   studentsEnrolled: number;
 
   @Prop()
-  thumbnailUrl: string;
+  thumbnailUrl?: string;
 
   @Prop({ default: 0 })
   rating: number;

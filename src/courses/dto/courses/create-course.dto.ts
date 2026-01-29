@@ -1,4 +1,4 @@
-import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, IsUrl, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CourseCategory, CourseDifficulty } from '../../schemas/course.schema';
 
@@ -42,6 +42,10 @@ export class CreateLessonDto {
   })
   @IsOptional()
   isPreview?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'The s3key used to store the media file on the S3 buckety='
+  })
 }
 
 
@@ -71,7 +75,7 @@ export class CreateModuleDto {
   lessons: CreateLessonDto[];
 }
 
-class PriceDto{
+class PriceDto {
   @ApiProperty({
     example: PaymentCurrency.NAIRA,
     enum: PaymentCurrency,
@@ -130,9 +134,19 @@ export class CreateCourseDto {
       { currency: 'USD', amount: 40 },
     ],
   })
+
+  @ApiPropertyOptional({
+    description: 'Thumbnail url returned from S3 bucket upload',
+    type: String,
+    example: "you know what a url looks like chief🙃"
+  })
+  @IsUrl()
+  @IsOptional()
+  thumbnailUrl?: string;
+
   @IsArray()
-  @ValidateNested({each:true})
-  @Type(()=>PriceDto)
+  @ValidateNested({ each: true })
+  @Type(() => PriceDto)
   prices: PriceDto[];
 
   @ApiProperty({
