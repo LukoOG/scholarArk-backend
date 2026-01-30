@@ -375,7 +375,6 @@ Validation checks:
 		example: { url: "signed get url for lesson" }
 	})
 	async playLesson(
-		@Param('courseId') courseId: Types.ObjectId,
 		@Param('lessonId') lessonId: Types.ObjectId,
 	) {
 		const result = await this.coursesService.getLessonUrl(lessonId);
