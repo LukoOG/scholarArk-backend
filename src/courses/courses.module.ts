@@ -28,7 +28,7 @@ import { LessonMedia, LessonMediaSchema } from './schemas/lesson-media.schema';
 	]),
 	AwsSdkModule.register({
 		client: new S3Client({
-			region: 'us-west-2'
+			region: 'us-east-1'
 		})
 	}),
 	AuthModule,

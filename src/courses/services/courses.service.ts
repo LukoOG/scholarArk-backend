@@ -43,7 +43,7 @@ export class CoursesService {
 		private readonly configService: ConfigService<Config, true>,
 		private readonly enrollmentService: EnrollmentService,
 	) {
-		this.env = configService.get("redis", { infer: true })
+		this.env = configService.get("aws", { infer: true })
 	}
 
 	private async validatePublishable(course: Course): Promise<void> {
@@ -227,7 +227,7 @@ export class CoursesService {
 			this.courseModel
 				.find(query)
 				.select(
-					'title thumbnail_url price rating category difficulty students_enrolled prices'
+					'title thumbnailUrl isPublished price rating category difficulty students_enrolled prices'
 				)
 				.populate({
 					path: "tutor",
@@ -260,7 +260,7 @@ export class CoursesService {
 				_id: { $in: courseIds }
 			})
 			.select(
-				'title thumbnail_url price rating category difficulty students_enrolled prices'
+				'title thumbnailUrl isPublished price rating category difficulty students_enrolled prices'
 			)
 			.populate({
 				path: "tutor",
@@ -358,7 +358,7 @@ export class CoursesService {
 			_id: courseId,
 			isPublished: true,
 		})
-			.select('title description totalDuration prices')
+			.select('title thumbnailUrl isPublished description totalDuration prices')
 			.lean<{ title: string; description: string; totalDuration: number }>();
 
 		if (!course) throw new NotFoundException();
@@ -572,6 +572,8 @@ export class CoursesService {
 
 	async getLessonUrl(lessonId: Types.ObjectId) {
 		const lesson = await this.lessonModel.findById(lessonId);
+		console.log(lesson.media.s3key)
+		console.log('env', this.env.bucket)
 
 		if (!lesson) throw new NotFoundException("Lesson not found");
 

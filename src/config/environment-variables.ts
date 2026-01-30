@@ -58,31 +58,41 @@ export class EnvironmentVariables {
   @IsPositive()
   @IsOptional()
   PAYSTACK_MINIMUM_BALANCE: number;
-  
+
   @IsString()
   GEMINI_API_KEY: string;
-  
+
   @IsString()
   GOOGLE_CLIENT_ID: string;
-  
+
   @IsString()
   CLOUDINARY_CLOUD_NAME: string;
-  
+
   @IsString()
   CLOUDINARY_API_KEY: string;
-  
+
   @IsString()
   CLOUDINARY_API_SECRET: string;
-  
+
   @IsString()
   REDIS_HOST: string;
-  
+
   @IsNumber()
   REDIS_PORT: number;
-  
+
   @IsString()
   REDIS_PASSWORD: string;
-  
+
   @IsString()
   RESEND_API_KEY: string;
+
+  @IsString()
+  AWS_ACCESS_KEY_ID
+
+  @IsString()
+  AWS_SECRET_ACCESS_KEY
+
+  @IsString()
+  AWS_BUCKET_NAME
+
 }

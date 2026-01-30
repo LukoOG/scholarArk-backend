@@ -9,7 +9,7 @@ export enum LessonMediaStatus {
 
 @Schema({ _id: false })
 export class LessonMedia {
-    @Prop({ required: true, select: false })
+    @Prop({ required: true })
     s3key: string;
 
     @Prop({ enum: LessonMediaStatus, default: LessonMediaStatus.PENDING })
