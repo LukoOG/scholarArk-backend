@@ -66,11 +66,11 @@ export class CoursesService {
 		if (lessons.length === 0) throw new BadRequestException("Course must contain at least 1 lesson");
 
 		for (const lesson of lessons) {
-			if (!lesson.isPublished) throw new BadRequestException(`Lesson ${lesson.title} is not published`);
+			//if (!lesson.isPublished) throw new BadRequestException(`Lesson ${lesson.title} is not published`);
 
 			if (lesson.type === LessonType.VIDEO) {
 				if (!lesson.media) throw new BadRequestException(`Video missing for lesson "${lesson.title}"`);
-				if (lesson.media.status !== 'ready') throw new BadRequestException(`Video upload not completed for "${lesson.title}"`)
+				//if (lesson.media.status !== 'ready') throw new BadRequestException(`Video upload not completed for "${lesson.title}"`)
 			}
 		}
 	}
