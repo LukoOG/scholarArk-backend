@@ -28,7 +28,6 @@ export class CourseAccessService {
 
       course = await this.courseModel.findById(lesson.course).select('tutor isPublished').lean().exec();
     }
-    console.log(course)
 
     if (!course) return false;
 

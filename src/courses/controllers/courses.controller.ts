@@ -360,7 +360,7 @@ Validation checks:
 	}
 
 	@Get('/lessons/:lessonId/play')
-	@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard, CourseAccessGuard)
 	@ApiBearerAuth()
 	@ApiOperation({
 		summary: 'Get secure playback URL for lesson video',

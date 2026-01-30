@@ -10,11 +10,10 @@ export class CourseAccessGuard implements CanActivate {
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const req = context.switchToHttp().getRequest();
 		const user = req.user;
-		const courseId = req.params.courseId;
-		const lessonId = req.params.lessonId
-		//console.log("here", user, user.id, courseId)
+		const { courseId, lessonId } = req.params;
+		// console.log("here", user.id, courseId)
 
-		if(!user || !courseId) return false
+		if(!user && (!courseId || !lessonId)) return false
 
 		return this.courseAccessService.canAccessCourse(
 			user.id,
