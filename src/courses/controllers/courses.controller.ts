@@ -359,7 +359,7 @@ Validation checks:
 		return ResponseHelper.success(result)
 	}
 
-	@Get(':courseId/lessons/:lessonId/play')
+	@Get('lessons/:lessonId/play')
 	@UseGuards(AuthGuard, CourseAccessGuard)
 	@ApiBearerAuth()
 	@ApiOperation({
