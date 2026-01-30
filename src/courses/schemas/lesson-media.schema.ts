@@ -16,7 +16,7 @@ export class LessonMedia {
     status: LessonMediaStatus;
 
     @Prop()
-    duration?: number;
+    duration?: number; //duration in minutes
 
     @Prop()
     size?: number;
