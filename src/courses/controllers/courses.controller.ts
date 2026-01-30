@@ -39,7 +39,7 @@ export class CoursesController {
 		return ResponseHelper.success({ "message": "Course created successfully", courseId })
 	}
 
-	@Post(':courseId/publish')
+	@Patch(':courseId/publish')
 	@UseGuards(AuthGuard, RolesGuard, CourseOwnerGuard)
 	@Roles(UserRole.TUTOR)
 	@ApiOperation({

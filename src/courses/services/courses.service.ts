@@ -50,13 +50,15 @@ export class CoursesService {
 		if (!course.title || !course.description) throw new BadRequestException("Course must contain basic details")
 
 		if (course.modules.length === 0) throw new BadRequestException("Course must contain at least 1 module");
+		console.log(course.prices.size)
 
-		if (course.prices.keys.length === 0) throw new BadRequestException("Course must have at least one price");
+		if (course.prices.size === 0) throw new BadRequestException("Course must have at least one price");
 
-		const moduleIds = course.modules.map((id) => id)
+		const moduleIds = course.modules.map((id) => id.toString())
+		console.log(moduleIds)
 
 		const lessons = await this.lessonModel.find({
-			module: { $in: { moduleIds } }
+			module: { $in: moduleIds  }
 		})
 			.lean()
 			.exec();
