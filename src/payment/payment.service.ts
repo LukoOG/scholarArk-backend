@@ -63,6 +63,8 @@ export class PaymentService {
                 payment.user,
                 payment.course
             )
+            //update students enrolled
+            await this.courseService.incrementEnrolledStudents(payment.course)
         } else {
             throw new BadRequestException('Transaction failed')
         }

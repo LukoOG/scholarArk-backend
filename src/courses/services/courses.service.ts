@@ -19,7 +19,7 @@ import { PaginatedResponse } from '../../common/interfaces';
 import { CourseFullContent } from '../types/course-full-content.type';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
 import { CourseOutlineDto } from '../dto/courses/course-outline.dto';
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand, S3Client, Type } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config';
@@ -80,6 +80,14 @@ export class CoursesService {
 			.lean()
 
 		return !!isTutor
+	}
+
+	async incrementEnrolledStudents(courseId: Types.ObjectId): Promise<void>{
+		await this.courseModel.findByIdAndUpdate(
+			courseId,
+			{ $inc: { studentsEnrolled: 1 } },
+			{ runValidators: true }
+		)
 	}
 
 	async create(dto: CreateCourseDto, tutorId: Types.ObjectId): Promise<{ courseId: Types.ObjectId }> {
@@ -273,6 +281,7 @@ export class CoursesService {
 		const items = await this.courseModel.find({
 			tutor: tutorId
 		})
+		.select("")
 		.lean<CourseListItem>()
 		.exec();
 

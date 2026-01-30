@@ -189,7 +189,7 @@ Validation checks:
 	@Get(':tutorId/tutor')
 	@UseGuards(AuthGuard)
 	@ApiOperation({
-		summary: 'Get tutor-owned courses',
+		summary: 'Get tutor-owned courses by their Id',
 		description: 'Returns all courses created by the authenticated tutor',
 	})
 	@ApiParam({
