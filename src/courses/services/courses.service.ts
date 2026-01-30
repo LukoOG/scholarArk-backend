@@ -572,8 +572,6 @@ export class CoursesService {
 
 	async getLessonUrl(lessonId: Types.ObjectId) {
 		const lesson = await this.lessonModel.findById(lessonId);
-		console.log(lesson.media.s3key)
-		console.log('env', this.env.bucket)
 
 		if (!lesson) throw new NotFoundException("Lesson not found");
 
