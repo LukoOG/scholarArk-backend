@@ -227,7 +227,7 @@ export class CoursesService {
 			this.courseModel
 				.find(query)
 				.select(
-					'title thumbnailUrl isPublished price rating category difficulty students_enrolled prices'
+					'title thumbnailUrl isPublished price rating category difficulty studentsEnrolled prices'
 				)
 				.populate({
 					path: "tutor",
@@ -283,7 +283,7 @@ export class CoursesService {
 		const items = await this.courseModel.find({
 			tutor: tutorId
 		})
-			.select("")
+			// .select("")
 			.lean<CourseListItem>()
 			.exec();
 
@@ -330,7 +330,6 @@ export class CoursesService {
 	async getFullContent(courseId: Types.ObjectId) {
 		const course = await this.courseModel
 			.findById(courseId)
-			.select('title description tutor modules')
 			.populate({
 				path: 'tutor',
 				select: 'name',
