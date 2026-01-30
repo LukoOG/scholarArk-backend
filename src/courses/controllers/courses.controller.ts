@@ -359,8 +359,8 @@ Validation checks:
 		return ResponseHelper.success(result)
 	}
 
-	@Get('lessons/:lessonId/play')
-	@UseGuards(AuthGuard, CourseAccessGuard)
+	@Get('/lessons/:lessonId/play')
+	@UseGuards(AuthGuard)
 	@ApiBearerAuth()
 	@ApiOperation({
 		summary: 'Get secure playback URL for lesson video',
@@ -380,5 +380,6 @@ Validation checks:
 		const result = await this.coursesService.getLessonUrl(lessonId);
 		return ResponseHelper.success(result, HttpStatus.OK);
 	}
-
 }
+ //TODO
+ //move play lesson and upload lesson to lesson service

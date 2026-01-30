@@ -11,6 +11,7 @@ export class CourseAccessGuard implements CanActivate {
 		const req = context.switchToHttp().getRequest();
 		const user = req.user;
 		const courseId = req.params.courseId;
+		const lessonId = req.params.lessonId
 		//console.log("here", user, user.id, courseId)
 
 		if(!user || !courseId) return false
@@ -18,7 +19,8 @@ export class CourseAccessGuard implements CanActivate {
 		return this.courseAccessService.canAccessCourse(
 			user.id,
 			user.role,
-			courseId
+			courseId,
+			lessonId
 		)
 	}
 }

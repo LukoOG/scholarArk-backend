@@ -3,6 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { Course, CourseDocument } from "../schemas/course.schema";
 import { EnrollmentService } from "src/enrollment/enrollment.service";
+import { Lesson, LessonDocument } from "../schemas/lesson.schema";
 
 
 @Injectable()
@@ -10,14 +11,24 @@ export class CourseAccessService {
   constructor(
     @InjectModel(Course.name)
     private readonly courseModel: Model<CourseDocument>,
+    @InjectModel(Lesson.name)
+    private readonly lessonModel: Model<LessonDocument>,
     private readonly enrollmentService: EnrollmentService,
-  ) {}
+  ) { }
 
-  async canAccessCourse(userId: Types.ObjectId, role: string, courseId: Types.ObjectId) {
-    const course = await this.courseModel
-      .findById(courseId)
-      .select('tutor isPublished')
-      .lean();
+  async canAccessCourse(userId: Types.ObjectId, role: string, courseId: Types.ObjectId, lessonId: Types.ObjectId) {
+    let course;
+
+    if(courseId){
+      course = await this.courseModel.findById(courseId).select('tutor isPublished').lean().exec();
+    } else if(!courseId && lessonId){
+      let lesson = await this.lessonModel.findById(lessonId).lean().exec()
+
+      if(!lesson) return false;
+
+      course = await this.courseModel.findById(lesson.course).select('tutor isPublished').lean().exec();
+    }
+    console.log(course)
 
     if (!course) return false;
 
@@ -33,11 +44,11 @@ export class CourseAccessService {
     return this.enrollmentService.isEnrolled(userId, courseId);
   }
 
-  async isTutorOwner(courseId: Types.ObjectId, tutorId: Types.ObjectId){
+  async isTutorOwner(courseId: Types.ObjectId, tutorId: Types.ObjectId) {
     const course = await this.courseModel.findById(courseId).lean().exec();
 
-    if(!course) throw new NotFoundException("Course not found")
-    if(course.tutor.toString() !== tutorId.toString()) throw new BadRequestException("You do not own this course");
+    if (!course) throw new NotFoundException("Course not found")
+    if (course.tutor.toString() !== tutorId.toString()) throw new BadRequestException("You do not own this course");
 
     return true
   }
