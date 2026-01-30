@@ -227,7 +227,7 @@ export class CoursesService {
 			this.courseModel
 				.find(query)
 				.select(
-					'title thumbnailUrl isPublished price rating category difficulty studentsEnrolled prices'
+					'-modules'
 				)
 				.populate({
 					path: "tutor",
