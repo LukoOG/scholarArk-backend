@@ -58,7 +58,7 @@ export class CoursesService {
 		console.log(moduleIds)
 
 		const lessons = await this.lessonModel.find({
-			module: { $in: moduleIds  }
+			module: { $in: moduleIds }
 		})
 			.lean()
 			.exec();
@@ -84,7 +84,7 @@ export class CoursesService {
 		return !!isTutor
 	}
 
-	async incrementEnrolledStudents(courseId: Types.ObjectId): Promise<void>{
+	async incrementEnrolledStudents(courseId: Types.ObjectId): Promise<void> {
 		await this.courseModel.findByIdAndUpdate(
 			courseId,
 			{ $inc: { studentsEnrolled: 1 } },
@@ -279,13 +279,13 @@ export class CoursesService {
 		};
 	}
 
-	async getTutorOwnedCourses(tutorId: Types.ObjectId){
+	async getTutorOwnedCourses(tutorId: Types.ObjectId) {
 		const items = await this.courseModel.find({
 			tutor: tutorId
 		})
-		.select("")
-		.lean<CourseListItem>()
-		.exec();
+			.select("")
+			.lean<CourseListItem>()
+			.exec();
 
 		return {
 			items,
@@ -293,12 +293,12 @@ export class CoursesService {
 		}
 	}
 
-	async getTutorOwnedCoursesById(tutorId: Types.ObjectId){
+	async getTutorOwnedCoursesById(tutorId: Types.ObjectId) {
 		const items = await this.courseModel.find({
 			tutor: tutorId
 		})
-		.lean<CourseListItem>()
-		.exec();
+			.lean<CourseListItem>()
+			.exec();
 
 		return {
 			items,
@@ -581,17 +581,21 @@ export class CoursesService {
 
 		const command = new GetObjectCommand({
 			Bucket: this.env.bucket,
-			Key: lesson.media.s3key
+			Key: lesson.media.s3key,
+			ResponseContentType: lesson.media.mimeType,
+			ResponseContentDisposition: "inline"
 		})
 
+		const expiryTime = lesson.media.duration + ( 1000 * 3)
+
 		const url = await getSignedUrl(this.s3, command, {
-			expiresIn: 600 * 5,
+			expiresIn: expiryTime,
 		});
 
 		return {
 			type: lesson.type,
 			url,
-			expiresIn: 600 * 5,
+			expiresIn: expiryTime,
 		};
 	}
 
