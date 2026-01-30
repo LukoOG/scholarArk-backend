@@ -341,7 +341,7 @@ export class CoursesService {
 				options: { sort: { position: 1 } },
 				populate: {
 					path: 'lessons',
-					select: 'title position type content',
+					select: '-media.s3key',
 					options: { sort: { position: 1 } },
 				},
 			})

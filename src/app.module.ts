@@ -43,7 +43,7 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
 
         return {
           stores: [keyv],
-          ttl: 45 * 1000
+          ttl: 10 * 1000
         }
 
       }
