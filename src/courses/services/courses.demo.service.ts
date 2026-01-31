@@ -165,4 +165,19 @@ export class CoursesDemoService {
         );
     }
 
+    async getCloudinaryUrls(lessonId: Types.ObjectId) {
+        const lesson = await this.lessonModel.findById(lessonId).select('media').lean().exec();
+
+        if (!lesson || !lesson.media?.demo) {
+            throw new NotFoundException('Lesson demo media not found');
+        }
+
+        return {
+            videoUrl: lesson.media.demo.videoUrl,
+            hlsUrl: lesson.media.demo.hlsUrl,
+            status: lesson.media.demo.status,
+            publicId: lesson.media.demo.publicId,
+        };
+    }
+
 }

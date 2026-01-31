@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query, UseGuards, UploadedFile, UseInterceptors, HttpStatus, UploadedFiles } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth, ApiQuery, ApiUnauthorizedResponse, ApiForbiddenResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth, ApiQuery, ApiUnauthorizedResponse, ApiForbiddenResponse, ApiOkResponse, ApiConsumes } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
@@ -25,6 +25,7 @@ import { multerConfig } from 'src/common/multer/multer.config';
 import { CoursesDemoService } from '../services/courses.demo.service';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { plainToInstance } from 'class-transformer';
+import { CreateCourseMultipartDto } from '../dto/courses/create-course-multipart.dto';
 
 @ApiTags('Courses')
 @ApiBearerAuth('access-token')
@@ -403,10 +404,48 @@ Validation checks:
 	@Post('demo')
 	@UseGuards(AuthGuard, RolesGuard)
 	@Roles(UserRole.TUTOR)
-	@ApiOperation({ summary: 'Create a new course' })
 	@ApiBearerAuth()
-	@ApiResponse({ status: 201, description: 'Course created successfully', type: Course })
-	@ApiResponse({ status: 400, description: 'Invalid request body' })
+	@ApiConsumes('multipart/form-data')
+	@ApiOperation({
+		summary: 'Create demo course with lesson media',
+		description:
+			'Creates a course in draft mode and uploads lesson videos asynchronously. ' +
+			'The request uses multipart/form-data with a stringified JSON payload and video files. ' +
+			'Video processing does not block course creation.' +
+			'Lesson videos are uploaded and processed asynchronously. ' +
+			'Course creation does not wait for video processing to complete.',
+	})
+	@ApiBody({
+		description:
+			'Multipart request containing course JSON and lesson media files. ' +
+			'Each lesson.mediaKey must match the original filename of its video.',
+		type: CreateCourseMultipartDto,
+	})
+	@ApiResponse({
+		status: 201,
+		description: 'Course drafted successfully',
+		schema: {
+			example: {
+				success: true,
+				message: 'Course drafted successfully',
+				data: {
+					courseId: '65f1a9c9b7c9a5f3a12e9c01',
+				},
+			},
+		},
+	})
+	@ApiResponse({
+		status: 400,
+		description: 'Invalid request payload or missing lesson media',
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Unauthorized',
+	})
+	@ApiResponse({
+		status: 403,
+		description: 'Forbidden – Tutor role required',
+	})
 	@UseInterceptors(FilesInterceptor('files', 10, multerConfig))
 	async create2(@Body("json") createCourseDto: string, @GetUser('id') tutorId: Types.ObjectId, @UploadedFiles() files?: Express.Multer.File[]) {
 		const parsed = JSON.parse(createCourseDto)
@@ -431,6 +470,52 @@ Validation checks:
 
 		return ResponseHelper.success({ "message": "Course drafted successfully", courseId }, HttpStatus.CREATED)
 	}
+
+	@Get('demo/lessons/:lessonId/play')
+	@ApiOperation({
+		summary: 'Get demo media URLs for a lesson',
+		description:
+			'Retrieves the Cloudinary MP4 and HLS URLs for a lesson’s demo media. ' +
+			'The lesson must have been uploaded previously. Returns status and URLs.',
+	})
+	@ApiBearerAuth()
+	@ApiParam({
+		name: 'lessonId',
+		type: 'string',
+		description: 'The ObjectId of the lesson to retrieve media for',
+		example: '65f1a9c9b7c9a5f3a12e9c01',
+	})
+	@ApiResponse({
+		status: 200,
+		description: 'Lesson demo media retrieved successfully',
+		schema: {
+			example: {
+				success: true,
+				message: 'Demo media retrieved',
+				data: {
+					videoUrl: 'https://res.cloudinary.com/.../lesson.mp4',
+					hlsUrl: 'https://res.cloudinary.com/.../lesson.m3u8',
+					status: 'uploaded', // processing | uploaded | failed
+					publicId: 'demo-lessons/lesson.mp4',
+				},
+			},
+		},
+	})
+	@ApiResponse({
+		status: 404,
+		description: 'Lesson or demo media not found',
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Unauthorized',
+	})
+	async getCloudinaryUrl(
+		@Param('lessonId') lessonId: Types.ObjectId,
+	) {
+		const result = await this.demo.getCloudinaryUrls(lessonId);
+		return ResponseHelper.success(result);
+	}
+
 
 }
 //TODO
