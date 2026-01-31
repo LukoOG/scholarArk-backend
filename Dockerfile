@@ -3,33 +3,34 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
+# Install pnpm
+RUN npm install -g pnpm
+
 # Copy package files
-COPY package*.json ./
-COPY pnpm-lock.yaml ./ 
-# Note: Using npm based on package-lock/package.json, but pnpm-lock is present. 
-# Attempting to use npm as primary based on package.json scripts.
-# If pnpm is preferred, we should install it. 
-# Proceeding with npm for standard NestJS setup as per package.json scripts.
+COPY package.json pnpm-lock.yaml ./
 
 # Install dependencies
-RUN npm ci
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
 # Build the application
-RUN npm run build
+RUN pnpm run build
 
 # Production stage
 FROM node:22-alpine
 
 WORKDIR /app
 
-# Copy package files again for production install
-COPY package*.json ./
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
 
 # Install only production dependencies
-RUN npm ci --only=production
+RUN pnpm install --prod --frozen-lockfile
 
 # Copy built assets from builder stage
 COPY --from=builder /app/dist ./dist
@@ -37,8 +38,8 @@ COPY --from=builder /app/dist ./dist
 # Set environment to production
 ENV NODE_ENV=production
 
-# Expose port (as seen in EADDRINUSE error, app uses 8080)
+# Expose port
 EXPOSE 8080
 
 # Start command
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main"]
