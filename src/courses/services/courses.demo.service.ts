@@ -6,7 +6,7 @@ import { CourseModule, CourseModuleDocument } from '../schemas/module.schema';
 import { Lesson, LessonDocument, LessonType } from '../schemas/lesson.schema';
 import { User, UserDocument } from '../../user/schemas/user.schema';
 import { CreateCourseDto } from '../dto/courses/create-course.dto';
-import { LessonMedia, LessonMediaDocument } from '../schemas/lesson-media.schema';
+import { LessonMedia, LessonMediaDocument, LessonMediaStatus } from '../schemas/lesson-media.schema';
 
 
 @Injectable()
@@ -17,7 +17,7 @@ export class CoursesDemoService {
         @InjectModel(Lesson.name) private lessonModel: Model<LessonDocument>,
         @InjectConnection() private readonly connection: Connection,
     ) { }
-    async create(dto: CreateCourseDto, tutorId: Types.ObjectId): Promise<{ courseId: Types.ObjectId }> {
+    async create(dto: CreateCourseDto, tutorId: Types.ObjectId): Promise<{ courseId: Types.ObjectId, lessonIds: Types.ObjectId[] }> {
         const session: ClientSession = await this.connection.startSession();
 
         session.startTransaction();
@@ -42,6 +42,7 @@ export class CoursesDemoService {
             );
 
             const courseId = course[0]._id;
+            const lessonIds = [];
             let totalCourseDuration = 0;
 
             for (let i = 0; i < dto.modules.length; i++) {
@@ -80,13 +81,18 @@ export class CoursesDemoService {
                                 duration: modLesson.duration,
                                 position: j + 1,
                                 isPreview: modLesson.isPreview ?? false,
-                                demoMedia: {
-                                    status: 'processing'
+                                media: {
+                                    ...modLesson.media,
+                                    demo: {
+                                        status: LessonMediaStatus.PROCESSING
+                                    }
                                 }
                             }
                         ],
                         { session },
                     )
+
+                    lessonIds.push(lesson[0]._id)
 
                     await this.moduleModel.updateOne(
                         { _id: module[0]._id },
@@ -113,7 +119,7 @@ export class CoursesDemoService {
             )
 
             await session.commitTransaction();
-            return { courseId }
+            return { courseId, lessonIds }
         } catch (error) {
             await session.abortTransaction();
             throw error

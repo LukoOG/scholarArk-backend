@@ -414,10 +414,14 @@ Validation checks:
 	@ApiResponse({ status: 201, description: 'Course created successfully', type: Course })
 	@ApiResponse({ status: 400, description: 'Invalid request body' })
 	@UseInterceptors(FileInterceptor('video', multerConfig))
-	async create2(@Body() createCourseDto: CreateCourseDto, @GetUser('id') tutorId: Types.ObjectId, @UploadedFile() file: Express.Multer.File){
-		const { courseId } = await this.demo.create(createCourseDto, tutorId)
-		this.cloud.uploadVideo(file);
-		ResponseHelper.success({"message":"courses created successfully", courseId })
+	async create2(@Body() createCourseDto: CreateCourseDto, @GetUser('id') tutorId: Types.ObjectId, @UploadedFile() file?: Express.Multer.File) {
+		const { courseId, lessonIds } = await this.demo.create(createCourseDto, tutorId)
+		if (file) {
+			for (const lessonId of lessonIds) {
+				const response = this.cloud.uploadVideo(file, lessonId, async (result) => { await this.demo.updateLessonMedia(result, lessonId) })
+			}
+		}
+		ResponseHelper.success({ "message": "courses created successfully", courseId })
 	}
 }
 //TODO

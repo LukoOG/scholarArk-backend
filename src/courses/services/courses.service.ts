@@ -470,7 +470,7 @@ export class CoursesService {
 		}
 
 		if (lesson.type === LessonType.VIDEO) {
-			if (!lesson.media || lesson.media.status !== LessonMediaStatus.READY) {
+			if (!lesson.media || lesson.media.status !== LessonMediaStatus.UPLOADED) {
 				throw new BadRequestException('Video not ready');
 			}
 		}
@@ -563,11 +563,11 @@ export class CoursesService {
 			throw new BadRequestException('No media found for lesson');
 		}
 
-		if (lesson.media.status !== LessonMediaStatus.PENDING) {
+		if (lesson.media.status !== LessonMediaStatus.PROCESSING) {
 			throw new BadRequestException('Media already completed');
 		}
 
-		lesson.media.status = LessonMediaStatus.READY;
+		lesson.media.status = LessonMediaStatus.UPLOADED;
 		await lesson.save();
 	}
 
@@ -578,7 +578,7 @@ export class CoursesService {
 
 		if (!lesson.media) throw new BadRequestException("Lesson media is not uploaded");
 
-		if (![LessonMediaStatus.READY, LessonMediaStatus.UPLOADED].includes(lesson.media.status)) throw new BadRequestException("Video not ready for playback");
+		if (![LessonMediaStatus.UPLOADED].includes(lesson.media.status)) throw new BadRequestException("Video not ready for playback");
 
 		const command = new GetObjectCommand({
 			Bucket: this.env.bucket,
@@ -601,13 +601,13 @@ export class CoursesService {
 	}
 
 	///demo onuly
-	async uploadVideoToCloudinary(file: Express.Multer.File){
-		let result = await this.cloudinaryService.uploadVideo(file)
-		console.log(result)
-		if (result) return result;
+	// async uploadVideoToCloudinary(file: Express.Multer.File){
+	// 	let result = await this.cloudinaryService.uploadVideo(file)
+	// 	console.log(result)
+	// 	if (result) return result;
 		
 
-		throw new InternalServerErrorException("Could not upload to cloudinary")
-	}
+	// 	throw new InternalServerErrorException("Could not upload to cloudinary")
+	// }
 }
 

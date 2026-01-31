@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { v2 as Cloudinary } from 'cloudinary';
+import { Types } from 'mongoose';
 import { Readable } from 'stream';
 
 @Injectable()
@@ -26,7 +27,7 @@ export class CloudinaryService {
     });
   }
 
-  async uploadVideo(file: Express.Multer.File) {
+  async uploadVideo(file: Express.Multer.File, lessonId: Types.ObjectId, callback: (result) => void) {
     const result = await new Promise((resolve, reject) => {
       this.cloudinary.uploader.upload_stream(
         {
