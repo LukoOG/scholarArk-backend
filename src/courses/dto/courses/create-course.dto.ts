@@ -169,7 +169,7 @@ export class CreateCourseDto {
   @ApiPropertyOptional({
     description: 'Thumbnail url returned from S3 bucket upload',
     type: String,
-    example: "you know what a url looks like chief🙃"
+    example: "https://image2url.com/r2/default/images/1769773616357-121d1b05-e768-4a13-bd0d-e530dc61e450.jpeg"
   })
   @IsUrl()
   @IsOptional()

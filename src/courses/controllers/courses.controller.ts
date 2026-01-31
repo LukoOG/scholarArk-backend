@@ -24,6 +24,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from 'src/common/multer/multer.config';
 import { CoursesDemoService } from '../services/courses.demo.service';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
+import { plainToInstance } from 'class-transformer';
 
 @ApiTags('Courses')
 @ApiBearerAuth('access-token')
@@ -407,16 +408,25 @@ Validation checks:
 	@ApiResponse({ status: 201, description: 'Course created successfully', type: Course })
 	@ApiResponse({ status: 400, description: 'Invalid request body' })
 	@UseInterceptors(FilesInterceptor('files', 10, multerConfig))
-	async create2(@Body() createCourseDto: CreateCourseDto, @GetUser('id') tutorId: Types.ObjectId, @UploadedFiles() files?: Express.Multer.File[]) {
-		// const { courseId, lessonIds } = await this.demo.create(createCourseDto, tutorId)
+	async create2(@Body("json") createCourseDto: string, @GetUser('id') tutorId: Types.ObjectId, @UploadedFiles() files?: Express.Multer.File[]) {
+		const parsed = JSON.parse(createCourseDto)
+		const dto = plainToInstance(CreateCourseDto, parsed)
+		// const { courseId, lessonIds } = await this.demo.create(dto, tutorId)
 		// if (files) {
 		// 	for (const lessonId of lessonIds) {
 		// 		//this.cloud.uploadVideo(file, lessonId, async (result) => { await this.demo.updateLessonMedia(result, lessonId) })
 		// 	}
 		// }
-		// ResponseHelper.success({ "message": "courses created successfully", courseId })
-		console.log(createCourseDto)
+		// console.log(dto)
+		let t = await new Promise((resolve, reject) => {
+			for (let i = 0; i++; i <= files.length) {
+				resolve(files[i].originalname)
+			}
+		})
+		console.log(t)
 	}
+
+	// ResponseHelper.success({ "message": "courses created successfully", courseId })
 }
 //TODO
 //move play lesson and upload lesson to lesson service
