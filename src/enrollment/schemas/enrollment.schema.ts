@@ -12,10 +12,10 @@ export class Enrollment {
   course: Types.ObjectId;
 
   @Prop({
-    enum: ['pending', 'active', 'completed', 'cancelled'],
+    enum: ['pending', 'active', 'completed', 'cancelled', 'refunded'],
     default: 'active',
   })
-  status: 'pending' | 'active' | 'completed' | 'cancelled';
+  status: 'pending' | 'active' | 'completed' | 'cancelled' | 'refunded';
 
   @Prop({ default: false })
   isPaid: boolean;
@@ -28,4 +28,4 @@ export class Enrollment {
 }
 
 export const EnrollmentSchema = SchemaFactory.createForClass(Enrollment);
-EnrollmentSchema.index({ user: 1, course: 1, }, { unique: true })
+EnrollmentSchema.index({ user: 1, course: 1 }, { unique: true });

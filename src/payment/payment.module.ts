@@ -12,39 +12,40 @@ import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config';
 import { EnrollmentModule } from 'src/enrollment/enrollment.module';
 import { CoursesModule } from 'src/courses/courses.module';
-
+import { AdminModule } from 'src/admin/admin.module';
 
 @Module({
   imports: [
     HttpModule.registerAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService<Config, true>) => {
-        const paystackUrl = configService.get('paystack', {infer:true}).url
-        const secretKey = configService.get('paystack', {infer:true}).secret_key
+        const paystackUrl = configService.get('paystack', { infer: true }).url;
+        const secretKey = configService.get('paystack', {
+          infer: true,
+        }).secret_key;
 
         return {
           baseURL: paystackUrl,
           headers: {
             Authorization: `Bearer ${secretKey}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           timeout: 15000,
-        }
-      }
+        };
+      },
     }),
-    MongooseModule.forFeature(
-      [
-        {
-          name: Payment.name,
-          schema: PaymentSchema
-        }
-      ]
-    ),
+    MongooseModule.forFeature([
+      {
+        name: Payment.name,
+        schema: PaymentSchema,
+      },
+    ]),
     AuthModule,
     EnrollmentModule,
     CoursesModule,
+    AdminModule,
   ],
   controllers: [PaymentController],
   providers: [PaymentService, PaystackService],
 })
-export class PaymentModule { }
+export class PaymentModule {}

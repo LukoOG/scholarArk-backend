@@ -7,44 +7,67 @@ import { Enrollment, EnrollmentDocument } from './schemas/enrollment.schema';
 
 @Injectable()
 export class EnrollmentService {
-	constructor(
-		@InjectModel(Enrollment.name) private enrollmentModel: Model<EnrollmentDocument>
-	){}
-	async enroll(userId: Types.ObjectId, courseId: Types.ObjectId){
-		const exists = await this.enrollmentModel.findOne({ user: userId, course: courseId });
+  constructor(
+    @InjectModel(Enrollment.name)
+    private enrollmentModel: Model<EnrollmentDocument>,
+  ) {}
+  async enroll(userId: Types.ObjectId, courseId: Types.ObjectId) {
+    const exists = await this.enrollmentModel.findOne({
+      user: userId,
+      course: courseId,
+    });
 
-		if(exists) return exists;
+    if (exists) return exists;
 
-		return this.enrollmentModel.create({
-			user: userId,
-			course: courseId,
-			status: 'pending',
-			isPaid: true
-		})
-	}
-	
-	async activateEnrollment(userId: Types.ObjectId, courseId: Types.ObjectId, paymentId: Types.ObjectId){
-		return this.enrollmentModel.findOneAndUpdate(
-			{user: userId, course: courseId},
-			{
-				status: 'active',
-				isPaid: true,
-				payment: paymentId,
-			},
-			{
-				upsert: true,
-				new: true
-			}
-		)
-	}
-	
-	async isEnrolled(userId: Types.ObjectId, courseId: Types.ObjectId): Promise<boolean>{
-		const enrollment = await this.enrollmentModel.findOne({
-			user: userId,
-			course: courseId,
-			status: 'active'
-		})
-		.exec();
-		return !!enrollment
-	}
+    return this.enrollmentModel.create({
+      user: userId,
+      course: courseId,
+      status: 'pending',
+      isPaid: true,
+    });
+  }
+
+  async activateEnrollment(
+    userId: Types.ObjectId,
+    courseId: Types.ObjectId,
+    paymentId: Types.ObjectId,
+  ) {
+    return this.enrollmentModel.findOneAndUpdate(
+      { user: userId, course: courseId },
+      {
+        status: 'active',
+        isPaid: true,
+        payment: paymentId,
+      },
+      {
+        upsert: true,
+        new: true,
+      },
+    );
+  }
+
+  async isEnrolled(
+    userId: Types.ObjectId,
+    courseId: Types.ObjectId,
+  ): Promise<boolean> {
+    const enrollment = await this.enrollmentModel
+      .findOne({
+        user: userId,
+        course: courseId,
+        status: 'active',
+      })
+      .exec();
+    return !!enrollment;
+  }
+
+  async revokeAccess(userId: Types.ObjectId, courseId: Types.ObjectId) {
+    return this.enrollmentModel
+      .updateOne(
+        { user: userId, course: courseId },
+        {
+          $set: { status: 'refunded', isPaid: false },
+        },
+      )
+      .exec();
+  }
 }

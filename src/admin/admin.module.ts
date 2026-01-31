@@ -25,5 +25,6 @@ import { preSave } from './schemas/middleware';
   ],
   providers: [AdminService],
   controllers: [AdminController],
+  exports: [AdminService],
 })
 export class AdminModule {}
