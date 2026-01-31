@@ -57,7 +57,7 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
     ThrottlerModule.forRoot({
       throttlers: [
         // { name: 'l0', limit: 4, ttl: 60 * 1_000 }, //regular
-        { name: 'l1', limit: 15, ttl: 10 * 1_000 } //for demo
+        { name: 'l1', limit: 150, ttl: 5 * 1_000 } //for demo
       ],
     }),
     MongooseModule.forRootAsync({
