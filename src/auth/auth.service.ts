@@ -130,7 +130,7 @@ export class AuthService {
 		let user = await this.userModel
 			.findOne({
 				$or: [
-					{ 'email.value': signupDto.email },
+					{ 'email.value': signupDto.email.value },
 				],
 			})
 			.exec();
@@ -141,10 +141,10 @@ export class AuthService {
 		const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
 		const { raw, token } = await this.generateEmailVerificationToken()
-
+		
 		const createdUser = new this.userModel({
 			...rest,
-			email: { value: signupDto.email.value, verified: true },
+			// email: { value: signupDto.email.value, verified: true },
 			emailVerification: { token: token, expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
 			role,
 			password: hashedPassword,

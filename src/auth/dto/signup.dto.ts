@@ -5,6 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class EmailDto {
   @IsEmail()
+  @IsString()
   value: string;
 
   @IsBoolean()
