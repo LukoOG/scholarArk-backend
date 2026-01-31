@@ -609,6 +609,5 @@ export class CoursesService {
 
 		throw new InternalServerErrorException("Could not upload to cloudinary")
 	}
-
 }
 

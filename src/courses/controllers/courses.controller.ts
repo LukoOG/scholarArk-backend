@@ -22,12 +22,14 @@ import { CourseOutlineDto } from '../dto/courses/course-outline.dto';
 import { UploadLessonDto, UploadLessonResponseDto } from '../dto/courses/upload-course.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from 'src/common/multer/multer.config';
+import { CoursesDemoService } from '../services/courses.demo.service';
+import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 
 @ApiTags('Courses')
 @ApiBearerAuth('access-token')
 @Controller('courses')
 export class CoursesController {
-	constructor(private readonly coursesService: CoursesService) { }
+	constructor(private readonly coursesService: CoursesService, private readonly demo: CoursesDemoService, private readonly cloud: CloudinaryService) { }
 
 	@Post()
 	@UseGuards(AuthGuard, RolesGuard)
@@ -402,6 +404,20 @@ Validation checks:
 
 		// await this.coursesService.uploadVideoToCloudinary(file)
 		return ResponseHelper.success({ "message": "video uploaded to cloudinary" })
+	}
+
+	@Post('demo')
+	@UseGuards(AuthGuard, RolesGuard)
+	@Roles(UserRole.TUTOR)
+	@ApiOperation({ summary: 'Create a new course' })
+	@ApiBearerAuth()
+	@ApiResponse({ status: 201, description: 'Course created successfully', type: Course })
+	@ApiResponse({ status: 400, description: 'Invalid request body' })
+	@UseInterceptors(FileInterceptor('video', multerConfig))
+	async create2(@Body() createCourseDto: CreateCourseDto, @GetUser('id') tutorId: Types.ObjectId, @UploadedFile() file: Express.Multer.File){
+		const { courseId } = await this.demo.create(createCourseDto, tutorId)
+		this.cloud.uploadVideo(file);
+		ResponseHelper.success({"message":"courses created successfully", courseId })
 	}
 }
 //TODO

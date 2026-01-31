@@ -16,6 +16,7 @@ import { CourseAccessGuard } from './guards/course.guard';
 import { EnrollmentModule } from 'src/enrollment/enrollment.module';
 import { ConfigModule } from '@nestjs/config';
 import { LessonMedia, LessonMediaSchema } from './schemas/lesson-media.schema';
+import { CoursesDemoService } from './services/courses.demo.service';
 
 @Module({
   imports: [
@@ -37,7 +38,7 @@ import { LessonMedia, LessonMediaSchema } from './schemas/lesson-media.schema';
 	ConfigModule
   ],
   controllers: [CoursesController, ModulesController, LessonsController],
-  providers: [CoursesService, ModulesService, LessonsService, CourseAccessService, CourseAccessGuard],
+  providers: [CoursesService, ModulesService, LessonsService, CourseAccessService, CourseAccessGuard, CoursesDemoService],
   exports: [CoursesService, LessonsService]
 })
 export class CoursesModule {}

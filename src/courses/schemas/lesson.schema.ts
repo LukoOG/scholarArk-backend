@@ -32,6 +32,14 @@ export class Lesson {
   @Prop({ type: LessonMedia })
   media?: LessonMedia;
 
+  @Prop({})
+  demoMedia?: {
+    videoUrl?: string; // Cloudinary MP4
+    hlsUrl?: string;   // Cloudinary HLS
+    publicId?: string;
+    status: 'processing' | 'ready' | 'failed';
+  };
+
   @Prop()
   content?: string;
 
