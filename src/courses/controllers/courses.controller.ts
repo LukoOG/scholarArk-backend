@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query, UseGuards, UploadedFile, UseInterceptors, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query, UseGuards, UploadedFile, UseInterceptors, HttpStatus, UploadedFiles } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth, ApiQuery, ApiUnauthorizedResponse, ApiForbiddenResponse, ApiOkResponse } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -20,7 +20,7 @@ import { RolesGuard } from 'src/common/guards';
 import { UserRole } from 'src/common/enums';
 import { CourseOutlineDto } from '../dto/courses/course-outline.dto';
 import { UploadLessonDto, UploadLessonResponseDto } from '../dto/courses/upload-course.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from 'src/common/multer/multer.config';
 import { CoursesDemoService } from '../services/courses.demo.service';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
@@ -390,16 +390,9 @@ Validation checks:
 	@UseInterceptors(FileInterceptor('video', multerConfig))
 	async uploadVideo(@UploadedFile() file: Express.Multer.File, @Body() inpt: TestDTO) {
 		console.log(inpt)
-		// const str = '"emma", "stuff"';
-		// const arr = str
-		// 	.split(',')
-		// 	.map(s => s.trim().replace(/^"|"$/g, ''));
-
-		// console.log(arr[0]);
-		const str = "['emma', 'stuff']";
-		const arr = JSON.parse(str.replace(/'/g, '"'));
-
-		console.log(arr[0]); // ["emma", "stuff"]
+		console.log(inpt.module[0].id)
+		console.log(inpt.module[0].lessons[0])
+		console.log(inpt.module[0].lessons.length)
 
 
 		// await this.coursesService.uploadVideoToCloudinary(file)
@@ -413,15 +406,16 @@ Validation checks:
 	@ApiBearerAuth()
 	@ApiResponse({ status: 201, description: 'Course created successfully', type: Course })
 	@ApiResponse({ status: 400, description: 'Invalid request body' })
-	@UseInterceptors(FileInterceptor('video', multerConfig))
-	async create2(@Body() createCourseDto: CreateCourseDto, @GetUser('id') tutorId: Types.ObjectId, @UploadedFile() file?: Express.Multer.File) {
-		const { courseId, lessonIds } = await this.demo.create(createCourseDto, tutorId)
-		if (file) {
-			for (const lessonId of lessonIds) {
-				const response = this.cloud.uploadVideo(file, lessonId, async (result) => { await this.demo.updateLessonMedia(result, lessonId) })
-			}
-		}
-		ResponseHelper.success({ "message": "courses created successfully", courseId })
+	@UseInterceptors(FilesInterceptor('files', 10, multerConfig))
+	async create2(@Body() createCourseDto: CreateCourseDto, @GetUser('id') tutorId: Types.ObjectId, @UploadedFiles() files?: Express.Multer.File[]) {
+		// const { courseId, lessonIds } = await this.demo.create(createCourseDto, tutorId)
+		// if (files) {
+		// 	for (const lessonId of lessonIds) {
+		// 		//this.cloud.uploadVideo(file, lessonId, async (result) => { await this.demo.updateLessonMedia(result, lessonId) })
+		// 	}
+		// }
+		// ResponseHelper.success({ "message": "courses created successfully", courseId })
+		console.log(createCourseDto)
 	}
 }
 //TODO

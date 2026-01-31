@@ -1,4 +1,4 @@
-import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, IsUrl, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, IsInt, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, IsUrl, ValidateNested } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { CourseCategory, CourseDifficulty } from '../../schemas/course.schema';
 
@@ -108,6 +108,7 @@ export class CreateModuleDto {
     description: 'Lessons under this module',
     type: [CreateLessonDto],
   })
+  @Transform(ParseArray())
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateLessonDto)
@@ -182,6 +183,7 @@ export class CreateCourseDto {
       { currency: 'USD', amount: 40 },
     ],
   })
+  @Transform(ParseArray())
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => PriceDto)
@@ -191,21 +193,34 @@ export class CreateCourseDto {
     description: 'Modules included in the course',
     type: [CreateModuleDto],
   })
+  @Transform(ParseArray())
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateModuleDto)
   modules: CreateModuleDto[];
 }
 
+
+
+export class TestModuleDTO {
+  @IsInt()
+  id: number;
+
+  @IsArray()
+  @IsString({ each: true })
+  lessons: string[];
+}
+
 export class TestDTO {
-    @Transform(ParseArray())
-    @IsArray()
-    @IsNotEmpty()
-    arr: string[];
+  @IsString()
+  email: string;
 
-    @IsString()
-    email: string;
+  @IsString()
+  name: string
 
-    @IsString()
-    name: string
+  @Transform(ParseArray())
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => TestModuleDTO)
+  module: TestModuleDTO[];
 }
