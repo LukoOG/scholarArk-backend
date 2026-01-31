@@ -12,9 +12,10 @@ export class EmailDto {
 }
 
 export class SignupDto {
-  @ApiProperty({ example: "okikiola@mgmail.com" })
-  @IsEmail()
-  email: String;
+  @ApiProperty({ example: { value: 'user@example.com', verified: false } })
+  @ValidateNested()
+  @Type(() => EmailDto)
+  email: EmailDto;
 
   @ApiProperty()
   @IsString()
