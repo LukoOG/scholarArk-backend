@@ -1,11 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { v2 as Cloudinary } from 'cloudinary';
 import { Types } from 'mongoose';
 import { Readable } from 'stream';
 
 @Injectable()
 export class CloudinaryService {
-  constructor(@Inject('CLOUDINARY') private cloudinary: typeof Cloudinary) { }
+  constructor(@Inject('CLOUDINARY') private cloudinary: typeof Cloudinary, private eventEmitter: EventEmitter2) { }
 
   async uploadImage(
     file: Express.Multer.File,
@@ -27,7 +28,7 @@ export class CloudinaryService {
     });
   }
 
-  async uploadVideo(file: Express.Multer.File, lessonId: Types.ObjectId, callback: (result) => void) {
+  async uploadVideo(file: Express.Multer.File, lessonId: Types.ObjectId) {
     const result = await new Promise((resolve, reject) => {
       this.cloudinary.uploader.upload_stream(
         {
@@ -38,8 +39,16 @@ export class CloudinaryService {
           ],
         },
         (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
+          if (error) {
+            this.eventEmitter.emit('lesson.media.failed', {
+              lessonId,
+            });
+          } else {
+            this.eventEmitter.emit('lesson.media.uploaded', {
+              lessonId,
+              result,
+            });
+          }
         }
       ).end(file.buffer);
     });

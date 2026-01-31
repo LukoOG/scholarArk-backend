@@ -86,6 +86,13 @@ export class CreateLessonDto {
   @ValidateNested()
   @Type(() => LessonMediaDto)
   media?: LessonMediaDto;
+
+  @ApiPropertyOptional({
+    description: 'Media key used to associate uploaded file with this lesson (filename)',
+    example: 'intro-video.mp4',
+  })
+  @IsString()
+  mediaKey?: string;
 }
 
 export class CreateModuleDto {

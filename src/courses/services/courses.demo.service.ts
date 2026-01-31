@@ -7,6 +7,7 @@ import { Lesson, LessonDocument, LessonType } from '../schemas/lesson.schema';
 import { User, UserDocument } from '../../user/schemas/user.schema';
 import { CreateCourseDto } from '../dto/courses/create-course.dto';
 import { LessonMedia, LessonMediaDocument, LessonMediaStatus } from '../schemas/lesson-media.schema';
+import { OnEvent } from '@nestjs/event-emitter';
 
 
 @Injectable()
@@ -17,7 +18,7 @@ export class CoursesDemoService {
         @InjectModel(Lesson.name) private lessonModel: Model<LessonDocument>,
         @InjectConnection() private readonly connection: Connection,
     ) { }
-    async create(dto: CreateCourseDto, tutorId: Types.ObjectId): Promise<{ courseId: Types.ObjectId, lessonIds: Types.ObjectId[] }> {
+    async create(dto: CreateCourseDto, tutorId: Types.ObjectId): Promise<{ courseId: Types.ObjectId, lessons: { id: Types.ObjectId, key: string }[] }> {
         const session: ClientSession = await this.connection.startSession();
 
         session.startTransaction();
@@ -42,7 +43,7 @@ export class CoursesDemoService {
             );
 
             const courseId = course[0]._id;
-            const lessonIds = [];
+            const lessons = [];
             let totalCourseDuration = 0;
 
             for (let i = 0; i < dto.modules.length; i++) {
@@ -92,7 +93,7 @@ export class CoursesDemoService {
                         { session },
                     )
 
-                    lessonIds.push(lesson[0]._id)
+                    lessons.push({ id: lesson[0]._id, key: modLesson.mediaKey })
 
                     await this.moduleModel.updateOne(
                         { _id: module[0]._id },
@@ -119,7 +120,7 @@ export class CoursesDemoService {
             )
 
             await session.commitTransaction();
-            return { courseId, lessonIds }
+            return { courseId, lessons }
         } catch (error) {
             await session.abortTransaction();
             throw error
@@ -139,4 +140,29 @@ export class CoursesDemoService {
             }
         )
     }
+
+    @OnEvent('lesson.media.uploaded')
+    async handleLessonMediaUploaded(payload: {
+        lessonId: Types.ObjectId;
+        result: any;
+    }) {
+        await this.lessonModel.updateOne(
+            { _id: payload.lessonId },
+            {
+                'media.demo.videoUrl': payload.result.secure_url,
+                'media.demo.hlsUrl': payload.result.eager?.[0]?.secure_url,
+                'media.demo.publicId': payload.result.public_id,
+                'media.demo.status': LessonMediaStatus.UPLOADED,
+            }
+        );
+    }
+
+    @OnEvent('lesson.media.failed')
+    async handleLessonMediaFailed({ lessonId }: { lessonId: Types.ObjectId }) {
+        await this.lessonModel.updateOne(
+            { _id: lessonId },
+            { 'media.demo.status': LessonMediaStatus.FAILED }
+        );
+    }
+
 }

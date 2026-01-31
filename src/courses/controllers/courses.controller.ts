@@ -9,7 +9,7 @@ import { CourseFullContentResponseDto } from '../dto/courses/course-full-content
 import { ResponseHelper } from '../../common/helpers/api-response.helper';
 import { Types } from 'mongoose';
 import { CoursesService } from '../services/courses.service';
-import { CreateCourseDto, TestDTO } from '../dto/courses/create-course.dto';
+import { CreateCourseDto, CreateLessonDto, TestDTO } from '../dto/courses/create-course.dto';
 import { UpdateCourseDto } from '../dto/courses/update-course.dto';
 import { Course } from '../schemas/course.schema';
 
@@ -411,22 +411,23 @@ Validation checks:
 	async create2(@Body("json") createCourseDto: string, @GetUser('id') tutorId: Types.ObjectId, @UploadedFiles() files?: Express.Multer.File[]) {
 		const parsed = JSON.parse(createCourseDto)
 		const dto = plainToInstance(CreateCourseDto, parsed)
-		// const { courseId, lessonIds } = await this.demo.create(dto, tutorId)
-		// if (files) {
-		// 	for (const lessonId of lessonIds) {
-		// 		//this.cloud.uploadVideo(file, lessonId, async (result) => { await this.demo.updateLessonMedia(result, lessonId) })
-		// 	}
-		// }
-		// console.log(dto)
-		let t = await new Promise((resolve, reject) => {
-			for (let i = 0; i++; i <= files.length) {
-				resolve(files[i].originalname)
-			}
-		})
-		console.log(t)
+
+		const fileMap = new Map<string, Express.Multer.File>();
+		files.forEach(file => fileMap.set(file.originalname, file));
+
+		const { courseId, lessons } = await this.demo.create(dto, tutorId)
+
+		for(const lesson of lessons){
+			let file = fileMap.get(lesson.key);
+			if(!file) return
+
+			this.cloud.uploadVideo(
+				file,
+				lesson.id,
+			)
+		}
 	}
 
-	// ResponseHelper.success({ "message": "courses created successfully", courseId })
 }
 //TODO
 //move play lesson and upload lesson to lesson service

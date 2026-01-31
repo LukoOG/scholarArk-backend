@@ -1,6 +1,8 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { JwtModule } from '@nestjs/jwt';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -14,8 +16,6 @@ import { Config, configuration, validateEnv } from './config';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { JwtModule } from '@nestjs/jwt';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AdminModule } from './admin/admin.module';
 import { CoursesModule } from './courses/courses.module';
 import { AssessmentsModule } from './assessments/assessments.module';
@@ -30,6 +30,7 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     CacheModule.registerAsync({
       isGlobal: true,
       inject: [ConfigService],
