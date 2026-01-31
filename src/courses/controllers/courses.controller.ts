@@ -9,7 +9,7 @@ import { CourseFullContentResponseDto } from '../dto/courses/course-full-content
 import { ResponseHelper } from '../../common/helpers/api-response.helper';
 import { Types } from 'mongoose';
 import { CoursesService } from '../services/courses.service';
-import { CreateCourseDto } from '../dto/courses/create-course.dto';
+import { CreateCourseDto, TestDTO } from '../dto/courses/create-course.dto';
 import { UpdateCourseDto } from '../dto/courses/update-course.dto';
 import { Course } from '../schemas/course.schema';
 
@@ -20,6 +20,8 @@ import { RolesGuard } from 'src/common/guards';
 import { UserRole } from 'src/common/enums';
 import { CourseOutlineDto } from '../dto/courses/course-outline.dto';
 import { UploadLessonDto, UploadLessonResponseDto } from '../dto/courses/upload-course.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from 'src/common/multer/multer.config';
 
 @ApiTags('Courses')
 @ApiBearerAuth('access-token')
@@ -195,7 +197,7 @@ Validation checks:
 	@ApiParam({
 		name: 'tutorId',
 		example: "695b897dcc20e8a0c87c70ed",
-		description:"Id of tutor whose courses are needed"
+		description: "Id of tutor whose courses are needed"
 	})
 	@ApiOkResponse({
 		description: 'Tutor-owned courses retrieved successfully',
@@ -380,6 +382,27 @@ Validation checks:
 		const result = await this.coursesService.getLessonUrl(lessonId);
 		return ResponseHelper.success(result, HttpStatus.OK);
 	}
+
+	//demo
+	@Post('test/video')
+	@UseInterceptors(FileInterceptor('video', multerConfig))
+	async uploadVideo(@UploadedFile() file: Express.Multer.File, @Body() inpt: TestDTO) {
+		console.log(inpt)
+		// const str = '"emma", "stuff"';
+		// const arr = str
+		// 	.split(',')
+		// 	.map(s => s.trim().replace(/^"|"$/g, ''));
+
+		// console.log(arr[0]);
+		const str = "['emma', 'stuff']";
+		const arr = JSON.parse(str.replace(/'/g, '"'));
+
+		console.log(arr[0]); // ["emma", "stuff"]
+
+
+		// await this.coursesService.uploadVideoToCloudinary(file)
+		return ResponseHelper.success({ "message": "video uploaded to cloudinary" })
+	}
 }
- //TODO
- //move play lesson and upload lesson to lesson service
+//TODO
+//move play lesson and upload lesson to lesson service

@@ -1,7 +1,6 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { ValidateNested, IsArray, IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsEmail, IsStrongPassword, IsMongoId } from 'class-validator';
+import { IsArray, IsString, IsOptional,IsDateString, IsEnum, IsMongoId } from 'class-validator';
 import { Gender, UserRole } from 'src/common/enums';
 import { ParseArray } from 'src/common/transforms/parse-array-transform';
 

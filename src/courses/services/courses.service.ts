@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, ForbiddenException, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
 import { Model, Types, FilterQuery, Connection, ClientSession } from 'mongoose';
 import { Course, CourseDocument, CourseListItem } from '../schemas/course.schema';
@@ -27,6 +27,7 @@ import { InjectAws } from 'aws-sdk-v3-nest';
 import { LessonMedia, LessonMediaDocument } from '../schemas/lesson-media.schema';
 import { FILE_FORMAT_CONFIG, UploadLessonDto } from '../dto/courses/upload-course.dto';
 import { EnrollmentService } from 'src/enrollment/enrollment.service';
+import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 
 
 @Injectable()
@@ -42,6 +43,7 @@ export class CoursesService {
 		@InjectAws(S3Client) private readonly s3: S3Client,
 		private readonly configService: ConfigService<Config, true>,
 		private readonly enrollmentService: EnrollmentService,
+		private readonly cloudinaryService: CloudinaryService,
 	) {
 		this.env = configService.get("aws", { infer: true })
 	}
@@ -596,6 +598,16 @@ export class CoursesService {
 			url,
 			expiresIn: expiryTime,
 		};
+	}
+
+	///demo onuly
+	async uploadVideoToCloudinary(file: Express.Multer.File){
+		let result = await this.cloudinaryService.uploadVideo(file)
+		console.log(result)
+		if (result) return result;
+		
+
+		throw new InternalServerErrorException("Could not upload to cloudinary")
 	}
 
 }

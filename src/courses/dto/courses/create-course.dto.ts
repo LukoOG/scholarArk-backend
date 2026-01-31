@@ -1,9 +1,10 @@
 import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, IsUrl, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { CourseCategory, CourseDifficulty } from '../../schemas/course.schema';
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
+import { ParseArray } from 'src/common/transforms/parse-array-transform';
 
 export class LessonMediaDto {
   @ApiProperty({
@@ -194,4 +195,17 @@ export class CreateCourseDto {
   @ValidateNested({ each: true })
   @Type(() => CreateModuleDto)
   modules: CreateModuleDto[];
+}
+
+export class TestDTO {
+    @Transform(ParseArray())
+    @IsArray()
+    @IsNotEmpty()
+    arr: string[];
+
+    @IsString()
+    email: string;
+
+    @IsString()
+    name: string
 }
