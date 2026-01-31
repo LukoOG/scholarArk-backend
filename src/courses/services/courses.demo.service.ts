@@ -178,6 +178,9 @@ export class CoursesDemoService {
             hlsUrl: lesson.media.demo.hlsUrl,
             status: lesson.media.demo.status,
             publicId: lesson.media.demo.publicId,
+            type: lesson.type,
+            url: lesson.media.demo.videoUrl,
+            expiresIn: 1800,
         };
     }
 
