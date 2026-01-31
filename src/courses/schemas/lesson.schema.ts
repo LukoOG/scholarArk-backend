@@ -38,7 +38,7 @@ export class Lesson {
   @Prop({ required: true })
   position: number;
 
-  @Prop({ default: false })
+  @Prop({ default: true }) // default: true for demo
   isPreview: boolean; // FREE lesson
 
   @Prop({ default: false })

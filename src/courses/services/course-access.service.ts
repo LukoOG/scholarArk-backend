@@ -22,9 +22,11 @@ export class CourseAccessService {
     if(courseId){
       course = await this.courseModel.findById(courseId).select('tutor isPublished').lean().exec();
     } else if(!courseId && lessonId){
-      let lesson = await this.lessonModel.findById(lessonId).lean().exec()
+      let lesson = await this.lessonModel.findById(lessonId).select('isPreview').lean().exec()
 
       if(!lesson) return false;
+
+      if(lesson.isPreview) return true; //For demo; access to free courses
 
       course = await this.courseModel.findById(lesson.course).select('tutor isPublished').lean().exec();
     }
@@ -40,7 +42,9 @@ export class CourseAccessService {
     if (!course.isPublished) return false;
 
     // Must be enrolled
-    return this.enrollmentService.isEnrolled(userId, courseId);
+    // return this.enrollmentService.isEnrolled(userId, courseId);
+    /// Demo: allowing access to all courses
+    return true
   }
 
   async isTutorOwner(courseId: Types.ObjectId, tutorId: Types.ObjectId) {
