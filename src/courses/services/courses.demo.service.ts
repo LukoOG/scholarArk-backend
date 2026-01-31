@@ -146,6 +146,7 @@ export class CoursesDemoService {
         lessonId: Types.ObjectId;
         result: any;
     }) {
+        console.log('video has been uploaded')
         await this.lessonModel.updateOne(
             { _id: payload.lessonId },
             {

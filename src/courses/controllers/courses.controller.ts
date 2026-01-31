@@ -460,6 +460,7 @@ Validation checks:
 			if (!lesson.key) continue;
 
 			let file = fileMap.get(lesson.key);
+			console.log(fileMap)
 			if (!file) continue
 
 			this.cloud.uploadVideo(

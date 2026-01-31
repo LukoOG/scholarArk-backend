@@ -29,34 +29,38 @@ export class CloudinaryService {
   }
 
   async uploadVideo(file: Express.Multer.File, lessonId: Types.ObjectId) {
-    const result = await new Promise((resolve, reject) => {
-      this.cloudinary.uploader.upload_stream(
+    return new Promise((resolve, reject) => {
+      const stream = this.cloudinary.uploader.upload_stream(
         {
           resource_type: 'video',
           folder: 'demo-videos',
-          eager: [
-            { streaming_profile: 'sd', format: 'm3u8' }
-          ],
+          eager: [{ streaming_profile: 'sd', format: 'm3u8' }],
         },
         (error, result) => {
           if (error) {
+            console.error('Cloudinary upload error:', error);
+
             this.eventEmitter.emit('lesson.media.failed', {
               lessonId,
+              error,
             });
-          } else {
-            this.eventEmitter.emit('lesson.media.uploaded', {
-              lessonId,
-              result,
-            });
-          }
-        }
-      ).end(file.buffer);
-    });
 
-    return {
-      id: result['public_id'],
-      playbackUrl: result['secure_url'],
-      hlsUrl: result['eager'][0]['secure_url'],
-    };
+            return reject(error); // ✅ IMPORTANT
+          }
+
+          console.log('Cloudinary upload success:', result?.public_id);
+
+          this.eventEmitter.emit('lesson.media.uploaded', {
+            lessonId,
+            result,
+          });
+
+          resolve(result); // ✅ IMPORTANT
+        },
+      );
+
+      stream.end(file.buffer);
+    });
   }
+
 }
