@@ -417,15 +417,19 @@ Validation checks:
 
 		const { courseId, lessons } = await this.demo.create(dto, tutorId)
 
-		for(const lesson of lessons){
+		for (const lesson of lessons) {
+			if (!lesson.key) continue;
+
 			let file = fileMap.get(lesson.key);
-			if(!file) return
+			if (!file) continue
 
 			this.cloud.uploadVideo(
 				file,
 				lesson.id,
 			)
 		}
+
+		return ResponseHelper.success({ "message": "Course drafted successfully", courseId }, HttpStatus.CREATED)
 	}
 
 }
