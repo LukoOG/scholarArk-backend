@@ -7,24 +7,6 @@ export enum LessonMediaStatus {
     FAILED = 'failed'
 }
 
-// @Schema({ _id: false })
-// export class LessonMedia {
-//     @Prop({ required: true })
-//     s3key: string;
-
-//     @Prop({ enum: LessonMediaStatus, default: LessonMediaStatus.PROCESSING})
-//     status: LessonMediaStatus;
-
-//     @Prop()
-//     duration?: number; //duration in minutes
-
-//     @Prop()
-//     size?: number;
-
-//     @Prop()
-//     mimeType: string;
-// }
-
 @Schema({ _id: false })
 export class LessonMedia {
   @Prop({ required: true })

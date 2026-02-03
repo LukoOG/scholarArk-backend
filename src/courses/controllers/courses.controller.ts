@@ -496,6 +496,7 @@ Validation checks:
 				data: {
 					videoUrl: 'https://res.cloudinary.com/.../lesson.mp4',
 					hlsUrl: 'https://res.cloudinary.com/.../lesson.m3u8',
+					url: 'https://res.cloudinary.com/.../lesson.m3u8',
 					status: 'uploaded', // processing | uploaded | failed
 					publicId: 'demo-lessons/lesson.mp4',
 				},
@@ -516,8 +517,6 @@ Validation checks:
 		const result = await this.demo.getCloudinaryUrls(lessonId);
 		return ResponseHelper.success(result);
 	}
-
-
 }
 //TODO
 //move play lesson and upload lesson to lesson service

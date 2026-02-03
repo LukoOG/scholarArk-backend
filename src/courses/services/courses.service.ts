@@ -32,7 +32,7 @@ import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 
 @Injectable()
 export class CoursesService {
-	private env;
+	private env: Config['aws'];
 	constructor(
 		@InjectModel(Course.name) private courseModel: Model<CourseDocument>,
 		@InjectModel(CourseModule.name) private moduleModel: Model<CourseModuleDocument>,
@@ -599,15 +599,5 @@ export class CoursesService {
 			expiresIn: expiryTime,
 		};
 	}
-
-	///demo onuly
-	// async uploadVideoToCloudinary(file: Express.Multer.File){
-	// 	let result = await this.cloudinaryService.uploadVideo(file)
-	// 	console.log(result)
-	// 	if (result) return result;
-		
-
-	// 	throw new InternalServerErrorException("Could not upload to cloudinary")
-	// }
 }
 

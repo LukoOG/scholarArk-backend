@@ -179,7 +179,7 @@ export class CoursesDemoService {
             status: lesson.media.demo.status,
             publicId: lesson.media.demo.publicId,
             type: lesson.type,
-            url: lesson.media.demo.videoUrl,
+            url: lesson.media.demo.hlsUrl,
             expiresIn: 1800,
         };
     }

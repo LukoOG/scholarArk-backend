@@ -55,8 +55,6 @@ export class Course {
   @Prop({ type: String, enum: CourseDifficulty, default: CourseDifficulty.BEGINNER })
   difficulty: CourseDifficulty;
 
-  // @Prop({ default: 0 })
-  // price: number;
   @Prop({ type: Map, of: Number, required: true })
   prices: Map<PaymentCurrency, number>
 
