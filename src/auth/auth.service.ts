@@ -18,6 +18,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { randomInt, createHash, randomBytes } from 'crypto';
 import { TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken';
+import { AccountExistsWithOAuthException } from './exceptions/auth.exception';
 
 const defaultAuthProviders = {
 	local: false,
@@ -133,15 +134,19 @@ export class AuthService {
 					{ 'email.value': signupDto.email.value },
 				],
 			})
+			.lean()
 			.exec();
 
+		if(user.authProviders && user.authProviders.google){
+			throw new AccountExistsWithOAuthException("google")
+		};
 		if (user) throw new UserAlreadyExistsException();
 		const { role = UserRole.STUDENT, password: plainPassword, ...rest } = signupDto;
 
 		const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
 		const { raw, token } = await this.generateEmailVerificationToken()
-		
+
 		const createdUser = new this.userModel({
 			...rest,
 			// email: { value: signupDto.email.value, verified: true },
