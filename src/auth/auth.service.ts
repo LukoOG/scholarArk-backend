@@ -137,9 +137,10 @@ export class AuthService {
 			.lean()
 			.exec();
 
-		if(user.authProviders && user.authProviders.google){
+		if (user?.authProviders?.google && !user?.authProviders?.local) {
 			throw new AccountExistsWithOAuthException("google")
 		};
+		
 		if (user) throw new UserAlreadyExistsException();
 		const { role = UserRole.STUDENT, password: plainPassword, ...rest } = signupDto;
 
