@@ -45,7 +45,7 @@ export class CoursesService {
 		private readonly enrollmentService: EnrollmentService,
 		private readonly cloudinaryService: CloudinaryService,
 	) {
-		this.env = configService.get("aws", { infer: true })
+		this.env = this.configService.get("aws", { infer: true })
 	}
 
 	private async validatePublishable(course: Course): Promise<void> {

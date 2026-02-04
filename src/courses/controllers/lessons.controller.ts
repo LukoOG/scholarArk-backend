@@ -17,7 +17,7 @@ import { UploadLessonDto, UploadLessonResponseDto } from "../dto/courses/upload-
 import { CoursesDemoService } from "../services/courses.demo.service";
 
 @ApiTags('Lessons')
-@Controller()
+@Controller('lessons')
 @UseGuards(AuthGuard, CourseOwnerGuard)
 export class LessonsController {
     constructor(
@@ -26,7 +26,7 @@ export class LessonsController {
     ) { }
     @UseGuards(AuthGuard, RolesGuard)
     @Roles(UserRole.TUTOR)
-    @Post(':courseId/lessons/:lessonId/upload-url')
+    @Post(':courseId/:lessonId/upload-url')
     @ApiBearerAuth()
     @ApiOperation({
         summary: 'Get signed upload URL for lesson media',
@@ -67,7 +67,7 @@ export class LessonsController {
         return ResponseHelper.success(result)
     }
 
-    @Get('/lessons/:lessonId/play')
+    @Get('/:lessonId/play')
     @UseGuards(AuthGuard, CourseAccessGuard)
     @ApiBearerAuth()
     @ApiOperation({
@@ -91,6 +91,9 @@ export class LessonsController {
 
     //demo
     @Post('test/video')
+    @ApiOperation({
+        summary: "Don't use this endpoint"
+    })
     @UseInterceptors(FileInterceptor('video', multerConfig))
     async uploadVideo(@UploadedFile() file: Express.Multer.File, @Body() inpt: TestDTO) {
         console.log(inpt)
@@ -100,15 +103,17 @@ export class LessonsController {
 
 
         // await this.lessonsService.uploadVideoToCloudinary(file)
-        return ResponseHelper.success({ "message": "video uploaded to cloudinary" })
+        //return ResponseHelper.success({ "message": "video uploaded to cloudinary" })
+        return ResponseHelper.error({ message: "Endpoint is restricted" }, HttpStatus.FORBIDDEN)
     }
 
-    @Get('demo/lessons/:lessonId/play')
+    @Get('demo/:lessonId/play')
     @ApiOperation({
-        summary: 'Get demo media URLs for a lesson',
-        description:
-            'Retrieves the Cloudinary MP4 and HLS URLs for a lesson’s demo media. ' +
-            'The lesson must have been uploaded previously. Returns status and URLs.',
+        // summary: 'Get demo media URLs for a lesson',
+        // description:
+        //     'Retrieves the Cloudinary MP4 and HLS URLs for a lesson’s demo media. ' +
+        //     'The lesson must have been uploaded previously. Returns status and URLs.',
+        summary: "Don't use this endpoint",
     })
     @ApiBearerAuth()
     @ApiParam({
@@ -145,7 +150,8 @@ export class LessonsController {
     async getCloudinaryUrl(
         @Param('lessonId') lessonId: Types.ObjectId,
     ) {
-        const result = await this.demo.getCloudinaryUrls(lessonId);
-        return ResponseHelper.success(result);
+        // const result = await this.demo.getCloudinaryUrls(lessonId);
+        // return ResponseHelper.success(result);
+        return ResponseHelper.error({ message: "Endpoint is restricted" }, HttpStatus.FORBIDDEN)
     }
 }

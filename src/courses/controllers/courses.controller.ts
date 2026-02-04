@@ -373,28 +373,29 @@ Validation checks:
 	})
 	@UseInterceptors(FilesInterceptor('files', 10, multerConfig))
 	async create2(@Body("json") createCourseDto: string, @GetUser('id') tutorId: Types.ObjectId, @UploadedFiles() files?: Express.Multer.File[]) {
-		const parsed = JSON.parse(createCourseDto)
-		const dto = plainToInstance(CreateCourseDto, parsed)
+		// const parsed = JSON.parse(createCourseDto)
+		// const dto = plainToInstance(CreateCourseDto, parsed)
 
-		const fileMap = new Map<string, Express.Multer.File>();
-		files.forEach(file => fileMap.set(file.originalname, file));
+		// const fileMap = new Map<string, Express.Multer.File>();
+		// files.forEach(file => fileMap.set(file.originalname, file));
 
-		const { courseId, lessons } = await this.demo.create(dto, tutorId)
+		// const { courseId, lessons } = await this.demo.create(dto, tutorId)
 
-		for (const lesson of lessons) {
-			if (!lesson.key) continue;
+		// for (const lesson of lessons) {
+		// 	if (!lesson.key) continue;
 
-			let file = fileMap.get(lesson.key);
-			console.log(fileMap)
-			if (!file) continue
+		// 	let file = fileMap.get(lesson.key);
+		// 	console.log(fileMap)
+		// 	if (!file) continue
 
-			this.cloud.uploadVideo(
-				file,
-				lesson.id,
-			)
-		}
+		// 	this.cloud.uploadVideo(
+		// 		file,
+		// 		lesson.id,
+		// 	)
+		// }
 
-		return ResponseHelper.success({ "message": "Course drafted successfully", courseId }, HttpStatus.CREATED)
+		// return ResponseHelper.success({ "message": "Course drafted successfully", courseId }, HttpStatus.CREATED)
+		return ResponseHelper.error({ message: "Endpoint is restricted" }, HttpStatus.FORBIDDEN)
 	}
 }
 //TODO
