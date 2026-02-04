@@ -141,7 +141,7 @@ export class AuthService {
 			throw new AccountExistsWithOAuthException("google")
 		};
 		
-		if (user) throw new UserAlreadyExistsException();
+		if (user) throw new UserAlreadyExistsException(user.email.value);
 		const { role = UserRole.STUDENT, password: plainPassword, ...rest } = signupDto;
 
 		const hashedPassword = await bcrypt.hash(plainPassword, 10);
