@@ -38,8 +38,8 @@ export class Lesson {
   @Prop({ required: true })
   position: number;
 
-  @Prop({ default: true }) // default: true for demo
-  isPreview: boolean; // FREE lesson
+  @Prop({ default: false }) 
+  isPreview: boolean; 
 
   @Prop({ default: false })
   isPublished: boolean;

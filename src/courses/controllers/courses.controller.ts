@@ -322,85 +322,6 @@ Validation checks:
 		return ResponseHelper.success(content, HttpStatus.OK)
 	}
 
-	@UseGuards(AuthGuard, RolesGuard)
-	@Roles(UserRole.TUTOR)
-	@Post(':courseId/lessons/:lessonId/upload-url')
-	@ApiBearerAuth()
-	@ApiOperation({
-		summary: 'Get signed upload URL for lesson media',
-		description: `
-	Generates a temporary S3 upload URL for a lesson video.
-
-	- Upload happens directly to S3
-	- Backend does NOT receive the file
-	- Must call completion endpoint after upload
-	`,
-	})
-	@ApiParam({
-		name: 'courseId',
-		description: 'Course ID',
-		example: '695bbc7f050dceb9e3202e22',
-	})
-	@ApiParam({
-		name: 'lessonId',
-		description: 'Lesson ID',
-		example: '695c4a483443b575a0086ce5',
-	})
-	@ApiBody({ type: UploadLessonDto })
-	@ApiResponse({
-		status: 200,
-		description: 'Signed upload URL generated',
-		type: UploadLessonResponseDto,
-	})
-	@ApiResponse({ status: 401, description: 'Unauthorized' })
-	@ApiResponse({ status: 403, description: 'Not course owner' })
-	@ApiResponse({ status: 404, description: 'Lesson not found' })
-	async uploadLesson(
-		@Param('lessonId') lessonId: Types.ObjectId,
-		@Param('couseId') courseId: Types.ObjectId,
-		@Body() dto: UploadLessonDto,
-		@GetUser('id') tutorId: Types.ObjectId,
-	) {
-		const result = await this.coursesService.getUploadUrl(lessonId, courseId, tutorId, dto)
-		return ResponseHelper.success(result)
-	}
-
-	@Get('/lessons/:lessonId/play')
-	@UseGuards(AuthGuard, CourseAccessGuard)
-	@ApiBearerAuth()
-	@ApiOperation({
-		summary: 'Get secure playback URL for lesson video',
-	})
-	@ApiParam({
-		name: 'lessonId',
-		example: '695c4a483443b575a0086ce5',
-	})
-	@ApiResponse({
-		status: 200,
-		description: 'Signed playback URL',
-		example: { url: "signed get url for lesson" }
-	})
-	async playLesson(
-		@Param('lessonId') lessonId: Types.ObjectId,
-	) {
-		const result = await this.coursesService.getLessonUrl(lessonId);
-		return ResponseHelper.success(result, HttpStatus.OK);
-	}
-
-	//demo
-	@Post('test/video')
-	@UseInterceptors(FileInterceptor('video', multerConfig))
-	async uploadVideo(@UploadedFile() file: Express.Multer.File, @Body() inpt: TestDTO) {
-		console.log(inpt)
-		console.log(inpt.module[0].id)
-		console.log(inpt.module[0].lessons[0])
-		console.log(inpt.module[0].lessons.length)
-
-
-		// await this.coursesService.uploadVideoToCloudinary(file)
-		return ResponseHelper.success({ "message": "video uploaded to cloudinary" })
-	}
-
 	@Post('demo')
 	@UseGuards(AuthGuard, RolesGuard)
 	@Roles(UserRole.TUTOR)
@@ -470,52 +391,6 @@ Validation checks:
 		}
 
 		return ResponseHelper.success({ "message": "Course drafted successfully", courseId }, HttpStatus.CREATED)
-	}
-
-	@Get('demo/lessons/:lessonId/play')
-	@ApiOperation({
-		summary: 'Get demo media URLs for a lesson',
-		description:
-			'Retrieves the Cloudinary MP4 and HLS URLs for a lesson’s demo media. ' +
-			'The lesson must have been uploaded previously. Returns status and URLs.',
-	})
-	@ApiBearerAuth()
-	@ApiParam({
-		name: 'lessonId',
-		type: 'string',
-		description: 'The ObjectId of the lesson to retrieve media for',
-		example: '65f1a9c9b7c9a5f3a12e9c01',
-	})
-	@ApiResponse({
-		status: 200,
-		description: 'Lesson demo media retrieved successfully',
-		schema: {
-			example: {
-				success: true,
-				message: 'Demo media retrieved',
-				data: {
-					videoUrl: 'https://res.cloudinary.com/.../lesson.mp4',
-					hlsUrl: 'https://res.cloudinary.com/.../lesson.m3u8',
-					url: 'https://res.cloudinary.com/.../lesson.m3u8',
-					status: 'uploaded', // processing | uploaded | failed
-					publicId: 'demo-lessons/lesson.mp4',
-				},
-			},
-		},
-	})
-	@ApiResponse({
-		status: 404,
-		description: 'Lesson or demo media not found',
-	})
-	@ApiResponse({
-		status: 401,
-		description: 'Unauthorized',
-	})
-	async getCloudinaryUrl(
-		@Param('lessonId') lessonId: Types.ObjectId,
-	) {
-		const result = await this.demo.getCloudinaryUrls(lessonId);
-		return ResponseHelper.success(result);
 	}
 }
 //TODO
