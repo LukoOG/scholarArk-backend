@@ -2,16 +2,25 @@ import { Injectable, BadRequestException, NotFoundException, ForbiddenException 
 import { InjectModel } from "@nestjs/mongoose";
 import { Lesson, LessonDocument, LessonType } from "../schemas/lesson.schema";
 import { Model, Types } from "mongoose";
-import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { UploadLessonDto, FILE_FORMAT_CONFIG } from "../dto/courses/upload-course.dto";
-import { LessonMediaStatus } from "../schemas/lesson-media.schema";
+import { LessonMedia, LessonMediaDocument, LessonMediaStatus } from "../schemas/lesson-media.schema";
+import { Config } from "src/config";
+import { ConfigService } from "@nestjs/config";
+import { InjectAws } from "aws-sdk-v3-nest";
 
 @Injectable()
 export class LessonsService {
+    private env: Config['aws']
     constructor(
         @InjectModel(Lesson.name) private readonly lessonModel: Model<LessonDocument>,
-    ) { }
+        @InjectModel(LessonMedia.name) private readonly lessonMediaModel: Model<LessonMediaDocument>,
+        @InjectAws(S3Client) private readonly s3: S3Client,
+        private readonly configService: ConfigService<Config, true>
+    ) { 
+        this.env = this.configService.get('aws', { infer: true })
+    }
 
     async getLessonForAssessment(lessonId: Types.ObjectId) {
         const lesson = await this.lessonModel

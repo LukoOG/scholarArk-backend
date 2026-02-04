@@ -31,7 +31,11 @@ import { CreateCourseMultipartDto } from '../dto/courses/create-course-multipart
 @ApiBearerAuth('access-token')
 @Controller('courses')
 export class CoursesController {
-	constructor(private readonly coursesService: CoursesService, private readonly demo: CoursesDemoService, private readonly cloud: CloudinaryService) { }
+	constructor(
+		private readonly coursesService: CoursesService,
+		private readonly demo: CoursesDemoService,
+		private readonly cloud: CloudinaryService
+	) { }
 
 	@Post()
 	@UseGuards(AuthGuard, RolesGuard)

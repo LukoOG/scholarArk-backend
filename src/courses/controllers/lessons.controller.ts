@@ -14,13 +14,15 @@ import { multerConfig } from "src/common/multer/multer.config";
 import { CreateCourseMultipartDto } from "../dto/courses/create-course-multipart.dto";
 import { TestDTO, CreateCourseDto } from "../dto/courses/create-course.dto";
 import { UploadLessonDto, UploadLessonResponseDto } from "../dto/courses/upload-course.dto";
+import { CoursesDemoService } from "../services/courses.demo.service";
 
 @ApiTags('Lessons')
 @Controller()
 @UseGuards(AuthGuard, CourseOwnerGuard)
 export class LessonsController {
     constructor(
-        private readonly lessonsService: LessonsService
+        private readonly lessonsService: LessonsService,
+        private readonly demo: CoursesDemoService,
     ) { }
     @UseGuards(AuthGuard, RolesGuard)
     @Roles(UserRole.TUTOR)
