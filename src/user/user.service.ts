@@ -114,8 +114,8 @@ export class UserService {
 			userId,
 			{
 				$set: {
-					'onboardingStaus.hasAcceptedTerms': true,
-					'onboardingStaus.termsAcceptedAt': new Date(),
+					'onboardingStatus.hasAcceptedTerms': true,
+					'onboardingStatus.termsAcceptedAt': new Date(),
 				}
 			},
 			{ new: true }
@@ -124,6 +124,8 @@ export class UserService {
 	async completeOnboarding(userId: Types.ObjectId) {
 		const user = await this.userModel.findById(userId).lean().exec();
 		if (!user) throw new UserNotFoundException();
+
+		console.log(user.onboardingStatus)
 
 		if (!user.onboardingStatus.hasAcceptedTerms) {
 			throw new BadRequestException('Terms not accepted');

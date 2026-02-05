@@ -49,6 +49,7 @@ export class User {
   googleId?: string;
 
   @Prop({
+    _id: false,
     type: {
       local: { type: Boolean, default: false },
       google: { type: Boolean, default: false },
@@ -90,7 +91,7 @@ export class User {
   @Prop()
   password?: string;
 
-  @Prop({ type: OnboardingStatus })
+  @Prop({ type: OnboardingStatus, required: true })
   onboardingStatus: OnboardingStatus;
 
   @Prop({ type: Nonce })

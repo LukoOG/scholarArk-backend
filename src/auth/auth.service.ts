@@ -27,7 +27,6 @@ const defaultAuthProviders = {
 	facebook: false,
 } as const;
 
-
 @Injectable()
 export class AuthService {
 	constructor(
@@ -149,10 +148,11 @@ export class AuthService {
 		const createdUser = new this.userModel({
 			...rest,
 			// email: { value: signupDto.email.value, verified: true },
-			emailVerification: { token: token, expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+			emailVerification: { token: token, expiresAt: new Date(Date.now() + 5 * 60 * 1000) },
 			role,
 			password: hashedPassword,
 			profile_pic: profilePicUrl,
+			onboardingStatus: {},
 			authProviders: { ...defaultAuthProviders, local: true }
 		});
 
