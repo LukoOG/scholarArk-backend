@@ -10,6 +10,7 @@ import { ResponseHelper } from '../common/helpers/api-response.helper';
 import { GetUser } from '../common/decorators'
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Types } from 'mongoose';
+import { OnboardingStatusDto } from './dto/onboarding-status.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -158,13 +159,35 @@ Requirements:
 	@UseGuards(AuthGuard)
 	@ApiBearerAuth()
 	@ApiOperation({
-		summary: "check the user's onboarding status",
-		description:""
+		summary: "Get user's onboarding status",
+		description: `
+Returns the current onboarding state of the authenticated user.
+
+This endpoint is used by the client to determine:
+- Whether the user has accepted Terms & Conditions
+- Whether profile setup is complete
+- Whether preferences have been selected
+- Whether onboarding should be enforced or skipped
+
+Typical usage:
+- Called immediately after login or signup
+- Used to redirect users to required onboarding steps
+`,
 	})
-	async checkOnboardingStatus(@GetUser('id') userId: Types.ObjectId) {
+	@ApiOkResponse({
+		description: 'User onboarding status retrieved successfully',
+		type: OnboardingStatusDto,
+	})
+	@ApiUnauthorizedResponse({
+		description: 'User is not authenticated',
+	})
+	async checkOnboardingStatus(
+		@GetUser('id') userId: Types.ObjectId,
+	) {
 		const result = await this.userService.isOnboardingComplete(userId);
-		return ResponseHelper.success(result, HttpStatus.OK)
+		return ResponseHelper.success(result, HttpStatus.OK);
 	}
+
 
 	@UseGuards(AuthGuard)
 	@Delete('me')
