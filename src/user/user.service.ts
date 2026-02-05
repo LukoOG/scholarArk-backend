@@ -27,6 +27,21 @@ export class UserService {
 		@InjectModel(UserFcmToken.name) private fcmTokenModel: Model<UserFcmTokenDocument>
 	) { }
 
+	private isProfileComplete(user: Partial<User>): boolean {
+		const requiredFields = [
+			user.first_name,
+			user.last_name,
+			user.profile_pic,
+			user.email,
+		]
+
+		return requiredFields.every((field) => field !== undefined && field !== null || field !== '')
+	}
+
+	private isMetaComplete(user: Partial<User>): boolean{
+		return user?.topicsIds.length > 0 && user?.goalsIds.length > 0 && user?.preferencesIds.length > 0
+	}
+
 	async findAll(role?: 'student' | 'tutor'): Promise<User[]> {
 		if (role) return this.userModel.find({ role }).exec();
 		return this.userModel.find().exec();
@@ -61,7 +76,7 @@ export class UserService {
 
 		if (goalIds) updatePayload.goalsIds = goalIds.map(id => new Types.ObjectId(id));
 		if (topicIds) updatePayload.topicsIds = topicIds.map(id => new Types.ObjectId(id));
-		if (preferenceIds) updatePayload.preferencesIds = preferenceIds.map(id => new Types.ObjectId(id));
+		if (preferenceIds) updatePayload.preferencesIds = preferenceIds.map(id => new Types.ObjectId(id) )
 
 		// Perform atomic update
 		console.log(updatePayload)
@@ -72,6 +87,20 @@ export class UserService {
 		).exec();
 
 		if (!updatedUser) throw new UserNotFoundException();
+
+		const isProfileComplete = this.isProfileComplete(updatedUser);
+
+		if (updatedUser.onboardingStatus.isProfileComplete !== isProfileComplete) {
+			updatedUser.onboardingStatus.isProfileComplete = isProfileComplete;
+			await updatedUser.save()
+		};
+
+		const isMetaComplete = this.isMetaComplete(updatedUser);
+
+		if(updatedUser.onboardingStatus.isMetaComplete !== isMetaComplete){
+			updatedUser.onboardingStatus.isMetaComplete = isMetaComplete;
+			await updatedUser.save()
+		};
 
 		const { password, refresh_token, ...userWithoutSecrets } = updatedUser.toObject();
 
@@ -135,8 +164,8 @@ export class UserService {
 			throw new BadRequestException('Profile incomplete');
 		}
 
-		if (!user.onboardingStatus.isPreferencesComplete) {
-			throw new BadRequestException('Preferences incomplete');
+		if (!user.onboardingStatus.isMetaComplete) {
+			throw new BadRequestException('Topics, Goals and Preferences incomplete');
 		}
 
 		return this.userModel.findByIdAndUpdate(

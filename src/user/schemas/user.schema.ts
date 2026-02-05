@@ -25,7 +25,7 @@ class OnboardingStatus {
   isProfileComplete: boolean;
 
   @Prop({ default: false })
-  isPreferencesComplete: boolean;
+  isMetaComplete: boolean;
 
   @Prop({ default: false })
   isOnboardingComplete: boolean;

@@ -73,7 +73,6 @@ export class UserController {
 		},
 	})
 	async updateMe(@Req() req, @GetUser('id') id: Types.ObjectId, @Body() updateUserDto: UpdateUserDto, @UploadedFile() file?: Express.Multer.File) {
-		console.log(req)
 		const response = await this.userService.update(id, updateUserDto, file);
 		return ResponseHelper.success(response)
 	}
