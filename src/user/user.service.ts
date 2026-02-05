@@ -53,12 +53,7 @@ export class UserService {
 		return user;
 	}
 
-	async update(id: Types.ObjectId, updateUserDto: UpdateUserDto, file): Promise<User> {
-		let profilePicUrl: string | undefined
-
-		if (file) {
-			profilePicUrl = await this.cloudinaryService.uploadImage(file, 'users/profile-pics');
-		};
+	async update(id: Types.ObjectId, updateUserDto: UpdateUserDto): Promise<User> {
 
 		//console.log(id)
 		const {
@@ -71,7 +66,6 @@ export class UserService {
 		// Build the update object
 		const updatePayload: any = {
 			...profileData,
-			profile_pic: profilePicUrl
 		};
 
 		if (goalIds) updatePayload.goalsIds = goalIds.map(id => new Types.ObjectId(id));

@@ -36,7 +36,7 @@ export class UpdateUserDto {
   @IsString()
   highest_qualification?: string;
 
-  @ApiPropertyOptional({ example: 'https://example.com/profile.jpg' })
+  @ApiPropertyOptional({ example: 's3://example.com/profile.jpg' })
   @IsOptional()
   @IsString()
   profile_pic?: string;

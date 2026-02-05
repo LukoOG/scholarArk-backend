@@ -31,7 +31,6 @@ export class UserController {
 
 	@UseGuards(AuthGuard)
 	@Patch('me')
-	@UseInterceptors(FileInterceptor('profile_pic', multerConfig))
 	@ApiBearerAuth()
 	@ApiOperation({
 		summary: 'Complete user registration or update user profile',
@@ -72,8 +71,8 @@ export class UserController {
 			},
 		},
 	})
-	async updateMe(@Req() req, @GetUser('id') id: Types.ObjectId, @Body() updateUserDto: UpdateUserDto, @UploadedFile() file?: Express.Multer.File) {
-		const response = await this.userService.update(id, updateUserDto, file);
+	async updateMe(@Req() req, @GetUser('id') id: Types.ObjectId, @Body() updateUserDto: UpdateUserDto) {
+		const response = await this.userService.update(id, updateUserDto);
 		return ResponseHelper.success(response)
 	}
 
