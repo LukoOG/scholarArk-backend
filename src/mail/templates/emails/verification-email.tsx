@@ -22,10 +22,6 @@ export const VerificationEmail = ({ token }: VerificationEmailProps) => {
         </Text>
 
         <Text>
-          Welcome to <strong>ScholarArk</strong> 🎉
-        </Text>
-
-        <Text>
           Please confirm your email address by clicking the button below.
           This helps us keep your account secure.
         </Text>
@@ -37,7 +33,8 @@ export const VerificationEmail = ({ token }: VerificationEmailProps) => {
         </Section>
 
         <Text>
-          This link will expire in 24 hours.
+          {/* This link will expire in 24 hours. */}
+          This code will expire after 24 hours
         </Text>
 
         <Text>

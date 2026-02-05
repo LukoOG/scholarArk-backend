@@ -49,39 +49,6 @@ export class CoursesController {
 		return ResponseHelper.success({ "message": "Course created successfully", courseId })
 	}
 
-	@Patch(':courseId/publish')
-	@UseGuards(AuthGuard, RolesGuard, CourseOwnerGuard)
-	@Roles(UserRole.TUTOR)
-	@ApiOperation({
-		summary: "Publish a Course",
-		description: `
-Publishes a course and makes it publicly visible and purchasable.
-
-Validation checks:
-- Course has at least one module
-- Course has at least one lesson
-- Course has valid pricing
-`,
-	})
-	@ApiBearerAuth()
-	@ApiResponse({ status: 200, description: 'Course published successfully' })
-	async publishCourse(@Param('courseId') courseId: Types.ObjectId, @GetUser('id') tutorId: Types.ObjectId) {
-		const response = await this.coursesService.publishCourse(courseId, tutorId)
-		return ResponseHelper.success(response, HttpStatus.OK)
-	}
-
-	@Post(':courseId/:lessonId/publish')
-	@UseGuards(AuthGuard, RolesGuard, CourseOwnerGuard)
-	@Roles(UserRole.TUTOR)
-	async publishLesson(
-		@Param('courseId') courseId: Types.ObjectId,
-		@GetUser('id') tutorId: Types.ObjectId,
-		@Param('lessonId') lessonId: Types.ObjectId
-	) {
-		const response = await this.coursesService.publishLesson(courseId, lessonId, tutorId)
-		return ResponseHelper.success(response, HttpStatus.OK)
-	}
-
 	@Get()
 	@ApiOperation({
 		summary: 'Get all courses',
@@ -324,6 +291,39 @@ Validation checks:
 	async getCourseContent(@Param('courseId') courseId: Types.ObjectId) {
 		const content = await this.coursesService.getFullContent(courseId)
 		return ResponseHelper.success(content, HttpStatus.OK)
+	}
+
+	@Patch(':courseId/publish')
+	@UseGuards(AuthGuard, RolesGuard, CourseOwnerGuard)
+	@Roles(UserRole.TUTOR)
+	@ApiOperation({
+		summary: "Publish a Course",
+		description: `
+Publishes a course and makes it publicly visible and purchasable.
+
+Validation checks:
+- Course has at least one module
+- Course has at least one lesson
+- Course has valid pricing
+`,
+	})
+	@ApiBearerAuth()
+	@ApiResponse({ status: 200, description: 'Course published successfully' })
+	async publishCourse(@Param('courseId') courseId: Types.ObjectId, @GetUser('id') tutorId: Types.ObjectId) {
+		const response = await this.coursesService.publishCourse(courseId, tutorId)
+		return ResponseHelper.success(response, HttpStatus.OK)
+	}
+
+	@Post(':courseId/:lessonId/publish')
+	@UseGuards(AuthGuard, RolesGuard, CourseOwnerGuard)
+	@Roles(UserRole.TUTOR)
+	async publishLesson(
+		@Param('courseId') courseId: Types.ObjectId,
+		@GetUser('id') tutorId: Types.ObjectId,
+		@Param('lessonId') lessonId: Types.ObjectId
+	) {
+		const response = await this.coursesService.publishLesson(courseId, lessonId, tutorId)
+		return ResponseHelper.success(response, HttpStatus.OK)
 	}
 
 	@Post('demo')

@@ -76,8 +76,6 @@ export class UserController {
 		return ResponseHelper.success(response)
 	}
 
-
-
 	@UseGuards(AuthGuard)
 	@Patch('me/fcm-token')
 	@ApiBearerAuth()
@@ -127,7 +125,7 @@ Finalizes onboarding for the authenticated user.
 Requirements:
 - Terms and Conditions accepted
 - Profile completed
-- Preferences selected
+- All Meta selected: That is, goals, topics and preferences
 `,
 	})
 	@ApiResponse({
@@ -156,6 +154,17 @@ Requirements:
 		);
 	}
 
+	@Get('me/profile-completed')
+	@UseGuards(AuthGuard)
+	@ApiBearerAuth()
+	@ApiOperation({
+		summary: "check the user's onboarding status",
+		description:""
+	})
+	async checkOnboardingStatus(@GetUser('id') userId: Types.ObjectId) {
+		const result = await this.userService.isOnboardingComplete(userId);
+		return ResponseHelper.success(result, HttpStatus.OK)
+	}
 
 	@UseGuards(AuthGuard)
 	@Delete('me')

@@ -144,6 +144,7 @@ export class UserService {
 			{ new: true }
 		)
 	}
+
 	async completeOnboarding(userId: Types.ObjectId) {
 		const user = await this.userModel.findById(userId).lean().exec();
 		if (!user) throw new UserNotFoundException();
@@ -169,6 +170,14 @@ export class UserService {
 		);
 	}
 
+	async isOnboardingComplete(userId: Types.ObjectId){
+		const user = await this.userModel.findById(userId).lean().exec();
+		if(!user) throw new UserNotFoundException();
+
+		const status = user.onboardingStatus;
+
+		return status;
+	}
 
 	async delete(id: Types.ObjectId): Promise<void> {
 		const res = await this.userModel.findByIdAndDelete(id).exec();
