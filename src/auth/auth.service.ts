@@ -130,9 +130,7 @@ export class AuthService {
 
 		let user = await this.userModel
 			.findOne({
-				$or: [
-					{ 'email.value': signupDto.email.value },
-				],
+				'email.value': signupDto.email.value
 			})
 			.lean()
 			.exec();
@@ -140,7 +138,7 @@ export class AuthService {
 		if (user?.authProviders?.google && !user?.authProviders?.local) {
 			throw new AccountExistsWithOAuthException("google")
 		};
-		
+
 		if (user) throw new UserAlreadyExistsException(user.email.value);
 		const { role = UserRole.STUDENT, password: plainPassword, ...rest } = signupDto;
 

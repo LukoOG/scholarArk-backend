@@ -13,6 +13,23 @@ type AuthProviders = {
   facebook?: boolean;
 };
 
+@Schema({ _id: false })
+class OnboardingStatus {
+  @Prop({ default: false })
+  hasAcceptedTerms: boolean;
+
+  @Prop({ type: Date })
+  termsAcceptedAt?: Date;
+
+  @Prop({ default: false })
+  isProfileComplete: boolean;
+
+  @Prop({ default: false })
+  isPreferencesComplete: boolean;
+
+  @Prop({ default: false })
+  isOnboardingComplete: boolean;
+}
 
 @Schema({ timestamps: true })
 export class User {
@@ -73,12 +90,8 @@ export class User {
   @Prop()
   password?: string;
 
-  @Prop({
-    enum: ['ACCOUNT_CREATED', 'PROFILE_COMPLETED', 'PREFERENCES_COMPLETED'],
-    default: 'ACCOUNT_CREATED',
-  })
-
-  onboardingStatus: string;
+  @Prop({ type: OnboardingStatus })
+  onboardingStatus: OnboardingStatus;
 
   @Prop({ type: Nonce })
   nonce?: Nonce;
