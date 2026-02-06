@@ -37,13 +37,19 @@ export class CourseFilterDto {
 }
 
 export enum CourseFeedType {
-  DEFAULT = 'default',
   FEATURED = 'featured',
-  BASED_ON_SUBSCRIPTIONS = 'based_on_subscriptions',
+  PERSONALIZED = 'personalized',
+  SIMILAR_TO_COMPLETED = 'similar-to-completed',
+  BASED_ON_SUBSCRIPTIONS = 'based-on-subscriptions',
 }
+
 
 export class CourseQueryDto extends IntersectionType(
   PaginationDto,
   CourseFilterDto,
 ) {
+  @ApiPropertyOptional({ enum: CourseFeedType })
+  @IsOptional()
+  @IsEnum(CourseFeedType)
+  feed?: CourseFeedType;
 }

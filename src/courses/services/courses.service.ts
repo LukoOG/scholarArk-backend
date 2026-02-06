@@ -14,7 +14,7 @@ import {
 } from '../../user/exceptions';
 
 import { PaginationDto } from '../../common/dto/pagination.dto';
-import { CourseQueryDto } from '../dto/courses/course-filter.dto';
+import { CourseFeedType, CourseQueryDto } from '../dto/courses/course-filter.dto';
 import { PaginatedResponse } from '../../common/interfaces';
 import { CourseFullContent } from '../types/course-full-content.type';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
@@ -31,7 +31,7 @@ import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { TopicService } from 'src/topics/topics.service';
 import { UserService } from 'src/user/user.service';
 import { CourseFullContentResponseDto } from '../dto/courses/course-full-content.dto';
-
+import { COURSE_FEED_STRATEGIES, CourseFeedStrategy } from '../strategies/course-feed.strategy';
 
 @Injectable()
 export class CoursesService {
@@ -92,7 +92,6 @@ export class CoursesService {
 
 		return subjects.map((s) => s._id);
 	}
-
 
 	async isTutor(courseId: Types.ObjectId, userId: Types.ObjectId) {
 		const isTutor = await this.courseModel
@@ -218,17 +217,21 @@ export class CoursesService {
 	}
 
 	async findAll(dto: CourseQueryDto, userId?: Types.ObjectId): Promise<PaginatedResponse<CourseListItem>> {
-		const { page = 1, limit = 20, topicIds, category, level, search } = dto;
+		const { page = 1, limit = 20, topicIds, level, feed, search } = dto;
 		const skip = (page - 1) * limit;
 
-		let query: any = {
+		const query: any = {
 			isPublished: true,
 			isDeleted: { $ne: true },
 		};
 
-		if (topicIds?.length) query.topicIds = { $in: topicIds };
-		if (level) query.difficulty = level;
-		if (category) query.category = category;
+		if (topicIds?.length) {
+			query.topicIds = { $in: topicIds };
+		};
+
+		if (level) {
+			query.difficulty = level;
+		};
 
 		if (search) {
 			query.$or = [
@@ -237,90 +240,32 @@ export class CoursesService {
 			];
 		};
 
-		let sort: any;
-		let user: User;
+		const user = await this.userService.findOne(userId);
 
-		if (userId) {
-			// example: prioritize courses in user's topics
-			user = await this.userService.findOne(userId);
-			if (user?.topicsIds?.length) {
-				sort = [
-					// Add a "priority" field for conditional sorting
-					{
-						$addFields: {
-							priority: {
-								$cond: {
-									if: { $in: ["$topicsIds", user.topicsIds] }, // Check if course topicId is in user's topics
-									then: 1,  // High priority for matching topics
-									else: 0   // Lower priority for non-matching topics
-								}
-							}
-						}
-					},
-					// First, sort by "priority" (1 for matching topics, 0 for non-matching)
-					{ priority: -1 },
-					// Then, sort by createdAt, descending (most recent first)
-					{ createdAt: -1 }
-				];
+		if (user) {
+			if (feed) {
+				const strategy = COURSE_FEED_STRATEGIES[feed as CourseFeedType];
+				if (strategy) {
+					Object.assign(query, strategy(user));
+				}
 			}
 		}
 
 		const [items, total] = await Promise.all([
-			this.courseModel.aggregate<PaginatedResponse<CourseListItem>>([
-				{
-					$match: query,
-				},
-				{
-					$addFields: {
-						sortKey: {
-							$cond: {
-								if: {
-									$gt: [{
-										$size: {
-											$setIntersection: [
-												{ $ifNull: ["$topicsIds", []] }, // Default to empty array if topicsIds is null
-												{ $ifNull: [user.topicsIds, []] }  // Default to empty array if user.topicsIds is null
-											]
-										}
-									}, 0]
-								},  // Check if there's any common topic
-								then: "$title",   // If so, use title for sorting
-								else: "$createdAt", // Otherwise, use createdAt for sorting
-							}
-						}
-					}
-				},
-				{
-					$sort: { sortKey: 1 }  // Sort by the 'sortKey' field (ascending)
-				},
-				{
-					$project: {
-						// title: 1,
-						// createdAt: 1,
-						// topicsIds: 1,
-						// sortKey: 1,
-						// tutor: 1,  // Make sure to include tutor so we can populate it
-						modules: 0  // Exclude modules (equivalent to select('-modules'))
-					}
-				},
-				{
-					$skip: skip
-				},
-				{
-					$limit: limit
-				}
-
-			])
-				.exec()
-				.then(courses => {
-					return this.courseModel.populate(courses, {
-						path: "tutor",
-						select: "first_name last_name email profile_pic"
-					});
-				}).then(populatedCourses => {
-					return populatedCourses.map((course) => course.toJSON())
+			this.courseModel
+				.find(query)
+				.select(
+					'-modules'
+				)
+				.populate({
+					path: "tutor",
+					select: "first_name last_name email profile_pic"
 				})
-				.catch(err => console.error("Error when populating mongoose aggregate", err)),
+				.sort({ createdAt: -1 })
+				.skip(skip)
+				.limit(limit)
+				.lean<CourseListItem[]>(),
+
 			this.courseModel.countDocuments(query),
 		]);
 
