@@ -49,8 +49,9 @@ Fetches the public profile information of a user (tutor).
 	})
 	@ApiParam({
 		name: 'userId',
+		type: 'string',
 		description: 'Unique ID of the user (tutor)',
-		example: '695b897dcc20e8a0c87c70ed',
+		example: '698252d9fab0631a9b613359',
 	})
 	@ApiResponse({
 		status: 200,
@@ -84,7 +85,7 @@ Fetches the public profile information of a user (tutor).
 		status: 404,
 		description: 'User not found',
 	})
-	async findUserById(@Param('userId') userId: string) {
+	async findUserById(@Param('userId') userId: Types.ObjectId) {
 		const response = await this.userService.findOne(userId);
 		return ResponseHelper.success(response)
 	}
