@@ -169,7 +169,7 @@ export class AuthService {
 		const { email, password: plainPassword, role } = loginDto;
 
 		const user = await this.userModel.findOne({ 'email.value': email })
-			.select('-unreadNotifications -nonce -wallet -googleId -onboardingStatus')
+			// .select('-unreadNotifications -nonce -wallet -googleId -onboardingStatus')
 			.exec();
 
 		if (!user) throw new UnauthorizedException('Invalid credentials');

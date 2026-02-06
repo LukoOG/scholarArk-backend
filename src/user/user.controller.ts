@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Req, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '../common/multer/multer.config';
-import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiCreatedResponse, ApiBadRequestResponse, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiParam, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -29,13 +29,65 @@ export class UserController {
 		const response = await this.userService.findOne(id);
 		return ResponseHelper.success(response)
 	}
-	
-	
-	// @Get(':id')
-	// async findOneMeas(@Param('id') id: Types.ObjectId) {
-	// 	const response = await this.userService.findOne(id);
-	// 	return ResponseHelper.success(response)
-	// }
+
+
+	@Get(':userId')
+	@ApiOperation({
+		summary: 'Get user profile by ID',
+		description: `
+Fetches the public profile information of a user (tutor).
+
+### Use cases
+- Tutor details page on mobile
+- Public profile preview
+- Course tutor attribution
+
+### Notes
+- Only public-safe fields are returned
+- This endpoint does NOT return courses
+`,
+	})
+	@ApiParam({
+		name: 'userId',
+		description: 'Unique ID of the user (tutor)',
+		example: '695b897dcc20e8a0c87c70ed',
+	})
+	@ApiResponse({
+		status: 200,
+		description: 'User profile fetched successfully',
+		schema: {
+			properties: {
+				_id: { type: 'string' },
+				first_name: { type: 'string' },
+				last_name: { type: 'string' },
+				birthday: { type: 'string' },
+				gender: { type: 'string' },
+				phone: { type: 'string' },
+				email: {
+					type: 'object',
+					properties: {
+						value: { type: 'string' },
+						verified: { type: 'boolean' },
+					},
+				},
+				profile_pic: { type: 'string', nullable: true },
+				// bio: { type: 'string', nullable: true },
+				// expertise: {
+				// 	type: 'array',
+				// 	items: { type: 'string' },
+				// },
+				createdAt: { type: 'string', format: 'date-time' },
+			},
+		},
+	})
+	@ApiResponse({
+		status: 404,
+		description: 'User not found',
+	})
+	async findUserById(@Param('userId') userId: string) {
+		const response = await this.userService.findOne(userId);
+		return ResponseHelper.success(response)
+	}
 
 	@UseGuards(AuthGuard)
 	@Patch('me')

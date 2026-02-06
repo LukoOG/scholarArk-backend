@@ -13,7 +13,11 @@ export const PRIVATE_FIELDS = [
   'passwordReset',
   'authProviders',
   'googleId',
-  'emailVerification'
+  'emailVerification',
+  'nonce',
+  'wallet',
+  'unreadNotifications',
+  'remindersEnabled'
 ];
 
 type AuthProviders = {
