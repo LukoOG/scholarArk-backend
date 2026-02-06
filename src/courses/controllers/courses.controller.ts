@@ -52,31 +52,52 @@ export class CoursesController {
 	@Get()
 	@UseGuards(OptionalAuthGuard)
 	@ApiOperation({
-		summary: 'Get all courses',
+		summary: 'Fetch courses',
 		description: `
-		Returns a paginated list of courses.
+Returns a paginated list of published courses.
 
-		Supports filtering by:
-		- topics
-		- goals
-		- course level
-		- search keyword
+### Supported use cases
+- Browse all available courses
+- Power mobile home sections (featured, personalized, etc.)
+- Infinite scrolling
 
-		This endpoint is **public** and does not require authentication.
-		Results are paginated to improve performance and support infinite scrolling on mobile.
-		`,
+### Authentication
+- Public endpoint
+- If authenticated, personalized feeds are enabled
+`,
+	})
+	@ApiQuery({
+		name: 'feed',
+		required: false,
+		enum: [
+			'featured',
+			'personalized',
+			'similar-to-completed',
+			'based-on-subscriptions',
+			'based-on-tutors',
+		],
+		description: `
+Controls the recommendation strategy used to fetch courses.
+
+- featured → Curated / promoted courses
+- personalized → Based on user interests
+- similar-to-completed → Similar to completed courses
+- based-on-subscriptions → Topics user follows
+- based-on-tutors → Tutors user follows
+`,
 	})
 	@ApiQuery({
 		name: 'topicIds',
 		required: false,
-		description: 'Filter by topic IDs',
-		example: ['64f17f0f6f0740d2d0bb6be3'],
+		isArray: true,
+		description: 'Filter courses by topic IDs',
+		example: ['6985fc8c28dafa8050663f11'],
 	})
 	@ApiQuery({
 		name: 'level',
 		required: false,
-		enum: ['Beginner', 'Intermediate', 'Advanced'],//CourseLevel,
-		example: 'Beginner',
+		enum: ['Beginner', 'Intermediate', 'Advanced'],
+		description: 'Filter by course difficulty level',
 	})
 	@ApiQuery({
 		name: 'search',
@@ -87,20 +108,25 @@ export class CoursesController {
 	@ApiQuery({
 		name: 'page',
 		required: false,
-		description: 'page of the pagination',
-		example: '1',
+		description: 'Page number (starts from 1)',
+		example: 1,
 	})
 	@ApiQuery({
 		name: 'limit',
 		required: false,
-		description: 'how much data should be returned per request',
-		example: '10',
+		description: 'Number of courses per page',
+		example: 20,
 	})
 	@ApiResponse({
 		status: 200,
-		description: 'Courses fetched successfully',
+		description: 'Paginated list of courses',
+		schema: {
+			properties: {
+				items: { type: 'array', items: { $ref: '#/components/schemas/CourseListItemDto' } },
+				meta: { $ref: '#/components/schemas/PaginationMetaDto' },
+			},
+		},
 	})
-	@ApiResponse({ status: 200, description: 'List of all courses', type: [Course] })
 	async findAll(@Query() query: CourseQueryDto, @Req() p: any, @GetUser('id') userId?: Types.ObjectId) {
 		console.log('query', query)
 		const result = await this.coursesService.findAll(query, userId);
