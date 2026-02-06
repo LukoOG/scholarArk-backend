@@ -55,7 +55,7 @@ export class Course {
   category: CourseCategory;
 
   @Prop({ type: [mongoose.Schema.Types.ObjectId], index: true, ref: "Topic" })
-  topicIds: Types.ObjectId[];
+  topicsIds: Types.ObjectId[];
 
   @Prop({ type: String, enum: CourseDifficulty, default: CourseDifficulty.BEGINNER })
   difficulty: CourseDifficulty;

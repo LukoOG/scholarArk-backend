@@ -30,6 +30,7 @@ import { EnrollmentService } from 'src/enrollment/enrollment.service';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { TopicService } from 'src/topics/topics.service';
 import { UserService } from 'src/user/user.service';
+import { CourseFullContentResponseDto } from '../dto/courses/course-full-content.dto';
 
 
 @Injectable()
@@ -236,33 +237,90 @@ export class CoursesService {
 			];
 		};
 
+		let sort: any;
+		let user: User;
+
 		if (userId) {
 			// example: prioritize courses in user's topics
-			const user = await this.userService.findOne(userId);
+			user = await this.userService.findOne(userId);
 			if (user?.topicsIds?.length) {
-				query = query.sort({
-					// pseudo-weight: courses with matching topics come first
-					topicsIds: { $in: user.topicsIds },
-					createdAt: -1
-				});
+				sort = [
+					// Add a "priority" field for conditional sorting
+					{
+						$addFields: {
+							priority: {
+								$cond: {
+									if: { $in: ["$topicsIds", user.topicsIds] }, // Check if course topicId is in user's topics
+									then: 1,  // High priority for matching topics
+									else: 0   // Lower priority for non-matching topics
+								}
+							}
+						}
+					},
+					// First, sort by "priority" (1 for matching topics, 0 for non-matching)
+					{ priority: -1 },
+					// Then, sort by createdAt, descending (most recent first)
+					{ createdAt: -1 }
+				];
 			}
 		}
 
 		const [items, total] = await Promise.all([
-			this.courseModel
-				.find(query)
-				.select(
-					'-modules'
-				)
-				.populate({
-					path: "tutor",
-					select: "first_name last_name email profile_pic"
-				})
-				.sort({ createdAt: -1 })
-				.skip(skip)
-				.limit(limit)
-				.lean<CourseListItem[]>(),
+			this.courseModel.aggregate<PaginatedResponse<CourseListItem>>([
+				{
+					$match: query,
+				},
+				{
+					$addFields: {
+						sortKey: {
+							$cond: {
+								if: {
+									$gt: [{
+										$size: {
+											$setIntersection: [
+												{ $ifNull: ["$topicsIds", []] }, // Default to empty array if topicsIds is null
+												{ $ifNull: [user.topicsIds, []] }  // Default to empty array if user.topicsIds is null
+											]
+										}
+									}, 0]
+								},  // Check if there's any common topic
+								then: "$title",   // If so, use title for sorting
+								else: "$createdAt", // Otherwise, use createdAt for sorting
+							}
+						}
+					}
+				},
+				{
+					$sort: { sortKey: 1 }  // Sort by the 'sortKey' field (ascending)
+				},
+				{
+					$project: {
+						// title: 1,
+						// createdAt: 1,
+						// topicsIds: 1,
+						// sortKey: 1,
+						// tutor: 1,  // Make sure to include tutor so we can populate it
+						modules: 0  // Exclude modules (equivalent to select('-modules'))
+					}
+				},
+				{
+					$skip: skip
+				},
+				{
+					$limit: limit
+				}
 
+			])
+				.exec()
+				.then(courses => {
+					return this.courseModel.populate(courses, {
+						path: "tutor",
+						select: "first_name last_name email profile_pic"
+					});
+				}).then(populatedCourses => {
+					return populatedCourses.map((course) => course.toJSON())
+				})
+				.catch(err => console.error("Error when populating mongoose aggregate", err)),
 			this.courseModel.countDocuments(query),
 		]);
 

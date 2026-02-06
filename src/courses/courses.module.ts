@@ -23,11 +23,31 @@ import { UserModule } from 'src/user/user.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
-		{ name: Course.name, schema: CourseSchema }, 
+		// { name: Course.name, schema: CourseSchema }, 
 		{ name: CourseModule.name, schema: CourseModuleSchema },
 		{ name: Lesson.name, schema: LessonSchema },
 		{ name: LessonMedia.name, schema: LessonMediaSchema },
 		{ name: User.name, schema: UserSchema },
+	]),
+	MongooseModule.forFeatureAsync([
+		{
+			name: Course.name,
+			useFactory() {
+				const schema = CourseSchema;
+
+				schema.set('toJSON', {
+					virtuals: true,
+					transform: (_doc, ret) => {
+						delete ret.modules
+
+						return ret
+					}
+				})
+
+				return schema
+			}
+
+		}
 	]),
 	AwsSdkModule.register({
 		client: new S3Client({
