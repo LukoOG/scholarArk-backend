@@ -80,7 +80,7 @@ export class Course {
 
   @Prop()
   publishedAt?: Date;
-}2
+}
 
 export const CourseSchema = SchemaFactory.createForClass(Course);
 

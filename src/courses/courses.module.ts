@@ -17,6 +17,7 @@ import { EnrollmentModule } from 'src/enrollment/enrollment.module';
 import { ConfigModule } from '@nestjs/config';
 import { LessonMedia, LessonMediaSchema } from './schemas/lesson-media.schema';
 import { CoursesDemoService } from './services/courses.demo.service';
+import { TopicsModule } from 'src/topics/topics.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CoursesDemoService } from './services/courses.demo.service';
 	AuthModule,
 	CloudinaryModule,
 	EnrollmentModule,
+	TopicsModule,
 	ConfigModule
   ],
   controllers: [CoursesController, ModulesController, LessonsController],

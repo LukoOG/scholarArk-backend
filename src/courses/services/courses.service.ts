@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException, ForbiddenException, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
 import { Model, Types, FilterQuery, Connection, ClientSession } from 'mongoose';
-import { Course, CourseDocument, CourseListItem } from '../schemas/course.schema';
+import { CATEGORY_SUBJECT_MAP, Course, CourseCategory, CourseDocument, CourseListItem } from '../schemas/course.schema';
 import { CourseModule, CourseModuleDocument } from '../schemas/module.schema';
 import { Lesson, LessonDocument, LessonType } from '../schemas/lesson.schema';
 import { LessonMediaStatus } from '../schemas/lesson-media.schema';
@@ -28,6 +28,7 @@ import { LessonMedia, LessonMediaDocument } from '../schemas/lesson-media.schema
 import { FILE_FORMAT_CONFIG, UploadLessonDto } from '../dto/courses/upload-course.dto';
 import { EnrollmentService } from 'src/enrollment/enrollment.service';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
+import { TopicService } from 'src/topics/topics.service';
 
 
 @Injectable()
@@ -43,6 +44,7 @@ export class CoursesService {
 		@InjectAws(S3Client) private readonly s3: S3Client,
 		private readonly configService: ConfigService<Config, true>,
 		private readonly enrollmentService: EnrollmentService,
+		private readonly topicService: TopicService,
 		private readonly cloudinaryService: CloudinaryService,
 	) {
 		this.env = this.configService.get("aws", { infer: true })
@@ -77,6 +79,18 @@ export class CoursesService {
 		}
 	}
 
+	private async resolveSubjectIdsFromCategory(
+		category: CourseCategory,
+	): Promise<Types.ObjectId[]> {
+		const subjectNames = CATEGORY_SUBJECT_MAP[category] ?? [];
+
+		if (!subjectNames.length) return [];
+
+		const subjects = await this.topicService.findByName(subjectNames);
+		return subjects.map((s) => s._id);
+	}
+
+
 	async isTutor(courseId: Types.ObjectId, userId: Types.ObjectId) {
 		const isTutor = await this.courseModel
 			.findOne({ _id: courseId, tutor: userId })
@@ -100,7 +114,9 @@ export class CoursesService {
 		session.startTransaction();
 
 		const coursePrices = new Map<string, number>();
-		dto.prices.map((price) => coursePrices.set(price.currency, price.amount))
+		dto.prices.map((price) => coursePrices.set(price.currency, price.amount));
+
+		const topicIds = this.resolveSubjectIdsFromCategory(dto.category)
 		try {
 			const course = await this.courseModel.create(
 				[
@@ -111,6 +127,7 @@ export class CoursesService {
 						category: dto.category,
 						difficulty: dto.difficulty,
 						prices: coursePrices,
+						topicIds,
 						thumbnailUrl: dto.thumbnailUrl,
 						isPublished: false,
 					}
@@ -483,13 +500,13 @@ export class CoursesService {
 		const course = await this.courseModel.findById(courseId).select('prices isPublished').lean().exec();
 
 		if (!course) throw new NotFoundException("Course not found");
- 
+
 		if (!course.isPublished) throw new BadRequestException("Course is not available for purchase");
 
 		const amount = course.prices?.[currency];
 
 		if (amount === undefined || amount === null) throw new BadRequestException(`Course is not available to purchase in ${currency}`);
-	
+
 		return amount
 	}
 }

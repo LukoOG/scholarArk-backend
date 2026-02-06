@@ -4,22 +4,29 @@ import { Model, Types, FilterQuery, Connection, ClientSession } from 'mongoose';
 import { Topic, TopicDocument } from './schemas/topic.schema';
 
 export interface TopicItem {
-	_id: Types.ObjectId;
-	name: string;
-	description: string;
+  _id: Types.ObjectId;
+  name: string;
+  description: string;
 }
 
 @Injectable()
 export class TopicService {
   constructor(
     @InjectModel(Topic.name) private topicModel: Model<TopicDocument>,
-  ) {}
+  ) { }
 
-  async findActive(): Promise<TopicItem> {
+  async findActive(): Promise<TopicItem[]> {
     return this.topicModel
       .find({ isActive: true })
       .select('_id name description')
       .sort({ name: 1 })
-      .lean<TopicItem>();
+      .lean<TopicItem[]>();
+  }
+
+  async findByName(subjectNames: string[]): Promise<TopicItem[]> {
+    return this.topicModel
+      .find({ name: { $in: subjectNames }, isActive: true })
+      .select('_id')
+      .lean<TopicItem[]>();
   }
 }
