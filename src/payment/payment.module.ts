@@ -42,6 +42,7 @@ import { PaystackWebhookController } from './webhooks/paystack.webhook.controlle
       ]
     ),
     AuthModule,
+    UserModule,
     EnrollmentModule,
     CoursesModule,
   ],

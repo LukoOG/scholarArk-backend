@@ -18,12 +18,14 @@ export interface CourseListItem {
 }
 
 export enum CourseCategory {
-  SCIENCE = 'science',
-  ARTS = 'arts',
-  COMMERCE = 'commerce',
-  TECHNOLOGY = 'technology',
   PROGRAMMING = 'programming',
+  TECHNOLOGY = 'technology',
+  DATA = 'data',
+  DESIGN = 'design',
+  BUSINESS = 'business',
+  STEM = 'stem',
   HEALTH = 'health',
+  ARTS = 'arts',
 }
 
 export enum CourseDifficulty {
@@ -52,6 +54,9 @@ export class Course {
   @Prop({ type: String, enum: CourseCategory, required: true })
   category: CourseCategory;
 
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], index: true, ref: "Topic" })
+  topicIds: Types.ObjectId[];
+
   @Prop({ type: String, enum: CourseDifficulty, default: CourseDifficulty.BEGINNER })
   difficulty: CourseDifficulty;
 
@@ -75,8 +80,70 @@ export class Course {
 
   @Prop()
   publishedAt?: Date;
-}
+}2
 
 export const CourseSchema = SchemaFactory.createForClass(Course);
 
 CourseSchema.index({ category: 1, difficulty: 1 });
+
+export const CATEGORY_SUBJECT_MAP: Record<CourseCategory, string[]> = {
+  [CourseCategory.PROGRAMMING]: [
+    'Programming',
+    'Web Development',
+    'Mobile Development',
+    'Software Engineering',
+  ],
+
+  [CourseCategory.TECHNOLOGY]: [
+    'Programming',
+    'Cloud Computing',
+    'DevOps',
+    'Cybersecurity',
+    'Networking',
+  ],
+
+  [CourseCategory.DATA]: [
+    'Data Analysis',
+    'Data Science',
+    'Statistics',
+    'Machine Learning',
+    'Mathematics',
+  ],
+
+  [CourseCategory.DESIGN]: [
+    'Graphic Design',
+    'UI/UX Design',
+    'Illustration',
+    'Animation',
+    'Drawing',
+  ],
+
+  [CourseCategory.BUSINESS]: [
+    'Business',
+    'Entrepreneurship',
+    'Marketing',
+    'Finance',
+    'Accounting',
+    'Economics',
+  ],
+
+  [CourseCategory.STEM]: [
+    'Physics',
+    'Chemistry',
+    'Biology',
+    'Mathematics',
+  ],
+
+  [CourseCategory.HEALTH]: [
+    'Health & Wellness',
+    'Nutrition',
+    'Mental Health',
+    'Biology',
+  ],
+
+  [CourseCategory.ARTS]: [
+    'Drawing',
+    'Illustration',
+    'Animation',
+  ],
+};

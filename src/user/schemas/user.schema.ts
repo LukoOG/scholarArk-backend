@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { Gender, UserRole } from 'src/common/enums';
 import { Email, EmailVerification, Name, Nonce, Phone, Wallet } from 'src/common/schemas';
+import mongoose from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -90,6 +91,13 @@ export class User {
 
   @Prop({ type: [Types.ObjectId], ref: "Goal", default: [] })
   goalsIds: string[];
+
+  //Filtering information
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: "Course" })
+  completedCourseIds: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], ref: 'User' })
+  subscribedTutorIds: Types.ObjectId[];
 
   @Prop()
   stars?: number;

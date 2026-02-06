@@ -29,6 +29,7 @@ export class PaystackWebhookController {
       await this.paymentService.handleSuccessfulPayment(
         event.data.reference,
         event,
+        event.data.metadata.tutorId
       );
     }
 

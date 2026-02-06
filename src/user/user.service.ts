@@ -42,6 +42,14 @@ export class UserService {
 		return user?.topicsIds.length > 0 && user?.goalsIds.length > 0 && user?.preferencesIds.length > 0
 	}
 
+	async updateSubscribedTutors(userId: Types.ObjectId, tutorId: Types.ObjectId): Promise<void> {
+		const result = await this.userModel.findByIdAndUpdate(
+			userId,
+			{
+				subscribedTutorIds: { $push: tutorId }
+			})
+	}
+
 	async findAll(role?: 'student' | 'tutor'): Promise<User[]> {
 		if (role) return this.userModel.find({ role }).exec();
 		return this.userModel.find().exec();

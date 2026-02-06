@@ -18,14 +18,15 @@ export class PaymentService {
         @InjectModel(Payment.name) public paymentModel: Model<PaymentDocument>,
         private readonly paystackService: PaystackService,
         private readonly enrollmentService: EnrollmentService,
-        private readonly courseService: CoursesService
+        private readonly courseService: CoursesService,
+        private readonly usersService: UserService,
     ) {
     }
 
     async initializeCoursePayment(userId: Identifier, email: string, dto: PaymentTransactionDto) {
         const reference = `SK_${Date.now()}_${userId}`;
 
-        const { courseId, currency } = dto
+        const { courseId, tutorId, currency } = dto
 
         //fetch amount from course
         const amount = await this.courseService.getCoursePrice(courseId, currency)
@@ -51,11 +52,11 @@ export class PaymentService {
             email,
             amount: amount * 100, //convert to minor units for paystack
             reference,
-            metadata: { userId, courseId }
+            metadata: { userId, courseId, tutorId }
         })
     }
 
-    async handleSuccessfulPayment(reference: string, payload: any) {
+    async handleSuccessfulPayment(reference: string, payload: any, tutorId: Types.ObjectId) {
         const payment = await this.paymentModel.findOne({ reference }).exec();
 
         if (!payment || payment.status === PaymentStatus.SUCCESS) return;
@@ -73,6 +74,8 @@ export class PaymentService {
             )
             //update students enrolled
             await this.courseService.incrementEnrolledStudents(payment.course)
+            //update student subscribed 
+            await this.usersService.updateSubscribedTutors(payment.user, tutorId)
         } else {
             throw new BadRequestException('Transaction failed')
         }
