@@ -85,8 +85,8 @@ export class CoursesService {
 		const subjectNames = CATEGORY_SUBJECT_MAP[category] ?? [];
 
 		if (!subjectNames.length) return [];
-
 		const subjects = await this.topicService.findByName(subjectNames);
+		
 		return subjects.map((s) => s._id);
 	}
 
@@ -116,7 +116,7 @@ export class CoursesService {
 		const coursePrices = new Map<string, number>();
 		dto.prices.map((price) => coursePrices.set(price.currency, price.amount));
 
-		const topicIds = this.resolveSubjectIdsFromCategory(dto.category)
+		const topicIds = await this.resolveSubjectIdsFromCategory(dto.category)
 		try {
 			const course = await this.courseModel.create(
 				[

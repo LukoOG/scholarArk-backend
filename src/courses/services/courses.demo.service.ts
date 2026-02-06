@@ -93,7 +93,7 @@ export class CoursesDemoService {
                         { session },
                     )
 
-                    lessons.push({ id: lesson[0]._id, key: modLesson.mediaKey })
+                    // lessons.push({ id: lesson[0]._id, key: modLesson.mediaKey })
 
                     await this.moduleModel.updateOne(
                         { _id: module[0]._id },
