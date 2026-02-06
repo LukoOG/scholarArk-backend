@@ -18,5 +18,8 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "jsx": "react-jsx",
+    "paths": {
+      "src/*": ["src/*"]
+    }
   }
 }

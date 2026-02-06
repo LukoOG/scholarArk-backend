@@ -4,7 +4,7 @@ import { AuthModule } from '../auth/auth.module';
 import { GoogleClientService } from '../common/services/google.service';
 import { CloudinaryModule } from '../common/cloudinary/cloudinary.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './schemas/user.schema';
+import { User, UserSchema, PRIVATE_FIELDS } from './schemas/user.schema';
 import { UserFcmToken, UserFcmTokenSchema } from './schemas/user-fcm-token.schema';
 import { preSave, preValidate } from './schemas/middleware';
 import { userMethods } from './schemas/methods';
@@ -23,9 +23,28 @@ import { TMP_DIR } from 'src/config';
         name: User.name,
         useFactory() {
           const schema = UserSchema;
-		  
-		  schema.set('toObject', { virtuals: true });
-		  schema.set('toJSON', { virtuals: true });
+
+          schema.set('toObject', {
+            virtuals: true,
+            transform: (_doc, ret) => {
+              PRIVATE_FIELDS.forEach((field) => delete ret[field]);
+
+              delete ret.__v;
+
+              return ret
+            }
+          });
+
+          schema.set('toJSON', {
+            virtuals: true,
+            transform: (_doc, ret) => {
+              PRIVATE_FIELDS.forEach((field) => delete ret[field]);
+
+              delete ret.__v;
+
+              return ret
+            }
+          });
 
           for (const method of userMethods) schema.method(method.name, method);
 
@@ -37,18 +56,18 @@ import { TMP_DIR } from 'src/config';
           return schema;
         },
       },
-	  {
-		  name: UserFcmToken.name,
-		  useFactory(){
-			  return UserFcmTokenSchema
-		  }
-	  },
+      {
+        name: UserFcmToken.name,
+        useFactory() {
+          return UserFcmTokenSchema
+        }
+      },
     ]),
-	CloudinaryModule,
-	AuthModule
+    CloudinaryModule,
+    AuthModule
   ],
   providers: [UserService, GoogleClientService],
   exports: [UserService],
   controllers: [UserController],
 })
-export class UserModule {}
+export class UserModule { }

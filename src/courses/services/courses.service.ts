@@ -483,13 +483,13 @@ export class CoursesService {
 		const course = await this.courseModel.findById(courseId).select('prices isPublished').lean().exec();
 
 		if (!course) throw new NotFoundException("Course not found");
-
+ 
 		if (!course.isPublished) throw new BadRequestException("Course is not available for purchase");
 
 		const amount = course.prices?.[currency];
 
-		if (!amount) throw new BadRequestException(`Course is not available to purchase in ${currency}`);
-
+		if (amount === undefined || amount === null) throw new BadRequestException(`Course is not available to purchase in ${currency}`);
+	
 		return amount
 	}
 }

@@ -5,6 +5,15 @@ import { Email, EmailVerification, Name, Nonce, Phone, Wallet } from 'src/common
 
 export type UserDocument = HydratedDocument<User>;
 
+export const PRIVATE_FIELDS = [
+  'password',
+  'refresh_token',
+  'onboardingStatus',
+  'passwordReset',
+  'authProviders',
+  'googleId',
+  'emailVerification'
+];
 
 type AuthProviders = {
   local: boolean;

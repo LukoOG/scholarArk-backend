@@ -29,6 +29,13 @@ export class UserController {
 		const response = await this.userService.findOne(id);
 		return ResponseHelper.success(response)
 	}
+	
+	
+	// @Get(':id')
+	// async findOneMeas(@Param('id') id: Types.ObjectId) {
+	// 	const response = await this.userService.findOne(id);
+	// 	return ResponseHelper.success(response)
+	// }
 
 	@UseGuards(AuthGuard)
 	@Patch('me')

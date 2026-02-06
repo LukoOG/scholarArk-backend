@@ -39,6 +39,14 @@ export class PaymentService {
             status: PaymentStatus.INITIALIZED,
         });
 
+        if (amount === 0) {
+            //automatically enroll
+            return await this.enrollmentService.enroll(
+                userId as Types.ObjectId,
+                courseId,
+            )
+        };
+
         return this.paystackService.initializeTransaction({
             email,
             amount: amount * 100, //convert to minor units for paystack
