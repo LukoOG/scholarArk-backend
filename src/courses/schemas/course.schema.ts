@@ -84,7 +84,11 @@ export class Course {
 
 export const CourseSchema = SchemaFactory.createForClass(Course);
 
-CourseSchema.index({ category: 1, difficulty: 1 });
+CourseSchema.index({ topicIds: 1 });
+CourseSchema.index({ difficulty: 1 });
+CourseSchema.index({ isPublished: 1 });
+CourseSchema.index({ title: 'text', description: 'text' });
+
 
 export const CATEGORY_SUBJECT_MAP: Record<CourseCategory, string[]> = {
   [CourseCategory.PROGRAMMING]: [

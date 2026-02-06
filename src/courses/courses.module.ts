@@ -18,6 +18,7 @@ import { ConfigModule } from '@nestjs/config';
 import { LessonMedia, LessonMediaSchema } from './schemas/lesson-media.schema';
 import { CoursesDemoService } from './services/courses.demo.service';
 import { TopicsModule } from 'src/topics/topics.module';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { TopicsModule } from 'src/topics/topics.module';
 		})
 	}),
 	AuthModule,
+	UserModule,
 	CloudinaryModule,
 	EnrollmentModule,
 	TopicsModule,

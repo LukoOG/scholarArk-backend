@@ -14,7 +14,7 @@ import { UpdateCourseDto } from '../dto/courses/update-course.dto';
 import { Course } from '../schemas/course.schema';
 
 import { GetUser, Roles } from '../../common/decorators'
-import { AuthGuard } from '../../auth/guards/auth.guard';
+import { AuthGuard, OptionalAuthGuard } from '../../auth/guards/auth.guard';
 import { CourseAccessGuard, CourseOwnerGuard } from '../guards/course.guard';
 import { RolesGuard } from 'src/common/guards';
 import { UserRole } from 'src/common/enums';
@@ -50,6 +50,7 @@ export class CoursesController {
 	}
 
 	@Get()
+	@UseGuards(OptionalAuthGuard)
 	@ApiOperation({
 		summary: 'Get all courses',
 		description: `
@@ -69,12 +70,6 @@ export class CoursesController {
 		name: 'topicIds',
 		required: false,
 		description: 'Filter by topic IDs',
-		example: ['64f17f0f6f0740d2d0bb6be3'],
-	})
-	@ApiQuery({
-		name: 'goalIds',
-		required: false,
-		description: 'Filter by goal IDs',
 		example: ['64f17f0f6f0740d2d0bb6be3'],
 	})
 	@ApiQuery({
@@ -106,9 +101,9 @@ export class CoursesController {
 		description: 'Courses fetched successfully',
 	})
 	@ApiResponse({ status: 200, description: 'List of all courses', type: [Course] })
-	async findAll(@Query() query: CourseQueryDto) {
+	async findAll(@Query() query: CourseQueryDto, @Req() p: any, @GetUser('id') userId?: Types.ObjectId) {
 		console.log('query', query)
-		const result = await this.coursesService.findAll(query);
+		const result = await this.coursesService.findAll(query, userId);
 		return ResponseHelper.success(result)
 	}
 

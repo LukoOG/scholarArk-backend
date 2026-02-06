@@ -1,7 +1,7 @@
 import { IsArray, IsEnum, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional, IntersectionType } from '@nestjs/swagger';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
-import { CourseDifficulty } from '../../schemas/course.schema';
+import { CourseCategory, CourseDifficulty } from '../../schemas/course.schema';
 
 export class CourseFilterDto {
   @ApiPropertyOptional({
@@ -28,12 +28,12 @@ export class CourseFilterDto {
   search?: string;
 
   @ApiPropertyOptional({
-	  example: ['64f17f0f6f0740d2d0bb6be3']
+    example: "",
+    enum:CourseCategory
   })
   @IsOptional()
-  @IsArray()
-  @IsMongoId({ each: true })
-  goalIds?: string[];
+  @IsEnum(CourseCategory)
+  category?: CourseCategory;
 }
 
 export class CourseQueryDto extends IntersectionType(

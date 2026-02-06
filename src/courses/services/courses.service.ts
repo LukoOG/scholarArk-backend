@@ -29,6 +29,7 @@ import { FILE_FORMAT_CONFIG, UploadLessonDto } from '../dto/courses/upload-cours
 import { EnrollmentService } from 'src/enrollment/enrollment.service';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { TopicService } from 'src/topics/topics.service';
+import { UserService } from 'src/user/user.service';
 
 
 @Injectable()
@@ -43,6 +44,7 @@ export class CoursesService {
 		@InjectConnection() private readonly connection: Connection,
 		@InjectAws(S3Client) private readonly s3: S3Client,
 		private readonly configService: ConfigService<Config, true>,
+		private readonly userService: UserService,
 		private readonly enrollmentService: EnrollmentService,
 		private readonly topicService: TopicService,
 		private readonly cloudinaryService: CloudinaryService,
@@ -86,7 +88,7 @@ export class CoursesService {
 
 		if (!subjectNames.length) return [];
 		const subjects = await this.topicService.findByName(subjectNames);
-		
+
 		return subjects.map((s) => s._id);
 	}
 
@@ -214,26 +216,18 @@ export class CoursesService {
 		};
 	}
 
-	async findAll(dto: CourseQueryDto): Promise<PaginatedResponse<CourseListItem>> {
-		const { page = 1, limit = 20, topicIds, level, search, goalIds } = dto;
+	async findAll(dto: CourseQueryDto, userId?: Types.ObjectId): Promise<PaginatedResponse<CourseListItem>> {
+		const { page = 1, limit = 20, topicIds, category, level, search } = dto;
 		const skip = (page - 1) * limit;
 
-		const query: any = {
+		let query: any = {
 			isPublished: true,
 			isDeleted: { $ne: true },
 		};
 
-		if (topicIds?.length) {
-			query.topicIds = { $in: topicIds };
-		};
-
-		if (level) {
-			query.difficulty = level;
-		};
-
-		if (goalIds?.length) {
-			query.goalIds = { $in: goalIds }
-		};
+		if (topicIds?.length) query.topicIds = { $in: topicIds };
+		if (level) query.difficulty = level;
+		if (category) query.category = category;
 
 		if (search) {
 			query.$or = [
@@ -241,6 +235,18 @@ export class CoursesService {
 				{ description: { $regex: search, $options: 'i' } },
 			];
 		};
+
+		if (userId) {
+			// example: prioritize courses in user's topics
+			const user = await this.userService.findOne(userId);
+			if (user?.topicsIds?.length) {
+				query = query.sort({
+					// pseudo-weight: courses with matching topics come first
+					topicsIds: { $in: user.topicsIds },
+					createdAt: -1
+				});
+			}
+		}
 
 		const [items, total] = await Promise.all([
 			this.courseModel
