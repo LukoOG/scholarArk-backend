@@ -3,6 +3,7 @@ import { HydratedDocument, Types } from 'mongoose';
 import { Gender, UserRole } from 'src/common/enums';
 import { Email, EmailVerification, Name, Nonce, Phone, Wallet } from 'src/common/schemas';
 import mongoose from 'mongoose';
+import { MediaRef } from 'src/common/schemas/media.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -106,8 +107,8 @@ export class User {
   @Prop()
   stars?: number;
 
-  @Prop()
-  profile_pic: string;
+  @Prop({ type: MediaRef })
+  profile_pic: MediaRef;
 
   @Prop()
   password?: string;

@@ -5,6 +5,7 @@ import { CourseCategory, CourseDifficulty } from '../../schemas/course.schema';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
 import { ParseArray } from 'src/common/transforms/parse-array-transform';
+import { MediaDto } from 'src/common/dto/media.dto';
 
 export class LessonMediaDto {
   @ApiProperty({
@@ -133,7 +134,7 @@ class PriceDto {
   currency: PaymentCurrency
 
   @ApiProperty({
-    example: 15000,
+    example: 20000,
     description: "Price amount in major unit of specified currency"
   })
   @IsNotEmpty()
@@ -175,12 +176,13 @@ export class CreateCourseDto {
 
   @ApiPropertyOptional({
     description: 'Thumbnail url returned from S3 bucket upload',
-    type: String,
-    example: "https://image2url.com/r2/default/images/1769773616357-121d1b05-e768-4a13-bd0d-e530dc61e450.jpeg"
+    type: MediaDto,
   })
   @IsUrl()
   @IsOptional()
-  thumbnailUrl?: string;
+  @ValidateNested()
+  @Type(()=>MediaDto)
+  thumbnailUrl?: MediaDto;
 
   @ApiProperty({
     description: 'List of Course Prices in Supported Currencies',

@@ -29,7 +29,6 @@ export class AuthController {
 		- Email verification handled separately
 		`,
 	})
-	@ApiBody({ type: SignupDto })
 	@ApiCreatedResponse({
 		description: 'User created successfully',
 		schema: {
@@ -56,8 +55,8 @@ export class AuthController {
 			},
 		},
 	})
-	async register(@Body() signupDto: SignupDto, @UploadedFile() file?: Express.Multer.File) {
-		const user = await this.authService.register(signupDto, file);
+	async register(@Body() signupDto: SignupDto) {
+		const user = await this.authService.register(signupDto);
 		return ResponseHelper.success(user, HttpStatus.CREATED)
 	}
 

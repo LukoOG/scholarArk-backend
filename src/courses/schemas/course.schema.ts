@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { CourseModule } from './module.schema';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
+import { MediaRef } from 'src/common/schemas/media.schema';
 
 export type CourseDocument = HydratedDocument<Course>;
 
@@ -66,8 +67,8 @@ export class Course {
   @Prop({ default: 0 })
   studentsEnrolled: number;
 
-  @Prop()
-  thumbnailUrl?: string;
+  @Prop({ type: MediaRef })
+  thumbnailUrl?: MediaRef;
 
   @Prop({ default: 0 })
   rating: number;
@@ -77,6 +78,9 @@ export class Course {
 
   @Prop({ default: false })
   isPublished: boolean;
+
+  @Prop({ default: false })
+  isFeatured: boolean;
 
   @Prop()
   publishedAt?: Date;
