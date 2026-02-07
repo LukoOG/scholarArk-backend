@@ -12,7 +12,6 @@ interface VerificationEmailProps {
 }
 
 export const VerificationEmail = ({ token }: VerificationEmailProps) => {
-  const verifyUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
   return (
     <EmailLayout>
@@ -27,14 +26,12 @@ export const VerificationEmail = ({ token }: VerificationEmailProps) => {
         </Text>
 
         <Section>
-          <Button href={verifyUrl}>
-            Verify Email
-          </Button>
+          <Text>OTP Code: {token}</Text>
         </Section>
 
         <Text>
           {/* This link will expire in 24 hours. */}
-          This code will expire after 24 hours
+          This code will expire after 10 minutes
         </Text>
 
         <Text>
