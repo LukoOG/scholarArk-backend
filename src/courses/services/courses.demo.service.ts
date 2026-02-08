@@ -35,7 +35,7 @@ export class CoursesDemoService {
                         category: dto.category,
                         difficulty: dto.difficulty,
                         prices: coursePrices,
-                        thumbnailUrl: dto.thumbnailUrl,
+                        thumbnailUrl: dto.thumbnail,
                         isPublished: false,
                     }
                 ],
