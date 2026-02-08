@@ -17,6 +17,7 @@ import {
 } from './exceptions';
 import * as bcrypt from 'bcrypt';
 import { MediaService } from 'src/common/services/media.service';
+import { MediaProvider } from 'src/common/schemas/media.schema';
 
 @Injectable()
 export class UserService {
@@ -70,6 +71,7 @@ export class UserService {
 			goalIds,
 			topicIds,
 			preferenceIds,
+			profile_pic,
 			...profileData
 		} = updateUserDto;
 
@@ -92,8 +94,19 @@ export class UserService {
 
 		if (!updatedUser) throw new UserNotFoundException();
 
-		const isProfileComplete = this.isProfileComplete(updatedUser);
+		if (profile_pic) {
+			updatedUser.profile_pic = {
+				key: profile_pic.s3key,
+				size: profile_pic.size,
+				mimeType: profile_pic.mimeType,
+				provider: MediaProvider.S3,
+			}
+			
+			await updatedUser.save()
+		};
 
+		const isProfileComplete = this.isProfileComplete(updatedUser);
+		
 		if (updatedUser.onboardingStatus.isProfileComplete !== isProfileComplete) {
 			updatedUser.onboardingStatus.isProfileComplete = isProfileComplete;
 			await updatedUser.save()

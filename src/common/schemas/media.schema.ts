@@ -23,7 +23,8 @@ export class MediaRef {
 
   @Prop({
     enum: MediaProvider,
-    default: MediaProvider.EXTERNAL
+    default: MediaProvider.S3,
+    required: true
   })
   provider: MediaProvider
 }

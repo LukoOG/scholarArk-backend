@@ -134,7 +134,19 @@ export class AuthService {
 			throw new AccountExistsWithOAuthException("google")
 		};
 
-		if (user) throw new UserAlreadyExistsException(user.email.value);
+		if (user && user.email.verified) {
+			throw new UserAlreadyExistsException(user.email.value);
+		} else if (user && !user.email.verified) {
+			const { raw, token } = this.generateEmailVerificationToken()
+
+			user.emailVerification = { token: token, expiresAt: new Date(Date.now() + 10 * 60 * 1000) };
+
+			this.mailService.sendVerificationEmail(user.email.value, raw);
+
+			await user.save();
+
+			return { message: "Email already exists; Check Inbox for OTP to verify your email" }
+		}
 		const { role = UserRole.STUDENT, password: plainPassword, email } = signupDto;
 
 		const hashedPassword = await bcrypt.hash(plainPassword, 10);
@@ -142,7 +154,7 @@ export class AuthService {
 		const { raw, token } = this.generateEmailVerificationToken()
 
 		const createdUser = new this.userModel({
-			email: { value: signupDto.email, verified: false },
+			email: { value: email, verified: false },
 			emailVerification: { token: token, expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
 			role,
 			password: hashedPassword,
@@ -154,7 +166,7 @@ export class AuthService {
 		this.mailService.sendVerificationEmail(createdUser.email.value, raw);
 
 		const savedUser = await createdUser.save();
-		if(!savedUser) return { message: "Registeration failed" }
+		if (!savedUser) return { message: "Registeration failed" }
 
 		return { message: "Registeration successful, Check inbox for OTP to verify your mail" }
 	}

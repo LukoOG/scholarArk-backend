@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { IsArray, IsString, IsOptional, IsDateString, IsEnum, IsMongoId } from 'class-validator';
 import { MediaDto } from 'src/common/dto/media.dto';
 import { Gender, UserRole } from 'src/common/enums';
@@ -44,13 +44,13 @@ export class UpdateUserDto {
 
   @ApiPropertyOptional({
     example: {
-      "s3key":"users/667234983as/345/pic.jpeg",
-      "size":"34902",
-      "mimeType":"image.jpeg"
+      "s3key": "users/667234983as/345/pic.jpeg",
+      "size": "34902",
+      "mimeType": "image.jpeg"
     }
   })
   @IsOptional()
-  @IsString()
+  @Type(() => MediaDto)
   profile_pic?: MediaDto;
 
   @ApiPropertyOptional({ enum: UserRole, example: UserRole.STUDENT })
