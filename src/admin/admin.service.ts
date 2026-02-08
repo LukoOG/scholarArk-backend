@@ -6,7 +6,6 @@ import { AdminMethods } from './schemas/methods';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
-import { UserService } from 'src/user/user.service';
 import { VerificationEnum, VerifyTutorDto } from './dto/verification.dto';
 import { TutorVerificationStatus, User, UserDocument } from 'src/user/schemas/user.schema';
 import { UserRole } from 'src/common/enums';
@@ -19,7 +18,6 @@ export class AdminService {
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
     private readonly jwtService: JwtService,
-    private readonly userService: UserService,
   ) { }
 
   async signup(dto: SignupDto) {
