@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Type, Transform } from "class-transformer";
 import { IsString, IsNotEmpty, IsOptional, IsArray, ValidateNested } from "class-validator";
 import { ParseArray } from "src/common/transforms/parse-array-transform";
-import { CreateLessonDto } from "../courses/create-course.dto";
+import { CreateLessonDto } from "../lessons/create-lesson.dto";
 
 export class CreateModuleDto {
   @ApiProperty({
@@ -22,7 +22,7 @@ export class CreateModuleDto {
 
   @ApiProperty({
     description: 'Lessons under this module',
-    type: [CreateLessonDto],
+    type: () => [CreateLessonDto],
   })
   @Transform(ParseArray())
   @IsArray()

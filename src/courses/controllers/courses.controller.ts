@@ -9,7 +9,8 @@ import { CourseFullContentResponseDto } from '../dto/courses/course-full-content
 import { ResponseHelper } from '../../common/helpers/api-response.helper';
 import { Types } from 'mongoose';
 import { CoursesService } from '../services/courses.service';
-import { CreateCourseDto, CreateLessonDto, TestDTO } from '../dto/courses/create-course.dto';
+import { CreateCourseDto, TestDTO } from '../dto/courses/create-course.dto';
+import { CreateLessonDto } from '../dto/lessons/create-lesson.dto';
 import { UpdateCourseDto } from '../dto/courses/update-course.dto';
 import { Course } from '../schemas/course.schema';
 
