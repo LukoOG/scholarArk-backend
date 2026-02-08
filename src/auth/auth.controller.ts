@@ -178,7 +178,7 @@ export class AuthController {
 		type: String,
 		required: true,
 		description: 'Email verification token sent via email',
-		example: 'd3f9c2a1e8b44a6f9c0b...',
+		example: '431349',
 	})
 	@ApiOkResponse({
 		description: 'Email verified successfully',

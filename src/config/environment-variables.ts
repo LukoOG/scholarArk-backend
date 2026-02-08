@@ -87,12 +87,14 @@ export class EnvironmentVariables {
   RESEND_API_KEY: string;
 
   @IsString()
-  AWS_ACCESS_KEY_ID
+  AWS_ACCESS_KEY_ID: string;
 
   @IsString()
-  AWS_SECRET_ACCESS_KEY
+  AWS_SECRET_ACCESS_KEY: string;
 
   @IsString()
-  AWS_BUCKET_NAME
+  AWS_BUCKET_NAME: string;
 
+  @IsString()
+  AWS_CDN_URL: string;
 }

@@ -75,6 +75,11 @@ export class User {
   })
   authProviders: AuthProviders;
 
+  @Prop({ type: String, minlength: 10, maxlength: 100 })
+  bio?: string;
+
+  @Prop({ type: Boolean })
+  is_verified?: boolean;
 
   @Prop({ type: Phone })
   phone?: Phone;
@@ -115,12 +120,6 @@ export class User {
 
   @Prop({ type: OnboardingStatus, required: true })
   onboardingStatus: OnboardingStatus;
-
-  @Prop({ type: Nonce })
-  nonce?: Nonce;
-
-  @Prop({ type: Wallet })
-  wallet?: Wallet;
 
   @Prop()
   refresh_token?: string;

@@ -240,9 +240,9 @@ export class CoursesService {
 			];
 		};
 
-		const user = await this.userService.findOne(userId);
 
-		if (user) {
+		if (userId) {
+			const user = await this.userService.findOne(userId);
 			if (feed) {
 				const strategy = COURSE_FEED_STRATEGIES[feed as CourseFeedType];
 				if (strategy) {

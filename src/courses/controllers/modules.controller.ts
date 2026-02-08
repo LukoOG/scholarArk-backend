@@ -11,7 +11,7 @@ import { RolesGuard } from "src/common/guards";
 import { UserRole } from "src/common/enums";
 
 @ApiTags('Modules')
-@Controller()
+@Controller("modules")
 @UseGuards(AuthGuard, CourseOwnerGuard, RolesGuard)
 @Roles(UserRole.TUTOR)
 export class ModulesController {
@@ -19,7 +19,7 @@ export class ModulesController {
         private readonly modulesService: ModulesService
     ) { }
 
-    @Post('courses/:courseId/modules')
+    @Post(':courseId')
     @ApiOperation({
         summary: 'Create a module in a course',
         description: 'Allows a tutor to add a new module to a draft course',
