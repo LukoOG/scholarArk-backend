@@ -5,20 +5,21 @@ import { CourseAccessService } from '../services/course-access.service';
 export class CourseAccessGuard implements CanActivate {
 	constructor(
 		private readonly courseAccessService: CourseAccessService
-	){}
+	) { }
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const req = context.switchToHttp().getRequest();
 		const user = req.user;
-		const { courseId, lessonId } = req.params;
+		const { courseId, lessonId, moduleId } = req.params;
 		// console.log("here", user.id, courseId)
 
-		if(!user && (!courseId || !lessonId)) return false
+		if (!user && (!courseId || !lessonId || !moduleId)) return false
 
 		return this.courseAccessService.canAccessCourse(
 			user.id,
 			user.role,
 			courseId,
+			moduleId,
 			lessonId
 		)
 	}
@@ -28,7 +29,7 @@ export class CourseAccessGuard implements CanActivate {
 export class CourseOwnerGuard implements CanActivate {
 	constructor(
 		private readonly courseAccessService: CourseAccessService,
-	){}
+	) { }
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const req = context.switchToHttp().getRequest();

@@ -79,7 +79,7 @@ export class User {
   bio?: string;
 
   @Prop({ type: Boolean })
-  is_verified?: boolean;
+  isVerified?: boolean;
 
   @Prop({ type: Phone })
   phone?: Phone;

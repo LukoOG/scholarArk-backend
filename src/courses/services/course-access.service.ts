@@ -4,6 +4,7 @@ import { Model, Types } from "mongoose";
 import { Course, CourseDocument } from "../schemas/course.schema";
 import { EnrollmentService } from "src/enrollment/enrollment.service";
 import { Lesson, LessonDocument } from "../schemas/lesson.schema";
+import { CourseModule, CourseModuleDocument } from "../schemas/module.schema";
 
 
 @Injectable()
@@ -11,22 +12,31 @@ export class CourseAccessService {
   constructor(
     @InjectModel(Course.name)
     private readonly courseModel: Model<CourseDocument>,
+    @InjectModel(CourseModule.name)
+    private readonly moduleModel: Model<CourseModuleDocument>,
     @InjectModel(Lesson.name)
     private readonly lessonModel: Model<LessonDocument>,
     private readonly enrollmentService: EnrollmentService,
   ) { }
 
-  async canAccessCourse(userId: Types.ObjectId, role: string, courseId: Types.ObjectId, lessonId: Types.ObjectId) {
+  async canAccessCourse(userId: Types.ObjectId, role: string, courseId: Types.ObjectId, moduleId: Types.ObjectId, lessonId: Types.ObjectId) {
     let course;
 
-    if(courseId){
+    if (courseId) {
       course = await this.courseModel.findById(courseId).select('tutor isPublished').lean().exec();
-    } else if(!courseId && lessonId){
-      let lesson = await this.lessonModel.findById(lessonId).select('isPreview').lean().exec()
+    } else if (!courseId && moduleId) {
+      let module = await this.moduleModel.findById(moduleId).select('course').lean().exec();
 
-      if(!lesson) return false;
+      if (!module) return false
 
-      if(lesson.isPreview) return true; //For demo; access to free courses
+      course = await this.courseModel.findById(module.course).select('tutor isPublished').lean().exec();
+    }
+    else if (!courseId && lessonId) {
+      let lesson = await this.lessonModel.findById(lessonId).select('course isPreview').lean().exec()
+
+      if (!lesson) return false;
+
+      if (lesson.isPreview) return true; //For demo; access to free courses
 
       course = await this.courseModel.findById(lesson.course).select('tutor isPublished').lean().exec();
     }
@@ -42,9 +52,9 @@ export class CourseAccessService {
     if (!course.isPublished) return false;
 
     // Must be enrolled
-    // return this.enrollmentService.isEnrolled(userId, courseId);
+    return this.enrollmentService.isEnrolled(userId, courseId);
     /// Demo: allowing access to all courses
-    return true
+    // return true
   }
 
   async isTutorOwner(courseId: Types.ObjectId, tutorId: Types.ObjectId) {
