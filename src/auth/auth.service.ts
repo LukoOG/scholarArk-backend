@@ -19,6 +19,7 @@ import * as bcrypt from 'bcrypt';
 import { randomInt, createHash, randomBytes } from 'crypto';
 import { TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken';
 import { AccountExistsWithOAuthException } from './exceptions/auth.exception';
+import { MediaProvider } from 'src/common/schemas/media.schema';
 
 const defaultAuthProviders = {
 	local: false,
@@ -248,7 +249,10 @@ export class AuthService {
 				user.googleId = googleId;
 				user.authProviders.google = true;
 				user.email.verified ||= email_verified;
-				user.profile_pic.key ||= picture;
+				user.profile_pic = {
+					url: picture,
+					provider: MediaProvider.EXTERNAL
+				}
 				await user.save();
 			};
 

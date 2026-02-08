@@ -9,8 +9,8 @@ export enum MediaProvider {
 
 @Schema({ _id: false })
 export class MediaRef {
-  @Prop({ required: true })
-  key: string;
+  @Prop()
+  key?: string;
 
   @Prop()
   url?: string;

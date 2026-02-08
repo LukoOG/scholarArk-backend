@@ -71,7 +71,7 @@ Fetches the public profile information of a user (tutor).
 						verified: { type: 'boolean' },
 					},
 				},
-				profile_pic: { type: 'string', nullable: true },
+				profilePicUrl: { type: 'string', nullable: true },
 				// bio: { type: 'string', nullable: true },
 				// expertise: {
 				// 	type: 'array',
