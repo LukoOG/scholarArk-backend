@@ -65,7 +65,7 @@ import { MediaService } from 'src/common/services/media.service';
 
             //case 2: s3 object
             if (pic?.key) {
-              return `${"CDN_URL"}/${pic.key}`
+              return `${CDN_URL}/${pic.key}`
             }
 
             //case 3: External, i.e not from S3
