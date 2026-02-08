@@ -63,7 +63,6 @@ export class CreateCourseDto {
     description: 'Thumbnail url returned from S3 bucket upload',
     type: MediaDto,
   })
-  @IsUrl()
   @IsOptional()
   @ValidateNested()
   @Type(()=>MediaDto)

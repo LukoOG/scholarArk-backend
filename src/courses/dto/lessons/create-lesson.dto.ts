@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, ValidateNested } from "class-validator";
+import { CreateAssessmentDto } from "src/assessments/dto/assessments/create-assessment.dto";
 
 export class LessonMediaDto {
   @ApiProperty({
@@ -82,6 +83,15 @@ export class CreateLessonDto {
   @ValidateNested()
   @Type(() => LessonMediaDto)
   media?: LessonMediaDto;
+
+  @ApiPropertyOptional({
+    description: 'Assessment for this lesson',
+    type: () => CreateAssessmentDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CreateAssessmentDto)
+  assessment?: CreateAssessmentDto;
 
   // @ApiPropertyOptional({
   //   description: 'Media key used to associate uploaded file with this lesson (filename)',

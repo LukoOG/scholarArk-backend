@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Admin, AdminSchema } from './schemas/admin.schema';
 import { adminMethods } from './schemas/methods';
 import { preSave } from './schemas/middleware';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { preSave } from './schemas/middleware';
         },
       },
     ]),
+    UserModule,
   ],
   providers: [AdminService],
   controllers: [AdminController],

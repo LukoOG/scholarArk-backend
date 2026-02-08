@@ -61,7 +61,7 @@ export class UserService {
 	async findOne(id: Types.ObjectId): Promise<User> {
 		const user = await this.userModel.findById(id).exec();
 		if (!user) throw new NotFoundException('User not found');
-		return user.toJSON();
+		return user
 	}
 
 	async update(id: Types.ObjectId, updateUserDto: UpdateUserDto): Promise<User> {

@@ -43,11 +43,11 @@ export class CoursesController {
 	@Roles(UserRole.TUTOR)
 	@ApiOperation({ summary: 'Create a new course' })
 	@ApiBearerAuth()
-	@ApiResponse({ status: 201, description: 'Course created successfully', type: Course })
+	@ApiResponse({ status: 201, description: 'Course drafted successfully', type: Course })
 	@ApiResponse({ status: 400, description: 'Invalid request body' })
 	async create(@Body() createCourseDto: CreateCourseDto, @GetUser('id') tutorId: Types.ObjectId) {
 		const { courseId } = await this.coursesService.create(createCourseDto, tutorId);
-		return ResponseHelper.success({ "message": "Course created successfully", courseId })
+		return ResponseHelper.success({ "message": "Course drafted successfully", courseId })
 	}
 
 	@Get()

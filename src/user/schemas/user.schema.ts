@@ -48,6 +48,12 @@ class OnboardingStatus {
   isOnboardingComplete: boolean;
 }
 
+export enum TutorVerificationStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+}
+
 @Schema({ timestamps: true })
 export class User {
   @Prop()
@@ -80,8 +86,25 @@ export class User {
   @Prop({ type: String, minlength: 10, maxlength: 100 })
   bio?: string;
 
-  @Prop({ type: Boolean })
-  isVerified?: boolean;
+  @Prop({
+    type: {
+      status: {
+        type: String,
+        enum: Object.values(TutorVerificationStatus),
+        default: TutorVerificationStatus.PENDING,
+      },
+      verifiedAt: { type: Date },
+      verifiedBy: { type: Types.ObjectId, ref: 'User' },
+      rejectionReason: { type: String },
+    },
+    default: {},
+  })
+  tutorVerification?: {
+    status: TutorVerificationStatus;
+    verifiedAt?: Date;
+    verifiedBy?: Types.ObjectId;
+    rejectionReason?: string;
+  };
 
   @Prop({ type: Phone })
   phone?: Phone;

@@ -20,6 +20,8 @@ import { CoursesDemoService } from './services/courses.demo.service';
 import { TopicsModule } from 'src/topics/topics.module';
 import { UserModule } from 'src/user/user.module';
 import { Config } from 'src/config';
+import { AssessmentsModule } from 'src/assessments/assessments.module';
+import { Assessment, AssessmentSchema } from 'src/assessments/schemas/assessments.schema';
 
 @Module({
 	imports: [
@@ -28,6 +30,7 @@ import { Config } from 'src/config';
 			{ name: CourseModule.name, schema: CourseModuleSchema },
 			{ name: Lesson.name, schema: LessonSchema },
 			{ name: LessonMedia.name, schema: LessonMediaSchema },
+			{ name: Assessment.name, schema: AssessmentSchema },
 			{ name: User.name, schema: UserSchema },
 		]),
 		MongooseModule.forFeatureAsync([
@@ -48,9 +51,9 @@ import { Config } from 'src/config';
 					})
 
 					schema.virtual('thumbnailUrl').get(function () {
-						if(!this.thumbnail) return null;
+						if (!this.thumbnail) return null;
 
-						if(this.thumbnail?.key){
+						if (this.thumbnail?.key) {
 							return `${CDN_URL}/${this.thumbnail.key}`
 						}
 					})

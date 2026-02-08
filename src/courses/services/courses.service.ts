@@ -32,6 +32,7 @@ import { TopicService } from 'src/topics/topics.service';
 import { UserService } from 'src/user/user.service';
 import { CourseFullContentResponseDto } from '../dto/courses/course-full-content.dto';
 import { COURSE_FEED_STRATEGIES, CourseFeedStrategy } from '../strategies/course-feed.strategy';
+import { Assessment, AssessmentDocument } from 'src/assessments/schemas/assessments.schema';
 
 @Injectable()
 export class CoursesService {
@@ -41,6 +42,7 @@ export class CoursesService {
 		@InjectModel(CourseModule.name) private moduleModel: Model<CourseModuleDocument>,
 		@InjectModel(Lesson.name) private lessonModel: Model<LessonDocument>,
 		@InjectModel(LessonMedia.name) private lessonMediaModel: Model<LessonMediaDocument>,
+		@InjectModel(Assessment.name) private readonly assessmentModel: Model<AssessmentDocument>,
 		@InjectModel(User.name) private userModel: Model<UserDocument>,
 		@InjectConnection() private readonly connection: Connection,
 		@InjectAws(S3Client) private readonly s3: S3Client,
@@ -192,6 +194,25 @@ export class CoursesService {
 					)
 
 					moduleDuration += modLesson.duration;
+
+					//create assessment if assessment
+					if (modLesson.assessment) {
+						await this.assessmentModel.create(
+							[
+								{
+									course: courseId,
+									module: module[0]._id,
+									lesson: lesson[0]._id,//modLesson.assessment.lessonId, 
+									createdBy: tutorId,
+									title: modLesson.assessment.title,
+									distribution: modLesson.assessment.distribution,
+									totalQuestions: modLesson.assessment.totalQuestions,
+									duration: modLesson.assessment.durationMinutes,
+								},
+							],
+							{ session },
+						);
+					}
 				};
 
 				await this.moduleModel.updateOne(
