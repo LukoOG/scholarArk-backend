@@ -13,6 +13,7 @@ import { UserController } from './user.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { Config, TMP_DIR } from 'src/config';
 import { MediaService } from 'src/common/services/media.service';
+import { MediaProvider } from 'src/common/schemas/media.schema';
 
 @Module({
   imports: [
@@ -64,7 +65,7 @@ import { MediaService } from 'src/common/services/media.service';
             if (typeof pic === "string") return pic;
 
             //case 2: s3 object
-            if (pic?.key) {
+            if (pic.provider == MediaProvider.S3 && pic?.key) {
               return `${CDN_URL}/${pic.key}`
             }
 

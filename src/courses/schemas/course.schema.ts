@@ -68,7 +68,7 @@ export class Course {
   studentsEnrolled: number;
 
   @Prop({ type: MediaRef })
-  thumbnailUrl?: MediaRef;
+  thumbnail?: MediaRef;
 
   @Prop({ default: 0 })
   rating: number;
@@ -80,7 +80,10 @@ export class Course {
   isPublished: boolean;
 
   @Prop({ default: false })
-  isFeatured: boolean;
+  isFeatured: boolean; //for admin
+
+  @Prop({ type: Number })
+  lessonCount?: number;
 
   @Prop()
   publishedAt?: Date;

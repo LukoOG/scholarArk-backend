@@ -6,6 +6,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
 import { ParseArray } from 'src/common/transforms/parse-array-transform';
 import { MediaDto } from 'src/common/dto/media.dto';
+import { CreateModuleDto } from '../modules/create-module.dto';
 
 export class LessonMediaDto {
   @ApiProperty({
@@ -96,33 +97,6 @@ export class CreateLessonDto {
   // mediaKey?: string;
 }
 
-export class CreateModuleDto {
-  @ApiProperty({
-    description: 'Module title',
-    example: 'JavaScript Basics',
-  })
-  @IsString()
-  title: string;
-
-  @ApiPropertyOptional({
-    description: 'Optional module description',
-    example: 'Covers the fundamentals of JavaScript',
-  })
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @ApiProperty({
-    description: 'Lessons under this module',
-    type: [CreateLessonDto],
-  })
-  @Transform(ParseArray())
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateLessonDto)
-  lessons: CreateLessonDto[];
-}
-
 class PriceDto {
   @ApiProperty({
     example: PaymentCurrency.NAIRA,
@@ -182,7 +156,7 @@ export class CreateCourseDto {
   @IsOptional()
   @ValidateNested()
   @Type(()=>MediaDto)
-  thumbnailUrl?: MediaDto;
+  thumbnail?: MediaDto;
 
   @ApiProperty({
     description: 'List of Course Prices in Supported Currencies',

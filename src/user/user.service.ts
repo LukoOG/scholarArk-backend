@@ -40,16 +40,16 @@ export class UserService {
 		return requiredFields.every((field) => field !== undefined && field !== null || field !== '')
 	}
 
-	private isMetaComplete(user: Partial<User>): boolean{
+	private isMetaComplete(user: Partial<User>): boolean {
 		return user?.topicsIds.length > 0 && user?.goalsIds.length > 0 && user?.preferencesIds.length > 0
 	}
 
 	async updateSubscribedTutors(userId: Types.ObjectId, tutorId: Types.ObjectId): Promise<void> {
 		const result = await this.userModel.findByIdAndUpdate(
 			userId,
-			{
-				subscribedTutorIds: { $push: tutorId }
-			})
+			{ $push: { subscribedTutorIds: tutorId } },
+			{ runValidators: true }
+		)
 	}
 
 	async findAll(role?: 'student' | 'tutor'): Promise<User[]> {
@@ -80,7 +80,7 @@ export class UserService {
 
 		if (goalIds) updatePayload.goalsIds = goalIds.map(id => new Types.ObjectId(id));
 		if (topicIds) updatePayload.topicsIds = topicIds.map(id => new Types.ObjectId(id));
-		if (preferenceIds) updatePayload.preferencesIds = preferenceIds.map(id => new Types.ObjectId(id) )
+		if (preferenceIds) updatePayload.preferencesIds = preferenceIds.map(id => new Types.ObjectId(id))
 
 		// Perform atomic update
 		console.log(updatePayload)
@@ -101,7 +101,7 @@ export class UserService {
 
 		const isMetaComplete = this.isMetaComplete(updatedUser);
 
-		if(updatedUser.onboardingStatus.isMetaComplete !== isMetaComplete){
+		if (updatedUser.onboardingStatus.isMetaComplete !== isMetaComplete) {
 			updatedUser.onboardingStatus.isMetaComplete = isMetaComplete;
 			await updatedUser.save()
 		};
@@ -180,9 +180,9 @@ export class UserService {
 		);
 	}
 
-	async isOnboardingComplete(userId: Types.ObjectId){
+	async isOnboardingComplete(userId: Types.ObjectId) {
 		const user = await this.userModel.findById(userId).lean().exec();
-		if(!user) throw new UserNotFoundException();
+		if (!user) throw new UserNotFoundException();
 
 		const status = user.onboardingStatus;
 

@@ -130,8 +130,9 @@ export class CoursesService {
 						difficulty: dto.difficulty,
 						prices: coursePrices,
 						topicIds,
-						thumbnailUrl: dto.thumbnailUrl,
+						thumbnail: dto.thumbnail,
 						isPublished: false,
+						lessonCount: 0,
 					}
 				],
 				{ session },
@@ -139,6 +140,7 @@ export class CoursesService {
 
 			const courseId = course[0]._id;
 			let totalCourseDuration = 0;
+			let lessonCount = 0;
 
 			for (let i = 0; i < dto.modules.length; i++) {
 				const mod = dto.modules[i]
@@ -181,6 +183,7 @@ export class CoursesService {
 						],
 						{ session },
 					)
+					lessonCount++;
 
 					await this.moduleModel.updateOne(
 						{ _id: module[0]._id },
@@ -202,7 +205,7 @@ export class CoursesService {
 
 			await this.courseModel.updateOne(
 				{ _id: courseId },
-				{ totalDuration: totalCourseDuration },
+				{ totalDuration: totalCourseDuration, lessonCount: lessonCount },
 				{ session },
 			)
 
