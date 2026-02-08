@@ -124,6 +124,12 @@ export class User {
   @Prop()
   refresh_token?: string;
 
+  @Prop()
+  nonce?: Nonce;
+
+  @Prop()
+  wallet?: Wallet;
+
   @Prop({ type: Number, min: 0, default: 0 })
   unreadNotifications?: number;
 
