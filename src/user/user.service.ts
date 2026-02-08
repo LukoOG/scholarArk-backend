@@ -16,6 +16,7 @@ import {
 	UserNotFoundException,
 } from './exceptions';
 import * as bcrypt from 'bcrypt';
+import { MediaService } from 'src/common/services/media.service';
 
 @Injectable()
 export class UserService {
@@ -24,6 +25,7 @@ export class UserService {
 		private readonly jwtService: JwtService,
 		private readonly configService: ConfigService<Config>,
 		private readonly cloudinaryService: CloudinaryService,
+		private readonly mediaService: MediaService,
 		@InjectModel(UserFcmToken.name) private fcmTokenModel: Model<UserFcmTokenDocument>
 	) { }
 
