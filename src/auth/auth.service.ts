@@ -157,7 +157,8 @@ export class AuthService {
 			emailVerification: { token: token, expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
 			role,
 			password: hashedPassword,
-			tutorVerification: role == UserRole.TUTOR ? {} : undefined,
+			tutorVerification: role === UserRole.TUTOR ? {} : undefined,
+			tutorProfile: role === UserRole.TUTOR ? {} : undefined,
 			onboardingStatus: {},
 			authProviders: { ...defaultAuthProviders, local: true }
 		});

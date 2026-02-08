@@ -3,6 +3,7 @@ import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { CourseModule } from './module.schema';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
 import { MediaRef } from 'src/common/schemas/media.schema';
+import  mongooseLeanVirtuals  from 'mongoose-lean-virtuals';
 
 export type CourseDocument = HydratedDocument<Course>;
 
@@ -95,7 +96,7 @@ CourseSchema.index({ topicIds: 1 });
 CourseSchema.index({ difficulty: 1 });
 CourseSchema.index({ isPublished: 1 });
 CourseSchema.index({ title: 'text', description: 'text' });
-
+CourseSchema.plugin(mongooseLeanVirtuals);
 
 export const CATEGORY_SUBJECT_MAP: Record<CourseCategory, string[]> = {
   [CourseCategory.PROGRAMMING]: [

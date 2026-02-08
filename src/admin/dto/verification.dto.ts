@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsOptional, IsString } from "class-validator";
-import { TutorVerificationStatus } from "src/user/schemas/user.schema";
+import { TutorVerificationStatus } from "src/user/schemas/sub-schema/tutor.sub";
+
 
 export enum VerificationEnum {
     APPROVED = 'approved',

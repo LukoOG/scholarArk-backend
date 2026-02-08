@@ -33,6 +33,7 @@ import { UserService } from 'src/user/user.service';
 import { CourseFullContentResponseDto } from '../dto/courses/course-full-content.dto';
 import { COURSE_FEED_STRATEGIES, CourseFeedStrategy } from '../strategies/course-feed.strategy';
 import { Assessment, AssessmentDocument } from 'src/assessments/schemas/assessments.schema';
+import { MediaProvider } from 'src/common/schemas/media.schema';
 
 @Injectable()
 export class CoursesService {
@@ -132,7 +133,12 @@ export class CoursesService {
 						difficulty: dto.difficulty,
 						prices: coursePrices,
 						topicIds,
-						thumbnail: dto.thumbnail,
+						thumbnail: {
+							key: dto.thumbnail.s3key,
+							mimeType: dto.thumbnail.mimeType,
+							size: dto.thumbnail.size,
+							provider: MediaProvider.S3,
+						},
 						isPublished: false,
 						lessonCount: 0,
 					}
@@ -283,7 +289,7 @@ export class CoursesService {
 				)
 				.populate({
 					path: "tutor",
-					select: "first_name last_name email profile_pic"
+					select: "first_name last_name email"
 				})
 				.sort({ createdAt: -1 })
 				.skip(skip)
@@ -452,13 +458,17 @@ export class CoursesService {
 		};
 	}
 
-	async findOne(id: string): Promise<Course> {
+	async findOne(id: string): Promise<any> {
 		const course = await this.courseModel
 			.findById(id)
-			.select('-modules')
+			.lean({ virtuals: true })
 			.exec();
 
-		if (!course) throw new NotFoundException(`Course #${id} not found`); return course;
+		console.log(course);
+
+
+		if (!course) throw new NotFoundException(`Course #${id} not found`);
+		return course;
 	}
 
 	async update(id: string, dto: UpdateCourseDto): Promise<Course> {

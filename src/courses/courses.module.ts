@@ -50,12 +50,23 @@ import { Assessment, AssessmentSchema } from 'src/assessments/schemas/assessment
 						}
 					})
 
+					schema.set('toObject', {
+						virtuals: true,
+						transform: (_doc, ret) => {
+							delete ret.modules
+
+							return ret
+						}
+					})
+
 					schema.virtual('thumbnailUrl').get(function () {
 						if (!this.thumbnail) return null;
 
 						if (this.thumbnail?.key) {
 							return `${CDN_URL}/${this.thumbnail.key}`
 						}
+
+						return "failed"
 					})
 
 					return schema

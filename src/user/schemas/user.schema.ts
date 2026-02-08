@@ -4,6 +4,8 @@ import { Gender, UserRole } from 'src/common/enums';
 import { Email, EmailVerification, Name, Nonce, Phone, Wallet } from 'src/common/schemas';
 import mongoose from 'mongoose';
 import { MediaRef } from 'src/common/schemas/media.schema';
+import { TutorProfile, TutorVerification } from './sub-schema/tutor.sub';
+import mongooseLeanVirtuals from 'mongoose-lean-virtuals';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -48,12 +50,6 @@ class OnboardingStatus {
   isOnboardingComplete: boolean;
 }
 
-export enum TutorVerificationStatus {
-  PENDING = 'pending',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-}
-
 @Schema({ timestamps: true })
 export class User {
   @Prop()
@@ -86,25 +82,18 @@ export class User {
   @Prop({ type: String, minlength: 10, maxlength: 100 })
   bio?: string;
 
+  @Prop({ type: String })
+  highest_qualification?: string;
+
   @Prop({
-    type: {
-      status: {
-        type: String,
-        enum: Object.values(TutorVerificationStatus),
-        default: TutorVerificationStatus.PENDING,
-      },
-      verifiedAt: { type: Date },
-      verifiedBy: { type: Types.ObjectId, ref: 'User' },
-      rejectionReason: { type: String },
-    },
-    default: {},
+    type: TutorVerification,
   })
-  tutorVerification?: {
-    status: TutorVerificationStatus;
-    verifiedAt?: Date;
-    verifiedBy?: Types.ObjectId;
-    rejectionReason?: string;
-  };
+  tutorVerification?: TutorVerification;
+
+  @Prop({
+    type: TutorProfile,
+  })
+  tutorProfile?: TutorProfile;
 
   @Prop({ type: Phone })
   phone?: Phone;
@@ -182,3 +171,4 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+UserSchema.plugin(mongooseLeanVirtuals)

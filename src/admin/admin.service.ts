@@ -7,8 +7,9 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
 import { VerificationEnum, VerifyTutorDto } from './dto/verification.dto';
-import { TutorVerificationStatus, User, UserDocument } from 'src/user/schemas/user.schema';
+import { User, UserDocument } from 'src/user/schemas/user.schema';
 import { UserRole } from 'src/common/enums';
+import { TutorVerificationStatus } from 'src/user/schemas/sub-schema/tutor.sub';
 
 @Injectable()
 export class AdminService {
