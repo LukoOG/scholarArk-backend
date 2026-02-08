@@ -112,8 +112,8 @@ export class User {
   @Prop()
   stars?: number;
 
-  @Prop({ type: MediaRef })
-  profile_pic: MediaRef;
+  @Prop({ type: mongoose.Schema.Types.Mixed })
+  profile_pic?: string | MediaRef;
 
   @Prop()
   password?: string;

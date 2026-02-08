@@ -23,10 +23,10 @@ import { MediaService } from 'src/common/services/media.service';
     MongooseModule.forFeatureAsync([
       {
         name: User.name,
-        useFactory(configSerivce: ConfigService<Config, true>) {
+        inject: [ConfigService],
+        useFactory: async (configService: ConfigService<Config, true>) => {
           const schema = UserSchema;
-          // console.log(configSerivce.get('aws', {infer:true}))
-          // const CDN_URL = configSerivce.get('aws', {infer: true}).cdn;
+          const CDN_URL = configService.get('aws', { infer: true }).cdn;
 
           schema.set('toObject', {
             virtuals: true,
@@ -57,10 +57,21 @@ import { MediaService } from 'src/common/services/media.service';
           });
 
           schema.virtual('profilePicUrl').get(function () {
-            if(!this.profile_pic?.key) return null;
-            if(typeof this.profile_pic === "string") return this.profile_pic;
+            const pic = this.profile_pic
+            if (!pic) return null
 
-            return `${"CDN_URL"}/${this.profile_pic.key}`
+            //case 1: legacy string (Cloudinary | Google)
+            if (typeof pic === "string") return pic;
+
+            //case 2: s3 object
+            if (pic?.key) {
+              return `${"CDN_URL"}/${pic.key}`
+            }
+
+            //case 3: External, i.e not from S3
+            if (pic?.url) return pic.url;
+
+            return null
           })
 
           schema.pre('validate', preValidate);
