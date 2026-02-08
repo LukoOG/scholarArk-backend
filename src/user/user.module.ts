@@ -25,7 +25,8 @@ import { MediaService } from 'src/common/services/media.service';
         name: User.name,
         useFactory(configSerivce: ConfigService<Config, true>) {
           const schema = UserSchema;
-          const CDN_URL = configSerivce.get('aws', {infer: true}).cdn;
+          // console.log(configSerivce.get('aws', {infer:true}))
+          // const CDN_URL = configSerivce.get('aws', {infer: true}).cdn;
 
           schema.set('toObject', {
             virtuals: true,
@@ -59,7 +60,7 @@ import { MediaService } from 'src/common/services/media.service';
             if(!this.profile_pic?.key) return null;
             if(typeof this.profile_pic === "string") return this.profile_pic;
 
-            return `${CDN_URL}/${this.profile_pic.key}`
+            return `${"CDN_URL"}/${this.profile_pic.key}`
           })
 
           schema.pre('validate', preValidate);

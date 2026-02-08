@@ -23,25 +23,23 @@ export class AuthController {
 	@ApiOperation({
 		summary: 'Register using email and password',
 		description: `
-		Creates a new user using email & password.
+Creates a new user using email & password.
 
-		- Auth provider: local
-		- Email verification handled separately
-		`,
+- Auth provider: local
+- Sends OTP to email for verification
+- Email verification is required before login
+  `,
 	})
 	@ApiCreatedResponse({
-		description: 'User created successfully',
+		description: 'Registration successful. Verification email sent.',
 		schema: {
 			example: {
 				data: {
-					user: {
-						_id: '6730a8cfb8c2a12b4e9b25cd',
-						email: { value: 'emma@test.com', verified: false },
-						role: 'STUDENT',
-					},
-					accessToken: 'eyJhbGciOiJIUzI1NiIsInR5...',
-					refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5...',
+					message:
+						'Registeration successful, Check inbox for OTP to verify your mail',
 				},
+				statusCode: 201,
+				error: null,
 			},
 		},
 	})
@@ -49,9 +47,9 @@ export class AuthController {
 		description: 'Validation failed or user already exists',
 		schema: {
 			example: {
+				data: null,
 				statusCode: 400,
-				message: 'User already exists',
-				error: 'Bad Request',
+				error: 'User already exists',
 			},
 		},
 	})
@@ -171,24 +169,45 @@ export class AuthController {
 	@ApiOperation({
 		summary: 'Verify user email',
 		description:
-			'Verifies a user email using a one-time token sent to their email address.',
+			'Verifies a user email using a one-time token sent to their email address. On success, authentication tokens are issued.',
 	})
 	@ApiQuery({
 		name: 'token',
 		type: String,
 		required: true,
-		description: 'Email verification token sent via email',
+		description: 'Email verification OTP sent via email',
 		example: '431349',
 	})
 	@ApiOkResponse({
 		description: 'Email verified successfully',
 		schema: {
 			example: {
-				success: true,
-				message: 'Email verified successfully',
 				data: {
+					user: {
+						_id: '6987ef5eafca065361b6f0c9',
+						email: {
+							value: 'emmanueladesipe01@gmail.com',
+							verified: true,
+							verifiedAt: '2026-02-08T02:05:43.745Z',
+						},
+						role: 'student',
+						topicsIds: [],
+						preferencesIds: [],
+						goalsIds: [],
+						completedCourseIds: [],
+						subscribedTutorIds: [],
+						createdAt: '2026-02-08T02:05:18.860Z',
+						updatedAt: '2026-02-08T02:05:43.753Z',
+						fullName: '',
+						profilePicUrl: null,
+						id: '6987ef5eafca065361b6f0c9',
+					},
+					accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+					refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
 					message: 'Email verified successfully',
 				},
+				statusCode: 200,
+				error: null,
 			},
 		},
 	})
@@ -196,15 +215,15 @@ export class AuthController {
 		description: 'Invalid or expired token',
 		schema: {
 			example: {
-				success: false,
-				message: 'Invalid or expired verification token',
+				data: null,
 				statusCode: 400,
+				error: 'Invalid or expired verification token',
 			},
 		},
 	})
 	async verifyEmail(@Query('token') token: string) {
-		await this.authService.verifyEmail(token);
-		return ResponseHelper.success({ message: "Email verified successfully" })
+		const result = await this.authService.verifyEmail(token);
+		return ResponseHelper.success(result)
 	}
 
 	@Post('forgot-password')

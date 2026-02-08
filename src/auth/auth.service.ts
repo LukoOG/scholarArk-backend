@@ -118,7 +118,7 @@ export class AuthService {
 
 		const { accessToken, refreshToken } = await this.generateTokens(user);
 
-		return { user: user.toJSON(), accessToken, refreshToken }
+		return { user: user.toJSON(), accessToken, refreshToken, message: "Email verified successfully" }
 	}
 
 	async register(signupDto: SignupDto): Promise<{ message: string }> {
