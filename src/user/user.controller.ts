@@ -133,7 +133,8 @@ Fetches the public profile information of a user (tutor).
 		},
 	})
 	async updateMe(@Req() req, @GetUser('id') id: Types.ObjectId, @Body() updateUserDto: UpdateUserDto) {
-		console.log(updateUserDto)
+		// console.log(updateUserDto)
+		console.log("request body:", req.body)
 		const response = await this.userService.update(id, updateUserDto);
 		return ResponseHelper.success(response)
 	}
