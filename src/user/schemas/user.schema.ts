@@ -14,6 +14,8 @@ export const PRIVATE_FIELDS = [
   'passwordReset',
   'authProviders',
   'googleId',
+  'profile_pic',
+  'fcmToken',
   'emailVerification',
   'nonce',
   'wallet',

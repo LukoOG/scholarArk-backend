@@ -127,7 +127,6 @@ export class AuthService {
 			.findOne({
 				'email.value': signupDto.email
 			})
-			.lean()
 			.exec();
 
 		if (user?.authProviders?.google && !user?.authProviders?.local) {
@@ -143,7 +142,7 @@ export class AuthService {
 
 			this.mailService.sendVerificationEmail(user.email.value, raw);
 
-			await user.save();
+			await user.save()
 
 			return { message: "Email already exists; Check Inbox for OTP to verify your email" }
 		}
