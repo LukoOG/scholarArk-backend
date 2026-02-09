@@ -35,5 +35,6 @@ import { AuthModule } from 'src/auth/auth.module';
   ],
   providers: [AdminService],
   controllers: [AdminController],
+  exports: [AdminService],
 })
 export class AdminModule { }
