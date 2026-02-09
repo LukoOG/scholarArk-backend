@@ -33,6 +33,7 @@ import { RefundStatus } from './schemas/payment.schema';
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
+  //document behavior when amount = 0
   @Post()
   @ApiBearerAuth()
   @ApiOperation({

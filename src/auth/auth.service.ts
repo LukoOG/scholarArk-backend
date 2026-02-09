@@ -18,6 +18,8 @@ import {
 import * as bcrypt from 'bcrypt';
 import { randomInt, createHash, randomBytes } from 'crypto';
 import { TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken';
+import { AccountExistsWithOAuthException } from './exceptions/auth.exception';
+import { MediaProvider } from 'src/common/schemas/media.schema';
 
 const defaultAuthProviders = {
 	local: false,
@@ -25,7 +27,6 @@ const defaultAuthProviders = {
 	apple: false,
 	facebook: false,
 } as const;
-
 
 @Injectable()
 export class AuthService {
@@ -87,8 +88,9 @@ export class AuthService {
 		return { accessToken, refreshToken };
 	}
 
-	private async generateEmailVerificationToken(): Promise<{ raw: string, token: string }> {
-		const raw = randomBytes(32).toString('hex');
+	private generateEmailVerificationToken(): { raw: string, token: string } {
+		const raw = randomInt(100000, 999999).toString();
+
 		const hashed = createHash('sha256').update(raw).digest('hex');
 
 		return { raw, token: hashed };
@@ -102,7 +104,7 @@ export class AuthService {
 		const user = await this.userModel.findOne({
 			'emailVerification.token': hashedToken,
 			'emailVerification.expiresAt': { $gt: new Date() },
-		});
+		}).exec();
 
 		if (!user) {
 			throw new BadRequestException('Invalid or expired verification token');
@@ -115,59 +117,65 @@ export class AuthService {
 
 		await user.save();
 
-		return {
-			message: 'Email verified successfully',
-		};
+		const { accessToken, refreshToken } = await this.generateTokens(user);
+
+		return { user: user.toJSON(), accessToken, refreshToken, message: "Email verified successfully" }
 	}
 
-	async register(signupDto: SignupDto, file?: Express.Multer.File): Promise<{ user: Omit<User, 'password'>, accessToken: string, refreshToken: string }> {
-		let profilePicUrl: string | undefined;
-
-		if (file) {
-			profilePicUrl = await this.cloudinaryService.uploadImage(file, 'users/profile-pics')
-		};
-
+	async register(signupDto: SignupDto): Promise<{ message: string }> {
 		let user = await this.userModel
 			.findOne({
-				$or: [
-					{ 'email.value': signupDto.email },
-				],
+				'email.value': signupDto.email
 			})
 			.exec();
 
-		if (user) throw new UserAlreadyExistsException();
-		const { role = UserRole.STUDENT, password: plainPassword, ...rest } = signupDto;
+		if (user?.authProviders?.google && !user?.authProviders?.local) {
+			throw new AccountExistsWithOAuthException("google")
+		};
+
+		if (user && user.email.verified) {
+			throw new UserAlreadyExistsException(user.email.value);
+		} else if (user && !user.email.verified) {
+			const { raw, token } = this.generateEmailVerificationToken()
+
+			user.emailVerification = { token: token, expiresAt: new Date(Date.now() + 10 * 60 * 1000) };
+
+			this.mailService.sendVerificationEmail(user.email.value, raw);
+
+			await user.save()
+
+			return { message: "Email already exists; Check Inbox for OTP to verify your email" }
+		}
+		const { role = UserRole.STUDENT, password: plainPassword, email } = signupDto;
 
 		const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
-		const { raw, token } = await this.generateEmailVerificationToken()
+		const { raw, token } = this.generateEmailVerificationToken()
 
 		const createdUser = new this.userModel({
-			...rest,
-			email: { value: signupDto.email, verified: false },
-			emailVerification: { token: token, expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+			email: { value: email, verified: false },
+			emailVerification: { token: token, expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
 			role,
 			password: hashedPassword,
-			profile_pic: profilePicUrl,
+			tutorVerification: role === UserRole.TUTOR ? {} : undefined,
+			tutorProfile: role === UserRole.TUTOR ? {} : undefined,
+			onboardingStatus: {},
 			authProviders: { ...defaultAuthProviders, local: true }
 		});
 
 		this.mailService.sendVerificationEmail(createdUser.email.value, raw);
 
 		const savedUser = await createdUser.save();
+		if (!savedUser) return { message: "Registeration failed" }
 
-		const { accessToken, refreshToken } = await this.generateTokens(savedUser);
-
-		const { password, refresh_token, ...userWithoutSecrets } = savedUser.toObject();
-
-		return { user: userWithoutSecrets, accessToken, refreshToken }
+		return { message: "Registeration successful, Check inbox for OTP to verify your mail" }
 	}
 
 	async login(loginDto: LoginDto): Promise<{ user: Omit<User, 'password'>, accessToken: string, refreshToken: string }> {
 		const { email, password: plainPassword, role } = loginDto;
 
 		const user = await this.userModel.findOne({ 'email.value': email })
-			.select('-unreadNotifications -nonce -wallet -googleId -onboardingStatus')
+			// .select('-unreadNotifications -nonce -wallet -googleId -onboardingStatus')
 			.exec();
 
 		if (!user) throw new UnauthorizedException('Invalid credentials');
@@ -187,9 +195,7 @@ export class AuthService {
 		}
 
 		const { accessToken, refreshToken } = await this.generateTokens(user);
-
-		const { password, refresh_token, ...userWithoutSecrets } = user.toObject();
-		return { user: userWithoutSecrets, accessToken, refreshToken }
+		return { user, accessToken, refreshToken }
 
 	}
 
@@ -251,11 +257,14 @@ export class AuthService {
 
 		if (user) {
 			if (!user.googleId) {
-				user.authProviders ??= defaultAuthProviders
+				user.authProviders ??= defaultAuthProviders;
 				user.googleId = googleId;
 				user.authProviders.google = true;
 				user.email.verified ||= email_verified;
-				user.profile_pic ||= picture;
+				user.profile_pic = {
+					url: picture,
+					provider: MediaProvider.EXTERNAL
+				}
 				await user.save();
 			};
 

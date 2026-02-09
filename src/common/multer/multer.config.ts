@@ -3,6 +3,6 @@ import { memoryStorage } from 'multer';
 export const multerConfig = {
   storage: memoryStorage(),
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
+    fileSize: 200 * 1024 * 1024, // 200MB
   },
 };

@@ -1,77 +1,14 @@
-import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsArray, IsEnum, IsInt, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, IsUrl, ValidateNested } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 import { CourseCategory, CourseDifficulty } from '../../schemas/course.schema';
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
+import { ParseArray } from 'src/common/transforms/parse-array-transform';
+import { MediaDto } from 'src/common/dto/media.dto';
+import { CreateModuleDto } from '../modules/create-module.dto';
 
-export class CreateLessonDto {
-  @ApiProperty({
-    description: 'Lesson title',
-    example: 'Introduction to JavaScript',
-  })
-  @IsString()
-  title: string;
-
-  @ApiProperty({
-    description: 'Lesson content type',
-    enum: ['video', 'article', 'quiz'],
-    example: 'video',
-  })
-  @IsEnum(['video', 'article', 'quiz'])
-  type: 'video' | 'article' | 'quiz';
-
-  @ApiPropertyOptional({
-    description: 'Text content for article or quiz lessons',
-    example: 'JavaScript is a programming language...',
-  })
-  @IsOptional()
-  @IsString()
-  content?: string;
-
-  @ApiProperty({
-    description: 'Lesson duration in seconds',
-    example: 420,
-  })
-  @IsNumber()
-  duration: number;
-
-  @ApiPropertyOptional({
-    description: 'Whether this lesson can be previewed before enrollment',
-    example: true,
-  })
-  @IsOptional()
-  isPreview?: boolean;
-}
-
-
-export class CreateModuleDto {
-  @ApiProperty({
-    description: 'Module title',
-    example: 'JavaScript Basics',
-  })
-  @IsString()
-  title: string;
-
-  @ApiPropertyOptional({
-    description: 'Optional module description',
-    example: 'Covers the fundamentals of JavaScript',
-  })
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @ApiProperty({
-    description: 'Lessons under this module',
-    type: [CreateLessonDto],
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateLessonDto)
-  lessons: CreateLessonDto[];
-}
-
-class PriceDto{
+class PriceDto {
   @ApiProperty({
     example: PaymentCurrency.NAIRA,
     enum: PaymentCurrency,
@@ -82,7 +19,7 @@ class PriceDto{
   currency: PaymentCurrency
 
   @ApiProperty({
-    example: 15000,
+    example: 20000,
     description: "Price amount in major unit of specified currency"
   })
   @IsNotEmpty()
@@ -122,6 +59,15 @@ export class CreateCourseDto {
   @IsEnum(CourseDifficulty)
   difficulty?: CourseDifficulty;
 
+  @ApiPropertyOptional({
+    description: 'Thumbnail url returned from S3 bucket upload',
+    type: MediaDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(()=>MediaDto)
+  thumbnail?: MediaDto;
+
   @ApiProperty({
     description: 'List of Course Prices in Supported Currencies',
     type: [PriceDto],
@@ -130,17 +76,44 @@ export class CreateCourseDto {
       { currency: 'USD', amount: 40 },
     ],
   })
+  @Transform(ParseArray())
   @IsArray()
-  @ValidateNested({each:true})
-  @Type(()=>PriceDto)
+  @ValidateNested({ each: true })
+  @Type(() => PriceDto)
   prices: PriceDto[];
 
   @ApiProperty({
     description: 'Modules included in the course',
     type: [CreateModuleDto],
   })
+  @Transform(ParseArray())
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateModuleDto)
   modules: CreateModuleDto[];
+}
+
+
+
+export class TestModuleDTO {
+  @IsInt()
+  id: number;
+
+  @IsArray()
+  @IsString({ each: true })
+  lessons: string[];
+}
+
+export class TestDTO {
+  @IsString()
+  email: string;
+
+  @IsString()
+  name: string
+
+  @Transform(ParseArray())
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => TestModuleDTO)
+  module: TestModuleDTO[];
 }

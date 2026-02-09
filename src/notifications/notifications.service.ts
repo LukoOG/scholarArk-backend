@@ -8,51 +8,51 @@ import { FirebaseService } from './firebase/firebase.service';
 
 @Injectable()
 export class NotificationsService {
-	constructor(
-		@InjectModel(User.name) private userModel: Model<UserDocument>,
-		@InjectModel(UserFcmToken.name) private fcmTokenModel: Model<UserFcmTokenDocument>,
-		private readonly firebaseService: FirebaseService
-	){};
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(UserFcmToken.name) private fcmTokenModel: Model<UserFcmTokenDocument>,
+    private readonly firebaseService: FirebaseService
+  ) { };
 
-	@Cron(CronExpression.EVERY_DAY_AT_5PM)
-	async sendDailyReminders(){
-		console.log("sending daily reminders");
-		
-		const users = await this.userModel.find({
-			remindersEnabled: true
-		})
-		.select('_id first_name')
-		.lean();
-		
-		const userIds = users.map(u => u._id);
-		
-		const tokens = 	await this.fcmTokenModel.find({
-			userId: { $in: userIds },
-			isActive: true,
-		})
-		.lean();
-		
-		const tokenMap = new Map<string, string[]>();
+  @Cron(CronExpression.EVERY_DAY_AT_5PM)
+  async sendDailyReminders() {
+    console.log("sending daily reminders");
 
-		for (const t of tokens) {
-		  const key = t.userId.toString();
-		  if (!tokenMap.has(key)) tokenMap.set(key, []);
-		  tokenMap.get(key)!.push(t.token);
-		}
-		
-		for (const user of users) {
-		  const userTokens = tokenMap.get(user._id.toString());
-		  if (!userTokens?.length) continue;
+    const users = await this.userModel.find({
+      remindersEnabled: true
+    })
+      .select('_id first_name')
+      .lean();
 
-		  await this.firebaseService.sendNotification(userTokens, {
-			title: `Hey ${user.first_name} 👋`,
-			body: "Don't forget to continue your courses today!",
-			data: {
-			  type: 'DAILY_REMINDER',
-			},
-		  });
-		}
-	};
+    const userIds = users.map(u => u._id);
+
+    const tokens = await this.fcmTokenModel.find({
+      userId: { $in: userIds },
+      isActive: true,
+    })
+      .lean();
+
+    const tokenMap = new Map<string, string[]>();
+
+    for (const t of tokens) {
+      const key = t.userId.toString();
+      if (!tokenMap.has(key)) tokenMap.set(key, []);
+      tokenMap.get(key)!.push(t.token);
+    }
+
+    for (const user of users) {
+      const userTokens = tokenMap.get(user._id.toString());
+      if (!userTokens?.length) continue;
+
+      await this.firebaseService.sendNotification(userTokens, {
+        title: `Hey ${user.first_name} 👋`,
+        body: "Don't forget to continue your courses today!",
+        data: {
+          type: 'DAILY_REMINDER',
+        },
+      });
+    }
+  };
 
   @Cron(CronExpression.EVERY_DAY_AT_8PM)
   async sendEveningReminder() {
@@ -64,7 +64,9 @@ export class NotificationsService {
   }
 
   // 🔔 8:30 PM notification
-  @Cron('30 20 * * *')
+  //@Cron('30 20 * * *')
+  @Cron(CronExpression.MONDAY_TO_FRIDAY_AT_9PM)
+  @Cron(CronExpression.MONDAY_TO_FRIDAY_AT_3PM)
   async sendLateEveningReminder() {
     await this.sendBulkNotification({
       title: 'Still time to learn ⏰',
@@ -72,71 +74,8 @@ export class NotificationsService {
       type: 'LATE_EVENING_REMINDER',
     });
   }
-  
-  @Cron('45 20 * * *')
-  async sendLateEveningReminder2() {
-    await this.sendBulkNotification({
-      title: 'Still time to learn ⏰',
-      body: 'Just 10–15 minutes of study can make a difference!',
-      type: 'LATE_EVENING_REMINDER',
-    });
-  }
-  
-  @Cron('50 20 * * *')
-  async sendLateEveningReminder3() {
-    await this.sendBulkNotification({
-      title: 'Still time to learn ⏰',
-      body: 'Just 10–15 minutes of study can make a difference!',
-      type: 'LATE_EVENING_REMINDER',
-    });
-  }
-  
-  @Cron('05 21 * * *')
-  async sendLateEveningReminder4() {
-    await this.sendBulkNotification({
-      title: 'Still time to learn ⏰',
-      body: 'Just 10–15 minutes of study can make a difference!',
-      type: 'LATE_EVENING_REMINDER',
-    });
-  }
-  
-  @Cron('10 21 * * *')
-  async sendLateEveningReminder5() {
-    await this.sendBulkNotification({
-      title: 'Still time to learn ⏰',
-      body: 'Just 10–15 minutes of study can make a difference!',
-      type: 'LATE_EVENING_REMINDER',
-    });
-  }
-  
-  @Cron('15 21 * * *')
-  async sendLateEveningReminder6() {
-    await this.sendBulkNotification({
-      title: 'Still time to learn ⏰',
-      body: 'Just 10–15 minutes of study can make a difference!',
-      type: 'LATE_EVENING_REMINDER',
-    });
-  }
-  
-  @Cron('30 21 * * *')
-  async sendLateEveningReminder7() {
-    await this.sendBulkNotification({
-      title: 'Still time to learn ⏰',
-      body: 'Just 10–15 minutes of study can make a difference!',
-      type: 'LATE_EVENING_REMINDER',
-    });
-  }
-  
-    @Cron('45 21 * * *')
-  async sendLateEveningReminder8() {
-    await this.sendBulkNotification({
-      title: 'Still time to learn ⏰',
-      body: 'Just 10–15 minutes of study can make a difference!',
-      type: 'LATE_EVENING_REMINDER',
-    });
-  }
-	
-private async sendBulkNotification(payload: {
+
+  private async sendBulkNotification(payload: {
     title: string;
     body: string;
     type: string;

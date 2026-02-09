@@ -98,6 +98,51 @@ export class PaymentService {
     if (payment.refundStatus !== 'none') {
       throw new BadRequestException('Refund already initiated or processed');
     }
+    private readonly logger = new Logger(PaymentService.name);
+    constructor(
+        @InjectModel(Payment.name) public paymentModel: Model<PaymentDocument>,
+        private readonly paystackService: PaystackService,
+        private readonly enrollmentService: EnrollmentService,
+        private readonly courseService: CoursesService,
+        private readonly usersService: UserService,
+    ) {
+    }
+
+    async initializeCoursePayment(userId: Identifier, email: string, dto: PaymentTransactionDto) {
+        const reference = `SK_${Date.now()}_${userId}`;
+
+        const { courseId, tutorId, currency } = dto
+
+        //fetch amount from course
+        const amount = await this.courseService.getCoursePrice(courseId, currency)
+
+        await this.paymentModel.create({
+            user: userId,
+            course: courseId,
+            amount,
+            currency: currency,
+            reference,
+            status: PaymentStatus.INITIALIZED,
+        });
+
+        if (amount === 0) {
+            //automatically enroll
+            return await this.enrollmentService.enroll(
+                userId as Types.ObjectId,
+                courseId,
+            )
+        };
+
+        return this.paystackService.initializeTransaction({
+            email,
+            amount: amount * 100, //convert to minor units for paystack
+            reference,
+            metadata: { userId, courseId, tutorId }
+        })
+    }
+
+    async handleSuccessfulPayment(reference: string, payload: any, tutorId: Types.ObjectId) {
+        const payment = await this.paymentModel.findOne({ reference }).exec();
 
     // 1. Check 7-day window
     const now = new Date();
@@ -116,47 +161,23 @@ export class PaymentService {
     payment.refundRequestedAt = now;
     await payment.save();
 
-    return {
-      message: 'Refund request submitted successfully',
-      data: payment,
-    };
-  }
+        if (verification.status) {
+            payment.status = PaymentStatus.SUCCESS;
+            payment.providerPayload = payload;
+            await payment.save();
 
-  async approveRefund(paymentId: Identifier) {
-    const payment = await this.paymentModel.findById(paymentId);
-    if (!payment) throw new NotFoundException('Payment not found');
+            await this.enrollmentService.enroll(
+                payment.user,
+                payment.course
+            )
+            //update students enrolled
+            await this.courseService.incrementEnrolledStudents(payment.course)
+            //update student subscribed 
+            await this.usersService.updateSubscribedTutors(payment.user, tutorId)
+        } else {
+            throw new BadRequestException('Transaction failed')
+        }
 
-    if (payment.refundStatus !== RefundStatus.PENDING) {
-      throw new BadRequestException('Refund is not pending');
-    }
-
-    payment.refundStatus = RefundStatus.PROCESSING;
-    await payment.save();
-
-    try {
-      // Call Paystack
-      const refundResponse = await this.paystackService.refundTransaction(
-        payment.reference,
-        payment.amount,
-      );
-
-      // Update status
-      payment.refundStatus = RefundStatus.PROCESSED;
-      payment.status = PaymentStatus.REFUNDED;
-      payment.refundTransactionId = refundResponse.id?.toString();
-      await payment.save();
-
-      // Revoke access
-      await this.enrollmentService.revokeAccess(payment.user, payment.course);
-
-      return {
-        message: 'Refund approved and processed',
-        data: payment,
-      };
-    } catch (error) {
-      payment.refundStatus = RefundStatus.FAILED;
-      await payment.save();
-      throw error;
     }
   }
 

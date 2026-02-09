@@ -1,11 +1,12 @@
 import { render } from '@react-email/render';
-import { WelcomeEmail } from './emails/welcome-email';
+import * as emails from './emails';
 import * as fs from 'fs';
 import * as path from 'path';
 
 async function preview() {
   const html = await render(
-    WelcomeEmail({ name: 'Emmanuel' }),
+    // emails.WelcomeEmail({ name: 'Emmanuel' }),
+    emails.VerificationEmail({ token: "198989" })
   );
 
   const outputPath = path.join(

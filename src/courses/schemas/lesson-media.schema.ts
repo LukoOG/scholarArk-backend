@@ -2,28 +2,38 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
 
 export enum LessonMediaStatus {
-    PENDING = 'pending',
+    PROCESSING = 'processing',
     UPLOADED = 'uploaded',
-    READY = 'ready'
+    FAILED = 'failed'
 }
 
 @Schema({ _id: false })
 export class LessonMedia {
-    @Prop({ required: true })
-    s3key: string;
+  @Prop({ required: true })
+  s3key: string;
 
-    @Prop({ enum: LessonMediaStatus, default: LessonMediaStatus.PENDING })
-    status: LessonMediaStatus;
+  @Prop({ enum: LessonMediaStatus, default: LessonMediaStatus.PROCESSING })
+  status: LessonMediaStatus;
 
-    @Prop()
-    duration?: number;
+  @Prop()
+  duration?: number; // duration in minutes
 
-    @Prop()
-    size?: number;
+  @Prop()
+  size?: number;
 
-    @Prop()
-    mimeType: string;
+  @Prop()
+  mimeType: string;
+
+  // ------------------- DEMO FIELDS -------------------
+  @Prop({ type: Object })
+  demo?: {
+    videoUrl?: string; // Cloudinary MP4 URL
+    hlsUrl?: string;   // Cloudinary HLS URL
+    publicId?: string;
+    status: LessonMediaStatus
+  };
 }
+
 
 export type LessonMediaDocument = HydratedDocument<LessonMedia>;
 export const LessonMediaSchema = SchemaFactory.createForClass(LessonMedia);

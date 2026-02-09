@@ -31,15 +31,15 @@ export class Lesson {
 
   @Prop({ type: LessonMedia })
   media?: LessonMedia;
-
+  
   @Prop()
   content?: string;
 
   @Prop({ required: true })
   position: number;
 
-  @Prop({ default: false })
-  isPreview: boolean; // FREE lesson
+  @Prop({ default: false }) 
+  isPreview: boolean; 
 
   @Prop({ default: false })
   isPublished: boolean;

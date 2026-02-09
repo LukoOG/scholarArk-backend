@@ -12,7 +12,6 @@ interface VerificationEmailProps {
 }
 
 export const VerificationEmail = ({ token }: VerificationEmailProps) => {
-  const verifyUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
   return (
     <EmailLayout>
@@ -22,22 +21,17 @@ export const VerificationEmail = ({ token }: VerificationEmailProps) => {
         </Text>
 
         <Text>
-          Welcome to <strong>ScholarArk</strong> 🎉
-        </Text>
-
-        <Text>
           Please confirm your email address by clicking the button below.
           This helps us keep your account secure.
         </Text>
 
         <Section>
-          <Button href={verifyUrl}>
-            Verify Email
-          </Button>
+          <Text>OTP Code: {token}</Text>
         </Section>
 
         <Text>
-          This link will expire in 24 hours.
+          {/* This link will expire in 24 hours. */}
+          This code will expire after 10 minutes
         </Text>
 
         <Text>

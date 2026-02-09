@@ -2,16 +2,18 @@ import { ApiProperty } from "@nestjs/swagger"
 import { IsEnum } from "class-validator";
 
 enum FileFormat {
-    MP4 = "video/mp4",
-    WEBM = "video/webm",
-    PDF = "pdf",
+  MP4 = "video/mp4",
+  WEBM = "video/webm",
+  PDF = "pdf",
 }
-export class UploadLessonDto{
-    @ApiProperty({
-        enum: FileFormat
-    })
-    @IsEnum(FileFormat)
-    type: FileFormat;
+export class UploadLessonDto {
+  @ApiProperty({
+    description: 'Mime type of the uploaded file',
+    example: 'video/mp4',
+    enum: FileFormat
+  })
+  @IsEnum(FileFormat)
+  type: FileFormat;
 }
 
 export const FILE_FORMAT_CONFIG = {
@@ -34,17 +36,17 @@ export const FILE_FORMAT_CONFIG = {
 
 
 export class UploadLessonResponseDto {
-    @ApiProperty({ description: "Signed AWS S3 bucket url to use in PUT request"})
-    url: string;
+  @ApiProperty({ description: "Signed AWS S3 bucket url to use in PUT request" })
+  url: string;
 
-    @ApiProperty({ description: "Key of the lesson file"})
-    key: string;
+  @ApiProperty({ description: "Key of the lesson file" })
+  key: string;
 
-    @ApiProperty({ description:"Amount of time till url expires in seconds", example: 300 })
-    expiresIn: number;
+  @ApiProperty({ description: "Amount of time till url expires in seconds", example: 300 })
+  expiresIn: number;
 }
 
 export class PlayLessonResponseDto {
-    @ApiProperty({ description: "Signed AWS S3 bucket url to fetch lesson resource"})
-    url: string;   
+  @ApiProperty({ description: "Signed AWS S3 bucket url to fetch lesson resource" })
+  url: string;
 }

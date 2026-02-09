@@ -1,7 +1,7 @@
-import { Controller, Get, Req, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Req, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '../common/multer/multer.config';
-import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiCreatedResponse, ApiBadRequestResponse, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiParam, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -10,38 +10,92 @@ import { ResponseHelper } from '../common/helpers/api-response.helper';
 import { GetUser } from '../common/decorators'
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Types } from 'mongoose';
+import { OnboardingStatusDto } from './dto/onboarding-status.dto';
 
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+	constructor(private readonly userService: UserService) { }
 
-  @Get()
-  async findAll(@Query('role') role?: 'student' | 'tutor') {
-    const response = await this.userService.findAll(role);
-	return ResponseHelper.success(response)	
-  }
+	@Get()
+	async findAll(@Query('role') role?: 'student' | 'tutor') {
+		const response = await this.userService.findAll(role);
+		return ResponseHelper.success(response)
+	}
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-   const response = await this.userService.findOne(id);
-	return ResponseHelper.success(response)   
-  }
-  
-  @UseGuards(AuthGuard)
-  @Get('me')
-  async findOneMe(@GetUser('id') id: string) {
-   const response = await this.userService.findOne(id);
-	return ResponseHelper.success(response)   
-  }
-  
-  @UseGuards(AuthGuard)
-  @Patch('me')
-  @UseInterceptors(FileInterceptor('profile_pic', multerConfig))
-  @ApiBearerAuth()
-  @ApiOperation({
-	  summary: 'Complete user registration or update user profile',
-	  description: `
+	@UseGuards(AuthGuard)
+	@Get('me')
+	async findOneMe(@GetUser('id') id: Types.ObjectId) {
+		const response = await this.userService.findOne(id);
+		return ResponseHelper.success(response)
+	}
+
+
+	@Get(':userId')
+	@ApiOperation({
+		summary: 'Get user profile by ID',
+		description: `
+Fetches the public profile information of a user (tutor).
+
+### Use cases
+- Tutor details page on mobile
+- Public profile preview
+- Course tutor attribution
+
+### Notes
+- Only public-safe fields are returned
+- This endpoint does NOT return courses
+`,
+	})
+	@ApiParam({
+		name: 'userId',
+		type: 'string',
+		description: 'Unique ID of the user (tutor)',
+		example: '698252d9fab0631a9b613359',
+	})
+	@ApiResponse({
+		status: 200,
+		description: 'User profile fetched successfully',
+		schema: {
+			properties: {
+				_id: { type: 'string' },
+				first_name: { type: 'string' },
+				last_name: { type: 'string' },
+				birthday: { type: 'string' },
+				gender: { type: 'string' },
+				phone: { type: 'string' },
+				email: {
+					type: 'object',
+					properties: {
+						value: { type: 'string' },
+						verified: { type: 'boolean' },
+					},
+				},
+				profilePicUrl: { type: 'string', nullable: true },
+				// bio: { type: 'string', nullable: true },
+				// expertise: {
+				// 	type: 'array',
+				// 	items: { type: 'string' },
+				// },
+				createdAt: { type: 'string', format: 'date-time' },
+			},
+		},
+	})
+	@ApiResponse({
+		status: 404,
+		description: 'User not found',
+	})
+	async findUserById(@Param('userId') userId: Types.ObjectId) {
+		const response = await this.userService.findOne(userId);
+		return ResponseHelper.success(response)
+	}
+
+	@UseGuards(AuthGuard)
+	@Patch('me')
+	@ApiBearerAuth()
+	@ApiOperation({
+		summary: 'Complete user registration or update user profile',
+		description: `
 	This endpoint is used for **two purposes**:
 
 	1. **Complete Registration Flow**  
@@ -55,93 +109,197 @@ export class UserController {
 	\`Authorization: Bearer <access_token>\`
 	  `,
 	})
-  @ApiBody({
-    type: UpdateUserDto,
-    description: 'Fields required to complete user profile',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Profile completed successfully',
-    schema: {
-      example: {
-        data: {
-          user: {
-            _id: '6730b2cfb8c2a12b4e9b25cd',
-            username: 'emmanuel',
-            email: { value: 'emma@test.com', verified: true },
-            role: 'STUDENT',
-            preferences: [],
-            goals: ['master backend engineering'],
-          topics: ['nestjs', 'mongodb'],
-          },
-        },
-      },
-    },
-  })
-  async updateMe(@Req() req, @GetUser('id') id: Types.ObjectId, @Body() updateUserDto: UpdateUserDto, @UploadedFile() file?: Express.Multer.File) {
-    console.log(req)
-	const response = await this.userService.update(id, updateUserDto, file);
-	return ResponseHelper.success(response)	
-  }
-  
-  @UseGuards(AuthGuard)
-  @Patch('me/fcm-token')
-  @ApiBearerAuth()
-  @ApiOperation({ description: "save fcm token for user (per device)" })
-  async saveToken(@GetUser('id') id: Types.ObjectId, @Body() dto: SaveFcmTokenDto){
-	  await this.userService.saveFcmToken(id, dto)
-	  return ResponseHelper.success({ message: "Token saved!" })
+	@ApiBody({
+		type: UpdateUserDto,
+		description: 'Fields required to complete user profile',
+	})
+	@ApiResponse({
+		status: 200,
+		description: 'Profile completed successfully',
+		schema: {
+			example: {
+				data: {
+					user: {
+						_id: '6730b2cfb8c2a12b4e9b25cd',
+						username: 'emmanuel',
+						email: { value: 'emma@test.com', verified: true },
+						role: 'STUDENT',
+						preferences: [],
+						goals: ['master backend engineering'],
+						topics: ['nestjs', 'mongodb'],
+					},
+				},
+			},
+		},
+	})
+	async updateMe(@Req() req, @GetUser('id') id: Types.ObjectId, @Body() updateUserDto: UpdateUserDto) {
+		// console.log(updateUserDto)
+		console.log("request body:", req.body)
+		const response = await this.userService.update(id, updateUserDto);
+		return ResponseHelper.success(response)
 	}
-  
-  @UseGuards(AuthGuard)
-  @Delete('me')
-  @ApiBearerAuth()
-  @ApiOperation({
-	  summary: 'Delete current user account',
-	  description:
-		'Deletes the authenticated user account. Requires a valid access token in the Authorization header.',
+
+	@UseGuards(AuthGuard)
+	@Patch('me/fcm-token')
+	@ApiBearerAuth()
+	@ApiOperation({ description: "save fcm token for user (per device)" })
+	async saveToken(@GetUser('id') id: Types.ObjectId, @Body() dto: SaveFcmTokenDto) {
+		await this.userService.saveFcmToken(id, dto)
+		return ResponseHelper.success({ message: "Token saved!" })
+	}
+
+	@Post('accept-terms')
+	@UseGuards(AuthGuard)
+	@ApiBearerAuth()
+	@ApiOperation({
+		summary: 'Accept Terms and Conditions',
+		description: 'Marks the authenticated user as having accepted the terms and conditions.',
 	})
 	@ApiResponse({
-	  status: 200,
-	  description: 'User account successfully deleted',
-	  schema: {
+		status: 200,
+		description: 'Terms accepted successfully',
 		example: {
-		  data: {
-			message: 'User deleted',
-		  },
-		  statusCode: 200,
-		  error: null,
+			message: 'Terms accepted successfully',
 		},
-	  },
 	})
 	@ApiResponse({
-	  status: 401,
-	  description: 'Unauthorized – invalid or missing access token',
-	  schema: {
-		example: {
-		  data: null,
-		  statusCode: 401,
-		  error: {
-			message: 'Invalid token',
-		  },
-		},
-	  },
+		status: 401,
+		description: 'Unauthorized',
+	})
+	async acceptTerms(
+		@GetUser('id') userId: Types.ObjectId,
+	) {
+		await this.userService.acceptTerms(userId);
+
+		return ResponseHelper.success(
+			{ message: 'Terms accepted successfully' },
+			HttpStatus.OK,
+		);
+	}
+
+	@Post('complete-onboarding')
+	@UseGuards(AuthGuard)
+	@ApiBearerAuth()
+	@ApiOperation({
+		summary: 'Complete user onboarding',
+		description: `
+Finalizes onboarding for the authenticated user.
+
+Requirements:
+- Terms and Conditions accepted
+- Profile completed
+- All Meta selected: That is, goals, topics and preferences
+`,
 	})
 	@ApiResponse({
-	  status: 404,
-	  description: 'User not found',
-	  schema: {
+		status: 200,
+		description: 'Onboarding completed successfully',
 		example: {
-		  data: null,
-		  statusCode: 404,
-		  error: {
-			message: 'User not found',
-		  },
+			message: 'Onboarding completed successfully',
 		},
-	  },
 	})
-  async removeMe(@GetUser('id') id: Types.ObjectId) {
-    const response = await this.userService.delete(id);
-	return ResponseHelper.success({ message :"User deleted" }, HttpStatus.OK)
-  }
+	@ApiResponse({
+		status: 400,
+		description: 'Onboarding requirements not met',
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Unauthorized',
+	})
+	async completeOnboarding(
+		@GetUser('id') userId: Types.ObjectId,
+	) {
+		await this.userService.completeOnboarding(userId);
+
+		return ResponseHelper.success(
+			{ message: 'Onboarding completed successfully' },
+			HttpStatus.OK,
+		);
+	}
+
+	@Get('me/profile-completed')
+	@UseGuards(AuthGuard)
+	@ApiBearerAuth()
+	@ApiOperation({
+		summary: "Get user's onboarding status",
+		description: `
+Returns the current onboarding state of the authenticated user.
+
+This endpoint is used by the client to determine:
+- Whether the user has accepted Terms & Conditions
+- Whether profile setup is complete
+- Whether preferences have been selected
+- Whether onboarding should be enforced or skipped
+
+Typical usage:
+- Called immediately after login or signup
+- Used to redirect users to required onboarding steps
+`,
+	})
+	@ApiOkResponse({
+		description: 'User onboarding status retrieved successfully',
+		type: OnboardingStatusDto,
+	})
+	@ApiUnauthorizedResponse({
+		description: 'User is not authenticated',
+	})
+	async checkOnboardingStatus(
+		@GetUser('id') userId: Types.ObjectId,
+	) {
+		const result = await this.userService.isOnboardingComplete(userId);
+		return ResponseHelper.success(result, HttpStatus.OK);
+	}
+
+
+	@UseGuards(AuthGuard)
+	@Delete('me')
+	@ApiBearerAuth()
+	@ApiOperation({
+		summary: 'Delete current user account',
+		description:
+			'Deletes the authenticated user account. Requires a valid access token in the Authorization header.',
+	})
+	@ApiResponse({
+		status: 200,
+		description: 'User account successfully deleted',
+		schema: {
+			example: {
+				data: {
+					message: 'User deleted',
+				},
+				statusCode: 200,
+				error: null,
+			},
+		},
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Unauthorized – invalid or missing access token',
+		schema: {
+			example: {
+				data: null,
+				statusCode: 401,
+				error: {
+					message: 'Invalid token',
+				},
+			},
+		},
+	})
+	@ApiResponse({
+		status: 404,
+		description: 'User not found',
+		schema: {
+			example: {
+				data: null,
+				statusCode: 404,
+				error: {
+					message: 'User not found',
+				},
+			},
+		},
+	})
+	async removeMe(@GetUser('id') id: Types.ObjectId) {
+		const response = await this.userService.delete(id);
+		return ResponseHelper.success({ message: "User deleted" }, HttpStatus.OK)
+	}
 }

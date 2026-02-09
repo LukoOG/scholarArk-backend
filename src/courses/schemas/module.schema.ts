@@ -25,11 +25,11 @@ export class CourseModule {
   @Prop({ default: 0 })
   totalDuration: number;
 
-  @Prop({ default: false })
-  isPublished: boolean;
+  // @Prop({ default: false })
+  // isPublished: boolean;
 }
 
 export type CourseModuleDocument = HydratedDocument<CourseModule>;
 export const CourseModuleSchema = SchemaFactory.createForClass(CourseModule);
 
-CourseModuleSchema.index({ courseId: 1, position: 1 });
+CourseModuleSchema.index({ course: 1, position: 1 }, { unique: true });

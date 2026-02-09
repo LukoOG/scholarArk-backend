@@ -13,6 +13,8 @@ import { Config } from 'src/config';
 import { EnrollmentModule } from 'src/enrollment/enrollment.module';
 import { CoursesModule } from 'src/courses/courses.module';
 import { AdminModule } from 'src/admin/admin.module';
+import { PaystackWebhookController } from './webhooks/paystack.webhook.controller';
+
 
 @Module({
   imports: [
@@ -41,11 +43,12 @@ import { AdminModule } from 'src/admin/admin.module';
       },
     ]),
     AuthModule,
+    UserModule,
     EnrollmentModule,
     CoursesModule,
     AdminModule,
   ],
-  controllers: [PaymentController],
+  controllers: [PaymentController, PaystackWebhookController],
   providers: [PaymentService, PaystackService],
 })
 export class PaymentModule {}

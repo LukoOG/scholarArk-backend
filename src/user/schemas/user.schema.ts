@@ -2,9 +2,28 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { Gender, UserRole } from 'src/common/enums';
 import { Email, EmailVerification, Name, Nonce, Phone, Wallet } from 'src/common/schemas';
+import mongoose from 'mongoose';
+import { MediaRef } from 'src/common/schemas/media.schema';
+import { TutorProfile, TutorVerification } from './sub-schema/tutor.sub';
+import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
 
 export type UserDocument = HydratedDocument<User>;
 
+export const PRIVATE_FIELDS = [
+  'password',
+  'refresh_token',
+  'onboardingStatus',
+  'passwordReset',
+  'authProviders',
+  'googleId',
+  'profile_pic',
+  'fcmToken',
+  'emailVerification',
+  'nonce',
+  'wallet',
+  'unreadNotifications',
+  'remindersEnabled'
+];
 
 type AuthProviders = {
   local: boolean;
@@ -13,15 +32,32 @@ type AuthProviders = {
   facebook?: boolean;
 };
 
+@Schema({ _id: false })
+class OnboardingStatus {
+  @Prop({ default: false })
+  hasAcceptedTerms: boolean;
+
+  @Prop({ type: Date })
+  termsAcceptedAt?: Date;
+
+  @Prop({ default: false })
+  isProfileComplete: boolean;
+
+  @Prop({ default: false })
+  isMetaComplete: boolean;
+
+  @Prop({ default: false })
+  isOnboardingComplete: boolean;
+}
 
 @Schema({ timestamps: true })
 export class User {
   @Prop()
   first_name: string;
-  
+
   @Prop()
   last_name: string;
-  
+
   @Prop({ type: Email })
   email: Email;
 
@@ -30,95 +66,109 @@ export class User {
 
   @Prop({ type: String, unique: true, sparse: true })
   googleId?: string;
-  
-  @Prop({
-	  type: {
-		local: { type: Boolean, default: false },
-		google: { type: Boolean, default: false },
-		apple: { type: Boolean, default: false },
-		facebook: { type: Boolean, default: false },
-	  },
-	  default: () => ({
-		local: false,
-		google: false,
-		apple: false,
-		facebook: false,
-	  }),
-    _id: false
-	})
-	authProviders: AuthProviders;
 
+  @Prop({
+    _id: false,
+    type: {
+      local: { type: Boolean, default: false },
+      google: { type: Boolean, default: false },
+      apple: { type: Boolean, default: false },
+      facebook: { type: Boolean, default: false },
+    },
+    required: true
+  })
+  authProviders: AuthProviders;
+
+  @Prop({ type: String, minlength: 10, maxlength: 100 })
+  bio?: string;
+
+  @Prop({ type: String })
+  highest_qualification?: string;
+
+  @Prop({
+    type: TutorVerification,
+  })
+  tutorVerification?: TutorVerification;
+
+  @Prop({
+    type: TutorProfile,
+  })
+  tutorProfile?: TutorProfile;
 
   @Prop({ type: Phone })
   phone?: Phone;
-  
+
   @Prop({ type: String, enum: Gender })
   gender?: Gender;
 
   @Prop({ type: Date })
   birthday?: Date;
-  
+
   @Prop({ type: String, enum: UserRole, default: UserRole.STUDENT })
   role: UserRole;
-  
+
   @Prop({ type: [Types.ObjectId], ref: "Topic", default: [] })
   topicsIds: string[];
-  
+
   @Prop({ type: [Types.ObjectId], ref: "Preference", default: [] })
   preferencesIds: string[];
-  
+
   @Prop({ type: [Types.ObjectId], ref: "Goal", default: [] })
   goalsIds: string[];
-  
+
+  //Filtering information
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: "Course" })
+  completedCourseIds: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], ref: 'User' })
+  subscribedTutorIds: Types.ObjectId[];
+
   @Prop()
   stars?: number;
 
-  @Prop()
-  profile_pic: string;
-  
+  @Prop({ type: mongoose.Schema.Types.Mixed })
+  profile_pic?: string | MediaRef;
+
   @Prop()
   password?: string;
-  
-  @Prop({
-	  enum: ['ACCOUNT_CREATED', 'PROFILE_COMPLETED', 'PREFERENCES_COMPLETED'],
-	  default: 'ACCOUNT_CREATED',
-	})
 
-	onboardingStatus: string;
+  @Prop({ type: OnboardingStatus, required: true })
+  onboardingStatus: OnboardingStatus;
 
-  @Prop({ type: Nonce })
-  nonce?: Nonce;  
-  
-  @Prop({ type: Wallet })
-  wallet?: Wallet;
-  
   @Prop()
   refresh_token?: string;
-  
+
+  @Prop()
+  nonce?: Nonce;
+
+  @Prop()
+  wallet?: Wallet;
+
   @Prop({ type: Number, min: 0, default: 0 })
   unreadNotifications?: number;
-  
+
   //virtuals
   fullName?: string;
-  
+
   ///
-  @Prop({ 
-	type: { 
-		otpHash: { type: String }, 
-		expiry: { type: Date } 
-		},
-		_id: false,
-	})
+  @Prop({
+    type: {
+      otpHash: { type: String },
+      expiry: { type: Date }
+    },
+    _id: false,
+  })
   passwordReset: {
-	  otpHash: string,
-	  expiry: Date
+    otpHash: string,
+    expiry: Date
   }
-  
+
   @Prop({ type: Boolean, default: false })
   remindersEnabled: boolean;
-  
+
   @Prop()
   fcmToken?: string
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+UserSchema.plugin(mongooseLeanVirtuals)

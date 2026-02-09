@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config'
 import { WelcomeEmail } from './templates/emails/welcome-email';
 import { VerificationEmail } from './templates/emails/verification-email';
+import { OTP } from './templates/emails';
 
 @Injectable()
 export class MailService {
@@ -22,13 +23,7 @@ export class MailService {
 			from: "ScholarArk <noreply@scholarark.com>",
 			to: [email],
 			subject: "Password Reset OTP!",
-			html: `
-			<p>You requested a password reset.</p>
-			<p>
-			  <p> OTP is: ${token}
-			</p>
-			<p>This link expires in 15 minutes.</p>
-		  `
+			react: OTP({ token })
 		})
 	}catch(error){
 		this.logger.error(`Failed to send email to ${email}`, error?.stack ?? error?.message ?? JSON.stringify(error),)  

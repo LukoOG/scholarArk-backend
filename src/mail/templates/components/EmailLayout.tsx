@@ -45,8 +45,35 @@ const footer = {
   marginTop: '32px',
 };
 
-const footerText = {
+export const footerText = {
   fontSize: '12px',
   color: '#8898aa',
   textAlign: 'center' as const,
+};
+
+export const heading = {
+  fontSize: '24px',
+  fontWeight: '600',
+  marginBottom: '12px',
+};
+
+export const paragraph = {
+  fontSize: '15px',
+  lineHeight: '1.6',
+  marginBottom: '14px',
+};
+
+export const button = {
+  backgroundColor: '#2563eb',
+  color: '#ffffff',
+  padding: '12px 24px',
+  borderRadius: '6px',
+  fontSize: '15px',
+  textDecoration: 'none',
+  display: 'inline-block',
+};
+
+export const signoff = {
+  fontSize: '14px',
+  marginTop: '24px',
 };

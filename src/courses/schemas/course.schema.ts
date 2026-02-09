@@ -2,27 +2,32 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { CourseModule } from './module.schema';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
+import { MediaRef } from 'src/common/schemas/media.schema';
+import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
 
 export type CourseDocument = HydratedDocument<Course>;
 
 export interface CourseListItem {
-	_id: string;
-	title: string;
-	thumbnail_url: string;
-	price: number;
-	rating: number;
-	category: CourseCategory;
-	difficulty: string;
-	students_enrolled: number;
+  _id: string;
+  title: string;
+  thumbnail_url: string;
+  price: number;
+  rating: number;
+  category: CourseCategory;
+  difficulty: string;
+  students_enrolled: number;
+  prices: Map<PaymentCurrency, number>
 }
 
 export enum CourseCategory {
-  SCIENCE = 'science',
-  ARTS = 'arts',
-  COMMERCE = 'commerce',
-  TECHNOLOGY = 'technology',
   PROGRAMMING = 'programming',
+  TECHNOLOGY = 'technology',
+  DATA = 'data',
+  DESIGN = 'design',
+  BUSINESS = 'business',
+  STEM = 'stem',
   HEALTH = 'health',
+  ARTS = 'arts',
 }
 
 export enum CourseDifficulty {
@@ -48,25 +53,23 @@ export class Course {
   @Prop({ required: true })
   description: string;
 
-  @Prop({ unique: true, index: true })
-  slug: string;
-
   @Prop({ type: String, enum: CourseCategory, required: true })
   category: CourseCategory;
+
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: "Topic" })
+  topicsIds: Types.ObjectId[];
 
   @Prop({ type: String, enum: CourseDifficulty, default: CourseDifficulty.BEGINNER })
   difficulty: CourseDifficulty;
 
-  // @Prop({ default: 0 })
-  // price: number;
   @Prop({ type: Map, of: Number, required: true })
   prices: Map<PaymentCurrency, number>
 
   @Prop({ default: 0 })
   studentsEnrolled: number;
 
-  @Prop()
-  thumbnailUrl: string;
+  @Prop({ type: MediaRef })
+  thumbnail?: MediaRef;
 
   @Prop({ default: 0 })
   rating: number;
@@ -77,10 +80,82 @@ export class Course {
   @Prop({ default: false })
   isPublished: boolean;
 
+  @Prop({ default: false })
+  isFeatured: boolean; //for admin
+
+  @Prop({ type: Number })
+  lessonCount?: number;
+
   @Prop()
   publishedAt?: Date;
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);
 
-CourseSchema.index({ category: 1, difficulty: 1 });
+CourseSchema.index({ topicIds: 1 });
+CourseSchema.index({ difficulty: 1 });
+CourseSchema.index({ isPublished: 1 });
+CourseSchema.index({ title: 'text', description: 'text' });
+CourseSchema.plugin(mongooseLeanVirtuals);
+
+export const CATEGORY_SUBJECT_MAP: Record<CourseCategory, string[]> = {
+  [CourseCategory.PROGRAMMING]: [
+    'Programming',
+    'Web Development',
+    'Mobile Development',
+    'Software Engineering',
+  ],
+
+  [CourseCategory.TECHNOLOGY]: [
+    'Programming',
+    'Cloud Computing',
+    'DevOps',
+    'Cybersecurity',
+    'Networking',
+  ],
+
+  [CourseCategory.DATA]: [
+    'Data Analysis',
+    'Data Science',
+    'Statistics',
+    'Machine Learning',
+    'Mathematics',
+  ],
+
+  [CourseCategory.DESIGN]: [
+    'Graphic Design',
+    'UI/UX Design',
+    'Illustration',
+    'Animation',
+    'Drawing',
+  ],
+
+  [CourseCategory.BUSINESS]: [
+    'Business',
+    'Entrepreneurship',
+    'Marketing',
+    'Finance',
+    'Accounting',
+    'Economics',
+  ],
+
+  [CourseCategory.STEM]: [
+    'Physics',
+    'Chemistry',
+    'Biology',
+    'Mathematics',
+  ],
+
+  [CourseCategory.HEALTH]: [
+    'Health & Wellness',
+    'Nutrition',
+    'Mental Health',
+    'Biology',
+  ],
+
+  [CourseCategory.ARTS]: [
+    'Drawing',
+    'Illustration',
+    'Animation',
+  ],
+};

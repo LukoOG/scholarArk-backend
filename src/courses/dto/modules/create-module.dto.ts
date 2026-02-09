@@ -1,20 +1,32 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsString, IsNotEmpty, IsOptional } from "class-validator";
+import { Type, Transform } from "class-transformer";
+import { IsString, IsNotEmpty, IsOptional, IsArray, ValidateNested } from "class-validator";
+import { ParseArray } from "src/common/transforms/parse-array-transform";
+import { CreateLessonDto } from "../lessons/create-lesson.dto";
 
 export class CreateModuleDto {
   @ApiProperty({
-    example: 'JavaScript Basics',
     description: 'Module title',
+    example: 'JavaScript Basics',
   })
   @IsString()
-  @IsNotEmpty()
   title: string;
 
   @ApiPropertyOptional({
+    description: 'Optional module description',
     example: 'Covers the fundamentals of JavaScript',
-    description: 'Module description',
   })
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiProperty({
+    description: 'Lessons under this module',
+    type: () => [CreateLessonDto],
+  })
+  @Transform(ParseArray())
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateLessonDto)
+  lessons: CreateLessonDto[];
 }

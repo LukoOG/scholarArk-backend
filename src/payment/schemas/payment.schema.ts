@@ -34,7 +34,7 @@ export class Payment {
   @Prop({ type: Types.ObjectId, ref: 'Course', required: true })
   course: Types.ObjectId;
 
-  @Prop({ type: Number, required: true, min: 1, immutable: true })
+  @Prop({ type: Number, required: true, min: 0, immutable: true }) //0 for free course
   amount: number;
 
   @Prop({ enum: PaymentCurrency, required: true })

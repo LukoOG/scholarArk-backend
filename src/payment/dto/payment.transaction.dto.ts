@@ -12,6 +12,13 @@ export class PaymentTransactionDto {
   courseId: Types.ObjectId;
 
   @ApiProperty({
+    description: 'Id of the tutor that owns the course being paid for',
+    example: '695bbc7f050dceb9e3202e22',
+  })
+  @IsMongoId()
+  tutorId: Types.ObjectId;
+
+  @ApiProperty({
     description: 'Currency to pay with',
     enum: PaymentCurrency,
     example: PaymentCurrency.NAIRA,

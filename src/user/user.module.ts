@@ -1,16 +1,19 @@
 import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthModule } from '../auth/auth.module';
+import { ConfigService } from '@nestjs/config';
 import { GoogleClientService } from '../common/services/google.service';
 import { CloudinaryModule } from '../common/cloudinary/cloudinary.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './schemas/user.schema';
+import { User, UserSchema, PRIVATE_FIELDS } from './schemas/user.schema';
 import { UserFcmToken, UserFcmTokenSchema } from './schemas/user-fcm-token.schema';
 import { preSave, preValidate } from './schemas/middleware';
 import { userMethods } from './schemas/methods';
 import { UserController } from './user.controller';
 import { MulterModule } from '@nestjs/platform-express';
-import { TMP_DIR } from 'src/config';
+import { Config, TMP_DIR } from 'src/config';
+import { MediaService } from 'src/common/services/media.service';
+import { MediaProvider } from 'src/common/schemas/media.schema';
 
 @Module({
   imports: [
@@ -21,34 +24,74 @@ import { TMP_DIR } from 'src/config';
     MongooseModule.forFeatureAsync([
       {
         name: User.name,
-        useFactory() {
+        inject: [ConfigService],
+        useFactory: async (configService: ConfigService<Config, true>) => {
           const schema = UserSchema;
-		  
-		  schema.set('toObject', { virtuals: true });
-		  schema.set('toJSON', { virtuals: true });
+          const CDN_URL = configService.get('aws', { infer: true }).cdn;
+
+          schema.set('toObject', {
+            virtuals: true,
+            transform: (_doc, ret) => {
+              PRIVATE_FIELDS.forEach((field) => delete ret[field]);
+
+              delete ret.__v;
+
+              return ret
+            }
+          });
+
+          schema.set('toJSON', {
+            virtuals: true,
+            transform: (_doc, ret) => {
+              PRIVATE_FIELDS.forEach((field) => delete ret[field]);
+
+              delete ret.__v;
+
+              return ret
+            }
+          });
 
           for (const method of userMethods) schema.method(method.name, method);
 
           schema.virtual('fullName').get(function () {
             return `${this.first_name ?? ''} ${this.last_name ?? ''}`.trim();
           });
+
+          schema.virtual('profilePicUrl').get(function () {
+            const pic = this.profile_pic
+            if (!pic) return null
+
+            //case 1: legacy string (Cloudinary | Google)
+            if (typeof pic === "string") return pic;
+
+            //case 2: s3 object
+            if (pic.provider == MediaProvider.S3 && pic?.key) {
+              return `${CDN_URL}/${pic.key}`
+            }
+
+            //case 3: External, i.e not from S3
+            if (pic?.url) return pic.url;
+
+            return null
+          })
+
           schema.pre('validate', preValidate);
 
           return schema;
         },
       },
-	  {
-		  name: UserFcmToken.name,
-		  useFactory(){
-			  return UserFcmTokenSchema
-		  }
-	  },
+      {
+        name: UserFcmToken.name,
+        useFactory() {
+          return UserFcmTokenSchema
+        }
+      },
     ]),
-	CloudinaryModule,
-	AuthModule
+    CloudinaryModule,
+    AuthModule
   ],
-  providers: [UserService, GoogleClientService],
+  providers: [UserService, GoogleClientService, MediaService],
   exports: [UserService],
   controllers: [UserController],
 })
-export class UserModule {}
+export class UserModule { }

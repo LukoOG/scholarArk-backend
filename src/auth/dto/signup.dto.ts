@@ -5,6 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class EmailDto {
   @IsEmail()
+  @IsString()
   value: string;
 
   @IsBoolean()
@@ -12,9 +13,14 @@ export class EmailDto {
 }
 
 export class SignupDto {
-  @ApiProperty({ example: "okikiola@mgmail.com" })
+  // @ApiProperty({ example: { value: 'user@example.com', verified: false } })
+  // @ValidateNested()
+  // @Type(() => EmailDto)
+  // email: EmailDto;
+  @ApiProperty({ example: "user@example.com" })
+  @IsString()
   @IsEmail()
-  email: String;
+  email: string;
 
   @ApiProperty()
   @IsString()

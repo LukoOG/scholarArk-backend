@@ -28,6 +28,7 @@ export interface Config {
   cloudinary: { cloud_name: string, key: string, secret: string };
   redis: { host: string, port: number, password: string };
   resend: string;
+  aws: { access: string, secret: string, bucket: string, cdn: string };
 }
 
 export function configuration() {
@@ -70,6 +71,7 @@ export function configuration() {
       },
     redis: { host: env.REDIS_HOST, port: env.REDIS_PORT, password: env.REDIS_PASSWORD },
     resend: env.RESEND_API_KEY,
+    aws: { access: env.AWS_ACCESS_KEY_ID, secret: env.AWS_SECRET_ACCESS_KEY, bucket: env.AWS_BUCKET_NAME, cdn: env.AWS_CDN_URL }
   };
 
   return config;
