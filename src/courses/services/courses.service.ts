@@ -34,6 +34,7 @@ import { CourseFullContentResponseDto } from '../dto/courses/course-full-content
 import { COURSE_FEED_STRATEGIES, CourseFeedStrategy } from '../strategies/course-feed.strategy';
 import { Assessment, AssessmentDocument } from 'src/assessments/schemas/assessments.schema';
 import { MediaProvider } from 'src/common/schemas/media.schema';
+import { sanitizeCourseListItem } from '../mapper/courses.mapper';
 
 @Injectable()
 export class CoursesService {
@@ -85,10 +86,13 @@ export class CoursesService {
 		}
 	}
 
+	private
+
 	private async resolveSubjectIdsFromCategory(
 		category: CourseCategory,
 	): Promise<Types.ObjectId[]> {
 		const subjectNames = CATEGORY_SUBJECT_MAP[category] ?? [];
+		console.log("subject names:", subjectNames)
 
 		if (!subjectNames.length) return [];
 		const subjects = await this.topicService.findByName(subjectNames);
@@ -121,7 +125,9 @@ export class CoursesService {
 		const coursePrices = new Map<string, number>();
 		dto.prices.map((price) => coursePrices.set(price.currency, price.amount));
 
-		const topicIds = await this.resolveSubjectIdsFromCategory(dto.category)
+		const topicsIds = await this.resolveSubjectIdsFromCategory(dto.category)
+
+		console.log('after topic service:', topicsIds)
 		try {
 			const course = await this.courseModel.create(
 				[
@@ -132,7 +138,7 @@ export class CoursesService {
 						category: dto.category,
 						difficulty: dto.difficulty,
 						prices: coursePrices,
-						topicIds,
+						topicsIds,
 						thumbnail: {
 							key: dto.thumbnail.s3key,
 							mimeType: dto.thumbnail.mimeType,
@@ -256,7 +262,7 @@ export class CoursesService {
 		};
 
 		if (topicIds?.length) {
-			query.topicIds = { $in: topicIds };
+			query.topicsIds = { $in: topicIds };
 		};
 
 		if (level) {
@@ -281,11 +287,12 @@ export class CoursesService {
 			}
 		}
 
+		console.log(query)
 		const [items, total] = await Promise.all([
 			this.courseModel
 				.find(query)
 				.select(
-					'-modules'
+					'-modules -topicsIds'
 				)
 				.populate({
 					path: "tutor",
@@ -299,8 +306,10 @@ export class CoursesService {
 			this.courseModel.countDocuments(query),
 		]);
 
+		const sanitizedItems = items.map(sanitizeCourseListItem)
+
 		return {
-			items,
+			items: sanitizedItems,
 			meta: {
 				total,
 				page,
@@ -466,14 +475,14 @@ export class CoursesService {
 				path: "tutor",
 				select: "first_name last_name email profile_pic"
 			})
-			// .lean({ virtuals: true })
+			.lean({ virtuals: true })
 			.exec();
 
 		console.log(course);
 
 
 		if (!course) throw new NotFoundException(`Course #${id} not found`);
-		return course;
+		return sanitizeCourseListItem(course);
 	}
 
 	async update(id: string, dto: UpdateCourseDto): Promise<Course> {

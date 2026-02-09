@@ -52,7 +52,7 @@ export class Payment {
   @Prop({ type: Number, immutable: true })
   transactionId: number;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   reference: string;
 
   @Prop({
