@@ -10,7 +10,7 @@ export class EnrollmentService {
   constructor(
     @InjectModel(Enrollment.name)
     private enrollmentModel: Model<EnrollmentDocument>,
-  ) {}
+  ) { }
   async enroll(userId: Types.ObjectId, courseId: Types.ObjectId) {
     const exists = await this.enrollmentModel.findOne({
       user: userId,
@@ -70,40 +70,14 @@ export class EnrollmentService {
       )
       .exec();
   }
-}
-	
-	async activateEnrollment(userId: Types.ObjectId, courseId: Types.ObjectId, paymentId: Types.ObjectId){
-		return this.enrollmentModel.findOneAndUpdate(
-			{user: userId, course: courseId},
-			{
-				status: 'active',
-				isPaid: true,
-				payment: paymentId,
-			},
-			{
-				upsert: true,
-				new: true
-			}
-		)
-	}
-	
-	async isEnrolled(userId: Types.ObjectId, courseId: Types.ObjectId): Promise<boolean>{
-		const enrollment = await this.enrollmentModel.findOne({
-			user: userId,
-			course: courseId,
-			status: 'active'
-		})
-		.exec();
-		return !!enrollment
-	}
 
-	async userEnrolledCourses(userId: Types.ObjectId): Promise<Types.ObjectId[]> {
-		const enrollments = await this.enrollmentModel.find({
-			user: userId
-		}).lean().exec();
+  async userEnrolledCourses(userId: Types.ObjectId): Promise<Types.ObjectId[]> {
+    const enrollments = await this.enrollmentModel.find({
+      user: userId
+    }).lean().exec();
 
-		const courseIds = enrollments.map((c)=>new Types.ObjectId(c.course));
+    const courseIds = enrollments.map((c) => new Types.ObjectId(c.course));
 
-		return courseIds
-	}
+    return courseIds
+  }
 }

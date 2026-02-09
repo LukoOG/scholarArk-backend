@@ -29,55 +29,8 @@ export class PaymentService {
     private readonly paystackService: PaystackService,
     private readonly enrollmentService: EnrollmentService,
     private readonly courseService: CoursesService,
-  ) {}
-
-  async initializeCoursePayment(
-    userId: Identifier,
-    email: string,
-    dto: PaymentTransactionDto,
-  ) {
-    const reference = `SK_${Date.now()}_${userId}`;
-
-    const { courseId, currency } = dto;
-
-    //fetch amount from course
-    const amount = await this.courseService.getCoursePrice(courseId, currency);
-
-    await this.paymentModel.create({
-      user: userId,
-      course: courseId,
-      amount,
-      currency: currency,
-      reference,
-      status: PaymentStatus.INITIALIZED,
-    });
-
-    return this.paystackService.initializeTransaction({
-      email,
-      amount: amount * 100, //convert to minor units for paystack
-      reference,
-      metadata: { userId, courseId },
-    });
-  }
-
-  async handleSuccessfulPayment(reference: string, payload: any) {
-    const payment = await this.paymentModel.findOne({ reference }).exec();
-
-    if (!payment || payment.status === PaymentStatus.SUCCESS) return;
-
-    const verification =
-      await this.paystackService.verifyTransaction(reference);
-
-    if (verification.status) {
-      payment.status = PaymentStatus.SUCCESS;
-      payment.providerPayload = payload;
-      await payment.save();
-
-      await this.enrollmentService.enroll(payment.user, payment.course);
-    }
-
-    throw new BadRequestException('Transaction failed');
-  }
+    private readonly usersService: UserService,
+  ) { }
 
   async requestRefund(
     userId: Identifier,
@@ -98,88 +51,104 @@ export class PaymentService {
     if (payment.refundStatus !== 'none') {
       throw new BadRequestException('Refund already initiated or processed');
     }
-    private readonly logger = new Logger(PaymentService.name);
-    constructor(
-        @InjectModel(Payment.name) public paymentModel: Model<PaymentDocument>,
-        private readonly paystackService: PaystackService,
-        private readonly enrollmentService: EnrollmentService,
-        private readonly courseService: CoursesService,
-        private readonly usersService: UserService,
-    ) {
+  }
+
+  async approveRefund(paymentId: Identifier) {
+    const payment = await this.paymentModel.findById(paymentId);
+    if (!payment) throw new NotFoundException('Payment not found');
+
+    if (payment.refundStatus !== RefundStatus.PENDING) {
+      throw new BadRequestException('Refund is not pending');
     }
 
-    async initializeCoursePayment(userId: Identifier, email: string, dto: PaymentTransactionDto) {
-        const reference = `SK_${Date.now()}_${userId}`;
-
-        const { courseId, tutorId, currency } = dto
-
-        //fetch amount from course
-        const amount = await this.courseService.getCoursePrice(courseId, currency)
-
-        await this.paymentModel.create({
-            user: userId,
-            course: courseId,
-            amount,
-            currency: currency,
-            reference,
-            status: PaymentStatus.INITIALIZED,
-        });
-
-        if (amount === 0) {
-            //automatically enroll
-            return await this.enrollmentService.enroll(
-                userId as Types.ObjectId,
-                courseId,
-            )
-        };
-
-        return this.paystackService.initializeTransaction({
-            email,
-            amount: amount * 100, //convert to minor units for paystack
-            reference,
-            metadata: { userId, courseId, tutorId }
-        })
-    }
-
-    async handleSuccessfulPayment(reference: string, payload: any, tutorId: Types.ObjectId) {
-        const payment = await this.paymentModel.findOne({ reference }).exec();
-
-    // 1. Check 7-day window
-    const now = new Date();
-    const paymentDate = new Date((payment as any).createdAt); // createdAt is reliable as it's set on creation
-    const diffDays = Math.ceil(
-      (now.getTime() - paymentDate.getTime()) / (1000 * 3600 * 24),
-    );
-
-    if (diffDays > 7) {
-      throw new BadRequestException('Refund period (7 days) has expired');
-    }
-
-    // 2. Mark as processing
-    payment.refundStatus = RefundStatus.PENDING; // Changed to PENDING for admin review
-    payment.refundReason = reason;
-    payment.refundRequestedAt = now;
+    payment.refundStatus = RefundStatus.PROCESSING;
     await payment.save();
 
-        if (verification.status) {
-            payment.status = PaymentStatus.SUCCESS;
-            payment.providerPayload = payload;
-            await payment.save();
+    try {
+      // Call Paystack
+      const refundResponse = await this.paystackService.refundTransaction(
+        payment.reference,
+        payment.amount,
+      );
 
-            await this.enrollmentService.enroll(
-                payment.user,
-                payment.course
-            )
-            //update students enrolled
-            await this.courseService.incrementEnrolledStudents(payment.course)
-            //update student subscribed 
-            await this.usersService.updateSubscribedTutors(payment.user, tutorId)
-        } else {
-            throw new BadRequestException('Transaction failed')
-        }
+      // Update status
+      payment.refundStatus = RefundStatus.PROCESSED;
+      payment.status = PaymentStatus.REFUNDED;
+      payment.refundTransactionId = refundResponse.id?.toString();
+      await payment.save();
 
+      // Revoke access
+      await this.enrollmentService.revokeAccess(payment.user, payment.course);
+
+      return {
+        message: 'Refund approved and processed',
+        data: payment,
+      };
+    } catch (error) {
+      payment.refundStatus = RefundStatus.FAILED;
+      await payment.save();
+      throw error;
     }
   }
+
+  async initializeCoursePayment(userId: Identifier, email: string, dto: PaymentTransactionDto) {
+    const reference = `SK_${Date.now()}_${userId}`;
+
+    const { courseId, tutorId, currency } = dto
+
+    //fetch amount from course
+    const amount = await this.courseService.getCoursePrice(courseId, currency)
+
+    await this.paymentModel.create({
+      user: userId,
+      course: courseId,
+      amount,
+      currency: currency,
+      reference,
+      status: PaymentStatus.INITIALIZED,
+    });
+
+    if (amount === 0) {
+      //automatically enroll
+      return await this.enrollmentService.enroll(
+        userId as Types.ObjectId,
+        courseId,
+      )
+    };
+
+    return this.paystackService.initializeTransaction({
+      email,
+      amount: amount * 100, //convert to minor units for paystack
+      reference,
+      metadata: { userId, courseId, tutorId }
+    })
+  }
+
+  async handleSuccessfulPayment(reference: string, payload: any, tutorId: Types.ObjectId) {
+    const payment = await this.paymentModel.findOne({ reference }).exec();
+
+    if (!payment || payment.status === PaymentStatus.SUCCESS) return;
+
+    const verification = await this.paystackService.verifyTransaction(reference);
+
+    if (verification.status) {
+      payment.status = PaymentStatus.SUCCESS;
+      payment.providerPayload = payload;
+      await payment.save();
+
+      await this.enrollmentService.enroll(
+        payment.user,
+        payment.course
+      )
+      //update students enrolled
+      await this.courseService.incrementEnrolledStudents(payment.course)
+      //update student subscribed 
+      await this.usersService.updateSubscribedTutors(payment.user, tutorId)
+    } else {
+      throw new BadRequestException('Transaction failed')
+    }
+  }
+
 
   async rejectRefund(paymentId: Identifier) {
     const payment = await this.paymentModel.findById(paymentId);
