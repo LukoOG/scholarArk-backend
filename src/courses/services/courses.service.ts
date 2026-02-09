@@ -289,12 +289,12 @@ export class CoursesService {
 				)
 				.populate({
 					path: "tutor",
-					select: "first_name last_name email"
+					select: "first_name last_name email profile_pic"
 				})
 				.sort({ createdAt: -1 })
 				.skip(skip)
 				.limit(limit)
-				.lean<CourseListItem[]>(),
+				.lean<CourseListItem[]>({ virtuals: true }),
 
 			this.courseModel.countDocuments(query),
 		]);
@@ -461,10 +461,12 @@ export class CoursesService {
 	async findOne(id: string): Promise<any> {
 		const course = await this.courseModel
 			.findById(id)
+			.select('-modules')
 			.populate({
 				path: "tutor",
 				select: "first_name last_name email profile_pic"
 			})
+			// .lean({ virtuals: true })
 			.exec();
 
 		console.log(course);
