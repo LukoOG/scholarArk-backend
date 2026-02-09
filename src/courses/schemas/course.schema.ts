@@ -3,19 +3,19 @@ import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { CourseModule } from './module.schema';
 import { PaymentCurrency } from 'src/payment/schemas/payment.schema';
 import { MediaRef } from 'src/common/schemas/media.schema';
-import  mongooseLeanVirtuals  from 'mongoose-lean-virtuals';
+import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
 
 export type CourseDocument = HydratedDocument<Course>;
 
 export interface CourseListItem {
-	_id: string;
-	title: string;
-	thumbnail_url: string;
-	price: number;
-	rating: number;
-	category: CourseCategory;
-	difficulty: string;
-	students_enrolled: number;
+  _id: string;
+  title: string;
+  thumbnail_url: string;
+  price: number;
+  rating: number;
+  category: CourseCategory;
+  difficulty: string;
+  students_enrolled: number;
   prices: Map<PaymentCurrency, number>
 }
 
@@ -56,7 +56,7 @@ export class Course {
   @Prop({ type: String, enum: CourseCategory, required: true })
   category: CourseCategory;
 
-  @Prop({ type: [mongoose.Schema.Types.ObjectId], index: true, ref: "Topic" })
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: "Topic" })
   topicsIds: Types.ObjectId[];
 
   @Prop({ type: String, enum: CourseDifficulty, default: CourseDifficulty.BEGINNER })

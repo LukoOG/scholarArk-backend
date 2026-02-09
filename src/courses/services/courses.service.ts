@@ -461,7 +461,10 @@ export class CoursesService {
 	async findOne(id: string): Promise<any> {
 		const course = await this.courseModel
 			.findById(id)
-			.lean({ virtuals: true })
+			.populate({
+				path: "tutor",
+				select: "first_name last_name email profile_pic"
+			})
 			.exec();
 
 		console.log(course);

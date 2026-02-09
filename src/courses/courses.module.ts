@@ -44,7 +44,9 @@ import { Assessment, AssessmentSchema } from 'src/assessments/schemas/assessment
 					schema.set('toJSON', {
 						virtuals: true,
 						transform: (_doc, ret) => {
-							delete ret.modules
+							delete ret.modules;
+
+							delete ret.thumbnail;
 
 							return ret
 						}
@@ -53,7 +55,9 @@ import { Assessment, AssessmentSchema } from 'src/assessments/schemas/assessment
 					schema.set('toObject', {
 						virtuals: true,
 						transform: (_doc, ret) => {
-							delete ret.modules
+							delete ret.modules;
+							
+							delete ret.thumbnail;
 
 							return ret
 						}

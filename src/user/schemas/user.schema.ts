@@ -5,7 +5,7 @@ import { Email, EmailVerification, Name, Nonce, Phone, Wallet } from 'src/common
 import mongoose from 'mongoose';
 import { MediaRef } from 'src/common/schemas/media.schema';
 import { TutorProfile, TutorVerification } from './sub-schema/tutor.sub';
-import mongooseLeanVirtuals from 'mongoose-lean-virtuals';
+import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
 
 export type UserDocument = HydratedDocument<User>;
 
