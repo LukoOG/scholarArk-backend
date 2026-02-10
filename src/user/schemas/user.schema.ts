@@ -12,7 +12,6 @@ export type UserDocument = HydratedDocument<User>;
 export const PRIVATE_FIELDS = [
   'password',
   'refresh_token',
-  'onboardingStatus',
   'passwordReset',
   'authProviders',
   'googleId',
