@@ -18,7 +18,7 @@ import { CoursesDemoService } from "../services/courses.demo.service";
 
 @ApiTags('Lessons')
 @Controller('lessons')
-@UseGuards(AuthGuard, CourseOwnerGuard)
+@UseGuards(AuthGuard)
 export class LessonsController {
     constructor(
         private readonly lessonsService: LessonsService,

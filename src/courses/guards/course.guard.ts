@@ -11,7 +11,7 @@ export class CourseAccessGuard implements CanActivate {
 		const req = context.switchToHttp().getRequest();
 		const user = req.user;
 		const { courseId, lessonId, moduleId } = req.params;
-		// console.log("here", user.id, (courseId || lessonId || moduleId))
+		console.log("here", user.id, (courseId || lessonId || moduleId))
 
 		if (!user && (!courseId || !lessonId || !moduleId)) return false
 
@@ -34,8 +34,13 @@ export class CourseOwnerGuard implements CanActivate {
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const req = context.switchToHttp().getRequest();
 		const user = req.user;
-		const courseId = req.params.courseId
+		const { courseId, lessonId, moduleId } = req.params;
 
-		return await this.courseAccessService.isTutorOwner(courseId, user.id)
+		return await this.courseAccessService.isTutorOwner(
+			courseId,
+			moduleId,
+			lessonId,
+			user.id,
+		)
 	}
 }

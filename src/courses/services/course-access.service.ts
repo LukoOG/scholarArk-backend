@@ -57,12 +57,42 @@ export class CourseAccessService {
     // return true
   }
 
-  async isTutorOwner(courseId: Types.ObjectId, tutorId: Types.ObjectId) {
-    const course = await this.courseModel.findById(courseId).lean().exec();
+  async isTutorOwner(courseId: Types.ObjectId, moduleId: Types.ObjectId, lessonId: Types.ObjectId, tutorId: Types.ObjectId) {
+    if (courseId) {
+      const course = await this.courseModel.findById(courseId).select('tutor').lean().exec();
 
-    if (!course) throw new NotFoundException("Course not found")
-    if (course.tutor.toString() !== tutorId.toString()) throw new BadRequestException("You do not own this course");
+      if (!course) throw new BadRequestException("Course Not Found");
 
-    return true
+      if (course.tutor.toString() !== tutorId.toString()) throw new BadRequestException("You do not own this course");
+
+      return true
+    } else if (!courseId && moduleId) {
+      const module = await this.moduleModel.findById(moduleId).select('course').lean().exec();
+
+      if (!module) throw new BadRequestException("Module not Found");
+
+      const course = await this.courseModel.findById(module.course).select('tutor').lean().exec();
+
+      if (!course) throw new BadRequestException("Course Not Found");
+
+      if (course.tutor.toString() !== tutorId.toString()) throw new BadRequestException("You do not own this course");
+
+      return true
+    }
+    else if (!courseId && lessonId) {
+      let lesson = await this.lessonModel.findById(lessonId).select('course isPreview').lean().exec()
+
+      if (!lesson) return false;
+
+      if (lesson.isPreview) return true; //For demo; access to free courses
+
+      const course = await this.courseModel.findById(lesson.course).select('tutor').lean().exec();
+
+      if (!course) throw new BadRequestException("Course Not Found");
+
+      if (course.tutor.toString() !== tutorId.toString()) throw new BadRequestException("You do not own this course");
+
+      return true
+    }
   }
 }

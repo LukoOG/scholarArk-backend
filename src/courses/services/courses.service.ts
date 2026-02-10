@@ -360,7 +360,7 @@ export class CoursesService {
 		const items = await this.courseModel.find({
 			tutor: tutorId
 		})
-			.select("-modules topicsIds")
+			.select("-modules -topicsIds")
 			.lean<CourseListItem[]>({ virtuals: true })
 			.exec();
 
