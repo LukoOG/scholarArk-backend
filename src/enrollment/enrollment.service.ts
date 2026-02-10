@@ -50,7 +50,7 @@ export class EnrollmentService {
     userId: Types.ObjectId,
     courseId: Types.ObjectId,
   ): Promise<boolean> {
-    // console.log(userId, courseId)
+    console.log("here",userId, courseId)
     const enrollment = await this.enrollmentModel
       .findOne({
         user: userId,

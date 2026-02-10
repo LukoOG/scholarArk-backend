@@ -37,6 +37,7 @@ export class CourseAccessService {
       if (!lesson) return false;
 
       if (lesson.isPreview) return true; //For demo; access to free courses
+      console.log("this is the lesson: ",lesson)
 
       course = await this.courseModel.findById(lesson.course).select('tutor isPublished').lean().exec();
     }
@@ -52,7 +53,7 @@ export class CourseAccessService {
     if (!course.isPublished) return false;
 
     // Must be enrolled
-    return this.enrollmentService.isEnrolled(userId, courseId);
+    return this.enrollmentService.isEnrolled(userId, course._id);
     /// Demo: allowing access to all courses
     // return true
   }
