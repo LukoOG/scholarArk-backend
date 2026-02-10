@@ -16,9 +16,9 @@ export const COURSE_FEED_STRATEGIES: Record<
     isFeatured: true,
   }),
 
-  [CourseFeedType.PERSONALIZED]: (user) => ({
+  [CourseFeedType.PERSONALIZED]: (user) => (user.topicsIds ? {
     topicsIds: { $in: user.topicsIds },
-  }),
+  } : { isFeatured: true }), //return featured courses
 
   [CourseFeedType.SIMILAR_TO_COMPLETED]: (user) => ({
     _id: { $nin: user.completedCourseIds },

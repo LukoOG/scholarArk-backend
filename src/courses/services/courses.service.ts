@@ -279,6 +279,7 @@ export class CoursesService {
 
 		if (userId) {
 			const user = await this.userService.findOne(userId);
+			console.log(user.email)
 			if (feed) {
 				const strategy = COURSE_FEED_STRATEGIES[feed as CourseFeedType];
 				if (strategy) {
