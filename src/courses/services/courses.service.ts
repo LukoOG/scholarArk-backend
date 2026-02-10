@@ -322,22 +322,29 @@ export class CoursesService {
 
 	async getEnrolledCourses(userId: Types.ObjectId) {
 		const courseIds = await this.enrollmentService.userEnrolledCourses(userId);
-		const items = await this.courseModel
-			.find({
-				_id: { $in: courseIds }
-			})
-			.select(
-				'title thumbnailUrl isPublished price rating category difficulty students_enrolled prices'
-			)
-			.populate({
-				path: "tutor",
-				select: "first_name last_name email profile_pic"
-			})
-			.lean<CourseListItem[]>();
+
+		const [items, total] = await Promise.all([
+			this.courseModel
+				.find({
+					_id: { $in: courseIds }
+				})
+				.select(
+					'-modules -topicsIds'
+				)
+				.populate({
+					path: "tutor",
+					select: "first_name last_name email profile_pic"
+				})
+				.lean<CourseListItem[]>({ virtuals: true }),
+			this.courseModel.countDocuments({ _id: { $in: courseIds } })
+		])
+
+		const sanitizedItems = items.map(sanitizeCourseListItem)
+
 		return {
-			items,
+			items: sanitizedItems,
 			meta: {
-				total: items.length,
+				total,
 				// page,
 				// limit,
 				// totalPages: Math.ceil(total / limit),
@@ -350,25 +357,13 @@ export class CoursesService {
 		const items = await this.courseModel.find({
 			tutor: tutorId
 		})
-			// .select("")
-			.lean<CourseListItem>()
+			.select("-modules topicsIds")
+			.lean<CourseListItem[]>({ virtuals: true })
 			.exec();
 
+		const sanitizedItems = items.map(sanitizeCourseListItem)
 		return {
-			items,
-			meta: {}
-		}
-	}
-
-	async getTutorOwnedCoursesById(tutorId: Types.ObjectId) {
-		const items = await this.courseModel.find({
-			tutor: tutorId
-		})
-			.lean<CourseListItem>()
-			.exec();
-
-		return {
-			items,
+			items: sanitizedItems,
 			meta: {}
 		}
 	}
@@ -382,16 +377,39 @@ export class CoursesService {
 		if (!user) throw new UserNotFoundException();
 		console.log(user.goalsIds, user.topicsIds)
 
-		return this.courseModel
-			.find({
+		const [items, total] = await Promise.all([
+			this.courseModel
+				.find({
+					$or: [
+						{ goals: { $in: user.goalsIds } },
+						{ topicsIds: { $in: user.topicsIds } },
+					],
+				})
+				.select('-modules -topicsIds')
+				.populate({
+					path: "tutor",
+					select: "email first_name last_name profile_pic"
+				})
+				.limit(10)
+				.sort({ popularity: -1 })
+				.lean({ virtuals: true })
+				.exec(),
+
+			this.courseModel.countDocuments({
 				$or: [
 					{ goals: { $in: user.goalsIds } },
-					{ topics: { $in: user.topicsIds } },
+					{ topicsIds: { $in: user.topicsIds } },
 				],
 			})
-			.limit(10)
-			.sort({ popularity: -1 })
-			.exec();
+		]);
+
+		const sanitizedItems = items.map(sanitizeCourseListItem);
+		return {
+			items: sanitizedItems,
+			meta: {
+				total
+			}
+		}
 	}
 
 	async getFullContent(courseId: Types.ObjectId) {
@@ -438,7 +456,7 @@ export class CoursesService {
 				title: string;
 				position: number;
 				totalDuration: number;
-			}[]>()
+			}[]>({ virtuals: true })
 			.exec();
 
 		const moduleIds = modules.map(m => m._id);
@@ -457,6 +475,7 @@ export class CoursesService {
 				isPreview: boolean;
 			}[]>()
 			.exec();
+
 
 		return {
 			...course,
@@ -478,8 +497,7 @@ export class CoursesService {
 			.lean({ virtuals: true })
 			.exec();
 
-		console.log(course);
-
+		console.log(sanitizeCourseListItem(course));
 
 		if (!course) throw new NotFoundException(`Course #${id} not found`);
 		return sanitizeCourseListItem(course);

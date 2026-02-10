@@ -203,7 +203,7 @@ Controls the recommendation strategy used to fetch courses.
 	@ApiUnauthorizedResponse({ description: 'Unauthorized' })
 	@ApiForbiddenResponse({ description: 'User is not a tutor' })
 	async tutorById(@Param('tutorId') tutorId: Types.ObjectId) {
-		const result = await this.coursesService.getTutorOwnedCoursesById(tutorId)
+		const result = await this.coursesService.getTutorOwnedCourses(tutorId)
 		return ResponseHelper.success(result)
 	}
 
