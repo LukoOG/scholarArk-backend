@@ -22,7 +22,7 @@ export class EnrollmentService {
     return this.enrollmentModel.create({
       user: userId,
       course: courseId,
-      status: 'pending',
+      status: 'active',
       isPaid: true,
     });
   }
@@ -50,6 +50,7 @@ export class EnrollmentService {
     userId: Types.ObjectId,
     courseId: Types.ObjectId,
   ): Promise<boolean> {
+    // console.log(userId, courseId)
     const enrollment = await this.enrollmentModel
       .findOne({
         user: userId,
