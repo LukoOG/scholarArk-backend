@@ -21,7 +21,7 @@ export const VerificationEmail = ({ token }: VerificationEmailProps) => {
         </Text>
 
         <Text>
-          Please confirm your email address by clicking the button below.
+          Please confirm your email address by entering the OTP code below
           This helps us keep your account secure.
         </Text>
 

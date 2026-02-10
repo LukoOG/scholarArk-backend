@@ -61,12 +61,12 @@ export class CoursesService {
 		if (!course.title || !course.description) throw new BadRequestException("Course must contain basic details")
 
 		if (course.modules.length === 0) throw new BadRequestException("Course must contain at least 1 module");
-		console.log(course.prices.size)
+		// console.log(course.prices.size)
 
 		if (course.prices.size === 0) throw new BadRequestException("Course must have at least one price");
 
 		const moduleIds = course.modules.map((id) => id.toString())
-		console.log(moduleIds)
+		// console.log(moduleIds)
 
 		const lessons = await this.lessonModel.find({
 			module: { $in: moduleIds }
@@ -208,7 +208,7 @@ export class CoursesService {
 					moduleDuration += modLesson.duration;
 
 					//create assessment if assessment
-					if (modLesson.assessment) {
+					if (modLesson.assessment && modLesson.type === "quiz") {
 						await this.assessmentModel.create(
 							[
 								{
@@ -224,6 +224,8 @@ export class CoursesService {
 							],
 							{ session },
 						);
+					} else{
+						throw new BadRequestException("A Lesson of type Quiz must have the assessment request data attached")
 					}
 				};
 
@@ -279,7 +281,7 @@ export class CoursesService {
 
 		if (userId) {
 			const user = await this.userService.findOne(userId);
-			console.log(user.email)
+			// console.log(user.email)
 			if (feed) {
 				const strategy = COURSE_FEED_STRATEGIES[feed as CourseFeedType];
 				if (strategy) {
@@ -288,7 +290,7 @@ export class CoursesService {
 			}
 		}
 
-		console.log(query)
+		console.log("course query:",query)
 		const [items, total] = await Promise.all([
 			this.courseModel
 				.find(query)
@@ -376,7 +378,6 @@ export class CoursesService {
 			.exec();
 
 		if (!user) throw new UserNotFoundException();
-		console.log(user.goalsIds, user.topicsIds)
 
 		const [items, total] = await Promise.all([
 			this.courseModel
@@ -461,7 +462,7 @@ export class CoursesService {
 			.exec();
 
 		const moduleIds = modules.map(m => m._id);
-		console.log(moduleIds)
+		// console.log(moduleIds)
 
 		const lessons = await this.lessonModel
 			.find({ module: { $in: moduleIds } })
@@ -498,7 +499,7 @@ export class CoursesService {
 			.lean({ virtuals: true })
 			.exec();
 
-		console.log(sanitizeCourseListItem(course));
+		// console.log(sanitizeCourseListItem(course));
 
 		if (!course) throw new NotFoundException(`Course #${id} not found`);
 		return sanitizeCourseListItem(course);

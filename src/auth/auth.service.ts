@@ -127,6 +127,7 @@ export class AuthService {
 			.findOne({
 				'email.value': signupDto.email
 			})
+			.lean()
 			.exec();
 
 		if (user?.authProviders?.google && !user?.authProviders?.local) {
