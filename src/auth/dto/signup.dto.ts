@@ -25,8 +25,10 @@ export class SignupDto {
   @ApiProperty()
   @IsString()
   @IsStrongPassword(
-		{ minLength: 8, minSymbols: 0 },
-		{ message: "Password must be at least 8 characters long" },
+		{ minLength: 8, minSymbols: 1, minUppercase: 1, minNumbers: 1 },
+		{ message: `
+      Password must be at least 8 characters long, \n contain at least 1 symbol, \n 1 number and \n 1 Uppercase character
+      ` },
 	)
   password: string;
   

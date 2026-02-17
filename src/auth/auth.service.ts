@@ -175,6 +175,7 @@ export class AuthService {
 	async login(loginDto: LoginDto): Promise<{ user: Omit<User, 'password'>, accessToken: string, refreshToken: string }> {
 		const { email, password: plainPassword, role } = loginDto;
 
+		//Check if User exists
 		const user = await this.userModel.findOne({ 'email.value': email })
 			// .select('-unreadNotifications -nonce -wallet -googleId -onboardingStatus')
 			.exec();
@@ -184,8 +185,11 @@ export class AuthService {
 		if (user.role !== role) {
 			throw new ForbiddenException(`User is not registered as ${role}`);
 		}
+		
+		//Check Email verified
+		if(!user.email.verified) throw new BadRequestException("User email is not yet verified")
 
-
+		//Check Password
 		const isMatch = await bcrypt.compare(plainPassword, user.password);
 		if (!isMatch) throw new UnauthorizedException('Invalid password');
 
