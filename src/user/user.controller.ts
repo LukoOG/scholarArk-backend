@@ -1,7 +1,5 @@
 import { Controller, Get, Post, Req, Body, Param, Delete, Patch, Query, HttpCode, HttpStatus, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { multerConfig } from '../common/multer/multer.config';
-import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiParam, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiParam, ApiQuery, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -12,6 +10,8 @@ import { GetUser } from '../common/decorators'
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Types } from 'mongoose';
 import { OnboardingStatusDto } from './dto/onboarding-status.dto';
+import { UserRole } from 'src/common/enums';
+import { UserListResponseDto, UserDetailResponseDto } from './dto/user-response.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -19,6 +19,34 @@ export class UserController {
 	constructor(private readonly userService: UserService) { }
 
 	@Get()
+	@ApiOperation({
+		summary: 'Get users',
+		description: 'Returns a paginated list of users. Optionally filter by role.'
+	})
+	@ApiQuery({
+		name: 'role',
+		required: false,
+		enum: UserRole,
+		description: 'Filter users by role'
+	})
+	@ApiQuery({
+		name: 'page',
+		required: false,
+		type: Number,
+		example: 1,
+		description: 'Page number (default: 1)'
+	})
+	@ApiQuery({
+		name: 'limit',
+		required: false,
+		type: Number,
+		example: 10,
+		description: 'Number of users per page'
+	})
+	@ApiOkResponse({
+		description: 'Paginated list of users',
+		type: UserListResponseDto
+	})
 	async findAll(@Query() role: UserQueryDto) {
 		const response = await this.userService.findAll(role);
 		return ResponseHelper.success(response)
@@ -26,11 +54,19 @@ export class UserController {
 
 	@UseGuards(AuthGuard)
 	@Get('me')
+	@ApiBearerAuth()
+	@ApiOperation({
+		summary: 'Get current user',
+		description: 'Returns the currently authenticated user profile'
+	})
+	@ApiOkResponse({
+		description: 'Current authenticated user',
+		type: UserDetailResponseDto
+	})
 	async findOneMe(@GetUser('id') id: Types.ObjectId) {
 		const response = await this.userService.findOne(id);
 		return ResponseHelper.success(response)
 	}
-
 
 	@Get(':userId')
 	@ApiOperation({

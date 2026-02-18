@@ -66,7 +66,6 @@ export class UserService {
 		if (role) {
 			query.role = role;
 		}
-		console.log(query, "role:", role)
 
 		const [items, total] = await Promise.all([
 			this.userModel
