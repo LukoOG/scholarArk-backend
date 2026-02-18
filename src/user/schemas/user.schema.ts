@@ -9,6 +9,10 @@ import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
 
 export type UserDocument = HydratedDocument<User>;
 
+export interface UserListItem {
+  
+}
+
 export const PRIVATE_FIELDS = [
   'password',
   'refresh_token',

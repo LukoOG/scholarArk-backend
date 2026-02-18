@@ -8,7 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
 import { Config } from '../config'
 import { Model, HydratedDocument, Types } from 'mongoose';
-import { User, UserDocument } from './schemas/user.schema';
+import { User, UserDocument, UserListItem } from './schemas/user.schema';
 import { UserFcmToken, UserFcmTokenDocument } from './schemas/user-fcm-token.schema';
 import { UserRole } from '../common/enums';
 import {
@@ -18,6 +18,8 @@ import {
 import * as bcrypt from 'bcrypt';
 import { MediaService } from 'src/common/services/media.service';
 import { MediaProvider } from 'src/common/schemas/media.schema';
+import { UserQueryDto } from './dto/get-users.dto';
+import { PaginatedResponse } from 'src/common/interfaces';
 
 @Injectable()
 export class UserService {
@@ -53,15 +55,43 @@ export class UserService {
 		)
 	}
 
-	async findAll(role?: 'student' | 'tutor'): Promise<User[]> {
-		if (role) return this.userModel.find({ role }).exec();
-		return this.userModel.find().exec();
+	async findAll(roleDto: UserQueryDto): Promise<PaginatedResponse<UserListItem>> {
+		const { page = 1, limit = 20, role } = roleDto;
+
+		const skip = (page - 1) * limit;
+
+		const query: any = {};
+
+		if (role) {
+			query.role = role;
+		}
+
+		const [items, total] = await Promise.all([
+			this.userModel
+				.find(query)
+				.sort({ createdAt: -1 })
+				.skip(skip)
+				.limit(limit),
+
+			this.userModel.countDocuments(query)
+		]);
+
+		return {
+			items,
+			meta: {
+				total,
+				page,
+				limit,
+				totalPages: Math.ceil(total/limit),
+				hasNextPage: page * limit < total
+			}
+		}
 	}
 
 	async findOne(id: Types.ObjectId): Promise<User> {
 		const user = await this.userModel.findById(id).exec();
 		if (!user) throw new NotFoundException('User not found');
-		return user
+		return user.toJSON()
 	}
 
 	async update(id: Types.ObjectId, updateUserDto: UpdateUserDto): Promise<User> {
@@ -101,12 +131,12 @@ export class UserService {
 				mimeType: profile_pic.mimeType,
 				provider: MediaProvider.S3,
 			}
-			
+
 			await updatedUser.save()
 		};
 
 		const isProfileComplete = this.isProfileComplete(updatedUser);
-		
+
 		if (updatedUser.onboardingStatus.isProfileComplete !== isProfileComplete) {
 			updatedUser.onboardingStatus.isProfileComplete = isProfileComplete;
 			await updatedUser.save()
@@ -118,9 +148,6 @@ export class UserService {
 			updatedUser.onboardingStatus.isMetaComplete = isMetaComplete;
 			await updatedUser.save()
 		};
-
-		const { password, refresh_token, ...userWithoutSecrets } = updatedUser.toObject();
-
 		return updatedUser;
 	}
 

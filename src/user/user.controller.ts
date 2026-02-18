@@ -5,6 +5,7 @@ import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiParam, A
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserQueryDto } from './dto/get-users.dto';
 import { SaveFcmTokenDto } from './dto/save-fcm-token.dto';
 import { ResponseHelper } from '../common/helpers/api-response.helper';
 import { GetUser } from '../common/decorators'
@@ -18,7 +19,7 @@ export class UserController {
 	constructor(private readonly userService: UserService) { }
 
 	@Get()
-	async findAll(@Query('role') role?: 'student' | 'tutor') {
+	async findAll(@Query('role') role: UserQueryDto) {
 		const response = await this.userService.findAll(role);
 		return ResponseHelper.success(response)
 	}

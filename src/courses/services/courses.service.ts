@@ -208,9 +208,6 @@ export class CoursesService {
 					moduleDuration += modLesson.duration;
 
 					//create assessment if assessment
-					console.log("bool", !!modLesson.assessment && modLesson.type === "quiz")
-					console.log("bool1", !!modLesson.assessment)
-					console.log("bool2", modLesson.type === "quiz")
 					if (!!modLesson.assessment && modLesson.type === "quiz") {
 						await this.assessmentModel.create(
 							[
