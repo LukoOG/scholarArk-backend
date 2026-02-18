@@ -19,7 +19,7 @@ export class UserController {
 	constructor(private readonly userService: UserService) { }
 
 	@Get()
-	async findAll(@Query('role') role: UserQueryDto) {
+	async findAll(@Query() role: UserQueryDto) {
 		const response = await this.userService.findAll(role);
 		return ResponseHelper.success(response)
 	}

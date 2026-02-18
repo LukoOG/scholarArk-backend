@@ -10,7 +10,31 @@ import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
 export type UserDocument = HydratedDocument<User>;
 
 export interface UserListItem {
-  
+  completedCourseIds: Types.ObjectId[];
+  subscribedTutorIds: Types.ObjectId[];
+  email: {
+    value: string;
+    verified: boolean;
+  };
+  role: UserRole;
+  topicsIds: Types.ObjectId[];
+  preferenceIds: Types.ObjectId[];
+  goalsIds: Types.ObjectId[];
+  onboardingStatus: {
+    hasAcceptedTerms: boolean;
+    isProfileComplete: boolean;
+    isMetaComplete: boolean;
+    isOnboardingComplete: boolean;
+  };
+  createdAt: string;
+  updatedAt: string;
+  birthday: string;
+  first_name: string;
+  gender: Gender;
+  last_name: string;
+  id: Types.ObjectId;
+  fullName: string;
+  profilePicUrl: string;
 }
 
 export const PRIVATE_FIELDS = [

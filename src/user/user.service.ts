@@ -20,6 +20,7 @@ import { MediaService } from 'src/common/services/media.service';
 import { MediaProvider } from 'src/common/schemas/media.schema';
 import { UserQueryDto } from './dto/get-users.dto';
 import { PaginatedResponse } from 'src/common/interfaces';
+import { sanitizeUserListItem } from './mapper/user.mapper';
 
 @Injectable()
 export class UserService {
@@ -65,19 +66,22 @@ export class UserService {
 		if (role) {
 			query.role = role;
 		}
+		console.log(query, "role:", role)
 
 		const [items, total] = await Promise.all([
 			this.userModel
 				.find(query)
+				.select('-password -googleId -refresh_token -__v')
 				.sort({ createdAt: -1 })
 				.skip(skip)
-				.limit(limit),
+				.limit(limit)
+				.lean<UserListItem[]>({ virtuals: true }),
 
 			this.userModel.countDocuments(query)
 		]);
 
 		return {
-			items,
+			items: items.map(sanitizeUserListItem),
 			meta: {
 				total,
 				page,
